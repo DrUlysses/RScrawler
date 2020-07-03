@@ -115,7 +115,7 @@ class bdNodePublisher
 
 class bdNode: public bdNodePublisher
 {
-	public:
+public:
 
     bdNode(bdNodeId *id, std::string dhtVersion, const std::string& bootfile, const std::string& filterfile,
 		bdDhtFunctions *fns, bdNodeManager* manager);
@@ -130,6 +130,7 @@ class bdNode: public bdNodePublisher
 	void shutdownNode();
 
 	void getOwnId(bdNodeId *id);
+	std::string getDhtVersion();
 
 	// virtual so manager can do callback.
 	// peer flags defined in bdiface.h
@@ -159,20 +160,20 @@ class bdNode: public bdNodePublisher
 //                                int mode, int point, int param, int cbtype, int errcode);
 
 	/* interaction with outside world (Accessed by controller to deliver us msgs) */
-int 	outgoingMsg(struct sockaddr_in *addr, char *msg, int *len);
-void 	incomingMsg(struct sockaddr_in *addr, char *msg, int len);
+    int outgoingMsg(struct sockaddr_in *addr, char *msg, int *len);
+    void incomingMsg(struct sockaddr_in *addr, char *msg, int len);
 
 	// For Relay Mode switching.
-void	dropRelayServers();
-void	pingRelayServers();
+    void dropRelayServers();
+    void pingRelayServers();
 
 // Below is internal Management of incoming / outgoing messages.
 
 private:
 
 	/* internal interaction with network */
-void	sendPkt(char *msg, int len, struct sockaddr_in addr);
-void	recvPkt(char *msg, int len, struct sockaddr_in addr);
+    void sendPkt(char *msg, int len, struct sockaddr_in addr);
+    void recvPkt(char *msg, int len, struct sockaddr_in addr);
 
 
 	/* output functions (send msg) */
@@ -233,10 +234,10 @@ void	recvPkt(char *msg, int len, struct sockaddr_in addr);
 	void doStats();
 
 	/********** Variables **********/
-	private:
+private:
 
 	/**** Some Variables are Protected to allow inherited classes to use *****/
-	protected:
+protected:
 
 	bdSpace mNodeSpace;
 	bdFilter mFilterPeers;
@@ -261,7 +262,7 @@ void	recvPkt(char *msg, int len, struct sockaddr_in addr);
 
 	bdQueryHistory mQueryHistory; /* for determining old peers */
 
-	private:
+private:
 
 	uint32_t mNodeOptionFlags;	
 	uint32_t mNodeDhtMode;

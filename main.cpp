@@ -23,11 +23,18 @@ int main(int argc, char **argv) {
     Logger *logger = new Logger();
     logger->start();
 
-    std::vector<Crawler> crawlers;
+    std::vector<Crawler> crawlers(CRAWLERS_COUNT);
+
+    std::fill(crawlers.begin(), crawlers.end(), Crawler());
+
+    int regionStart = 0;
+    int regionLength = 32 / CRAWLERS_COUNT;
+    int regionEnd = regionLength;
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
-        Crawler *tempCrawler = new Crawler();
-        tempCrawler->start();
-        crawlers.push_back(*tempCrawler);
+        crawlers[i].setRegions(regionStart, regionEnd);
+        crawlers[i].start();
+        regionStart = regionEnd + 1;
+        regionEnd = i == CRAWLERS_COUNT - 2 ? 32 : regionEnd + regionLength;
     }
 
     sleep(CRAWL_DURATION);
@@ -36,6 +43,8 @@ int main(int argc, char **argv) {
         crawlers[i].stop();
 
     logger->stop();
+
+    logger.
 
     std::cerr << "Crawls finished";
     std::cerr << std::endl;

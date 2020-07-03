@@ -73,8 +73,8 @@ int bitdht_create_ping_msg(bdToken *tid, bdNodeId *id, bdToken *vid, char *msg, 
 
 	if (vid)
 	{
-        	be_node *vnode = be_create_str_wlen((char *) vid->data, vid->len);
-        	be_add_keypair(dict, "v", vnode);
+        be_node *vnode = be_create_str_wlen((char *) vid->data, vid->len);
+        be_add_keypair(dict, "v", vnode);
 	}
 
 
@@ -667,18 +667,14 @@ uint32_t beMsgType(be_node *n)
 int beMsgGetToken(be_node *n, bdToken &token)
 {
 	if (n->type != BE_STR)	
-	{
 		return 0;
-	}
-        int len = be_str_len(n);
+    int len = be_str_len(n);
 
 	if(len > BITDHT_TOKEN_MAX_LEN)
-		return 0 ;
+		return 0;
 
 	for(int i = 0; i < len; i++)
-	{
 		token.data[i] = n->val.s[i];
-	}
 	token.len = len;
 	return 1;
 }

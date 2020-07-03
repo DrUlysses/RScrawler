@@ -3,9 +3,11 @@
 
 #include <util/bdthreads.h>
 #include <bdfilter.h>
+#include <bdobj.h>
 
 #define LOG_FILENAME "dhtlogs"
 #define DHT_FILENAME "foundDHTs"
+#define RS_PEERS_FILENAME "rspeers"
 
 class Logger : public bdThread {
 public:
@@ -13,11 +15,13 @@ public:
     ~Logger();
 
     virtual void run();
-    //int tick();
+
+    void sortRsPeers();
 
 private:
     bdMutex dhtMutex;
     std::map<bdNodeId, bdFilteredPeer> discoveredPeers;
+    //static std::map<bdId, bdToken> RSPeers;
     void iteration();
 };
 

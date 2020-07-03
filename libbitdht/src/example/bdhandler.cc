@@ -285,25 +285,19 @@ int BitDhtHandler::PeerCallback(const bdId *id, uint32_t status)
 			/* do nothing */
 			std::cerr << "BitDhtHandler::PeerCallback() QUERY FAILURE ... do nothin ";
 			std::cerr << std::endl;
-
-
 		break;
 
 		case BITDHT_MGR_QUERY_PEER_OFFLINE:
 			/* do nothing */
-
 			std::cerr << "BitDhtHandler::PeerCallback() QUERY PEER OFFLINE ... do nothin ";
 			std::cerr << std::endl;
-
-			break;
+        break;
 
 		case BITDHT_MGR_QUERY_PEER_UNREACHABLE:
 			/* do nothing */
-
 			std::cerr << "BitDhtHandler::PeerCallback() QUERY PEER UNREACHABLE ... saving address ";
 			std::cerr << std::endl;
 			it->second.id = *id;
-
 		break;
 
 		case BITDHT_MGR_QUERY_PEER_ONLINE:

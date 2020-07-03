@@ -50,19 +50,23 @@ void bdStdRandomNodeId(bdNodeId *id)
 {
 	uint32_t *a_data = (uint32_t *) id->data;
 	for(int i = 0; i < BITDHT_KEY_INTLEN; i++)
-	{
 		a_data[i] = bdRandom::random_u32();
-	}
 	return;
+}
+
+void bdStdRandomIdFromRegion(bdNodeId *id, int start, int end) {
+    uint32_t *a_data = (uint32_t *) id->data;
+    a_data[0] = bdRandom::random_u32() % end + start;
+    for (int i = 1; i < BITDHT_KEY_INTLEN; i++)
+        a_data[i] = bdRandom::random_u32();
+    return;
 }
 
 void bdStdZeroNodeId(bdNodeId *id)
 {
 	uint32_t *a_data = (uint32_t *) id->data;
 	for(int i = 0; i < BITDHT_KEY_INTLEN; i++)
-	{
 		a_data[i] = 0;
-	}
 	return;
 }
 

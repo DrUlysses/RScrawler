@@ -38,6 +38,7 @@
 
 
 void bdStdRandomNodeId(bdNodeId *id);
+void bdStdRandomIdFromRegion(bdNodeId *id, int start, int end);
 void bdStdZeroNodeId(bdNodeId *id);
 
 void bdStdRandomId(bdId *id);

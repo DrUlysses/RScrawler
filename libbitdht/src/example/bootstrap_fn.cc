@@ -6,23 +6,15 @@
 #define TICK_LENGTH 1
 #define PEER_RECONNECT_TICKS 2
 
-void bdSingleSourceFindPeer(const std::string bootstrapfile, bdNodeId ownID, std::string &peer_ip, uint16_t &peer_port, short shotsCount, short searchRounds) {
+void bdSingleSourceFindPeer(BitDhtHandler &dht, bdNodeId ownID, uint16_t &peer_port, short shotsCount, short searchRounds, int regionStart, int regionEnd) {
     std::map<bdNodeId, bdQueryStatus> query;
-
-    std::cerr << "Starting with ownID: ";
-    bdStdPrintNodeId(std::cerr, &ownID);
-    std::cerr << std::endl;
-
-    uint16_t port = 6775;
-    std::string appId = "bsId";
-    BitDhtHandler dht(&ownID, port, appId, bootstrapfile);
 
     bdNodeId searchId;
 
     /* Search for initial random peers */
     for (int i = 0; i < shotsCount; ++i) {
         /* install search node with random ID */
-        bdStdRandomNodeId(&searchId);
+        bdStdRandomIdFromRegion(&searchId, regionStart, regionEnd);
         bdSingleShotFindPeer(dht, searchId, query);
     }
 
@@ -32,21 +24,19 @@ void bdSingleSourceFindPeer(const std::string bootstrapfile, bdNodeId ownID, std
 
     dht.mUdpBitDht->getDhtQueries(query);
 
-    bdQuerySummary querySummary;
-
+    std::list<bdNodeId> toCheckList;
     for (short i = 0; i < searchRounds; i++) {
-        std::list<bdNodeId> toCheckList;
-        printQuerySummary(query, dht, querySummary, toCheckList);
+        printSummary(query, dht, toCheckList);
         std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
-
+        /*if (toCheckList.size() == 0)
+            searchRounds++;*/
         std::list<bdNodeId>::iterator toCheckListIterator;
         for (toCheckListIterator = toCheckList.begin(); toCheckListIterator != toCheckList.end(); toCheckListIterator++) {
             bdSingleShotFindPeer(dht, (*toCheckListIterator), query);
         }
     }
 
-    std::list<bdNodeId> toCheckList;
-    printQuerySummary(query, dht, querySummary, toCheckList);
+    printSummary(query, dht, toCheckList);
     std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
 
     dht.shutdown();
@@ -106,11 +96,12 @@ void bdSingleShotFindPeer(BitDhtHandler &dht, bdNodeId searchID, std::map<bdNode
     }
 }
 
-void printQuerySummary(std::map<bdNodeId, bdQueryStatus> &query, BitDhtHandler &dht, bdQuerySummary &querySummary, std::list<bdNodeId> &toCheckList) {
+void printSummary(std::map<bdNodeId, bdQueryStatus> &query, BitDhtHandler &dht, std::list<bdNodeId> &toCheckList) {
     std::string status;
     auto *tempAddr = new sockaddr_in;
     std::multimap<bdMetric, bdPeer>::iterator itIdsMap;
     std::map<bdNodeId, bdQueryStatus>::iterator it;
+    bdQuerySummary querySummary;
     for (it = query.begin(); it != query.end(); it++) {
         dht.mUdpBitDht->getDhtQueryStatus(&(*it).first, querySummary);
         bdStdPrintNodeId(std::cout, &(*it).first);

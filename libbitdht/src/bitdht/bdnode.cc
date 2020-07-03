@@ -109,13 +109,9 @@ void bdNode::setNodeOptions(uint32_t optFlags)
 {
 	mNodeOptionFlags = optFlags;
 	if (optFlags & BITDHT_OPTIONS_MAINTAIN_UNSTABLE_PORT)
-	{
 		mNodeSpace.setAttachedFlag(BITDHT_PEER_STATUS_DHT_ENGINE | BITDHT_PEER_STATUS_DHT_ENGINE_VERSION, ATTACH_NUMBER);
-	}
 	else
-	{
 		mNodeSpace.setAttachedFlag(BITDHT_PEER_STATUS_DHT_ENGINE | BITDHT_PEER_STATUS_DHT_ENGINE_VERSION, 0);
-	}
 }
 
 #define BDNODE_HIGH_MSG_RATE	50
@@ -876,10 +872,8 @@ void bdNode::msgout_ping(bdId *id, bdToken *transId)
 	bdToken vid;
 	uint32_t vlen = BITDHT_TOKEN_MAX_LEN;
 	if (mDhtVersion.size() < vlen)
-	{
 		vlen = mDhtVersion.size();
-	}
-	memcpy(vid.data, mDhtVersion.c_str(), vlen);	
+	memcpy(vid.data, mDhtVersion.c_str(), vlen);
 	vid.len = vlen;
 
         /* create string */
@@ -911,10 +905,8 @@ void bdNode::msgout_pong(bdId *id, bdToken *transId)
 	bdToken vid;
 	uint32_t vlen = BITDHT_TOKEN_MAX_LEN;
 	if (mDhtVersion.size() < vlen)
-	{
 		vlen = mDhtVersion.size();
-	}
-	memcpy(vid.data, mDhtVersion.c_str(), vlen);	
+	memcpy(vid.data, mDhtVersion.c_str(), vlen);
 	vid.len = vlen;
 
         char msg[10240];
@@ -1230,9 +1222,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	be_node *be_transId = beMsgGetDictNode(node, "t");
         bdToken transId;
 	if (be_transId)
-	{
 		beMsgGetToken(be_transId, transId);
-	}
 	else
 	{
 #ifdef DEBUG_NODE_PARSE
@@ -1248,9 +1238,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	/* extract common features */
 	char dictkey[2] = "r";
 	if (beQuery)
-	{
 		dictkey[0] = 'a';
-	}
 
 	be_node *be_data = beMsgGetDictNode(node, dictkey);
 	if (!be_data)
@@ -1264,7 +1252,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	}
 
 	/************************** handle id (all) ***************************/
-        be_node *be_id = beMsgGetDictNode(be_data, "id");
+    be_node *be_id = beMsgGetDictNode(be_data, "id");
 	bdNodeId id;
 	if(!be_id || !beMsgGetNodeId(be_id, id))
 	{
@@ -1292,9 +1280,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	}
 
 	if (be_version)
-	{
 		beMsgGetToken(be_version, versionId);
-	}
 
 	/************************ handle options (optional:bitdht extension) **************/
 	be_node  *be_options = beMsgGetDictNode(node, "o");
@@ -1432,9 +1418,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	}
 
 	if (be_port)
-	{
 		beMsgGetUInt32(be_port, &port);
-	}
 
 	/****************** handle Connect (lots) ***************************/
 	bdId connSrcAddr;
@@ -1526,35 +1510,22 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	}
 
 	if (be_ConnSrcAddr)
-	{
 		beMsgGetBdId(be_ConnSrcAddr, connSrcAddr);
-	}
 
 	if (be_ConnDestAddr)
-	{
 		beMsgGetBdId(be_ConnDestAddr, connDestAddr);
-	}
 
 	if (be_ConnMode)
-	{
 		beMsgGetUInt32(be_ConnMode, &connMode);
-	}
 
 	if (be_ConnParam)
-	{
 		beMsgGetUInt32(be_ConnParam, &connParam);
-	}
 
 	if (be_ConnStatus)
-	{
 		beMsgGetUInt32(be_ConnStatus, &connStatus);
-	}
 
 	if (be_ConnType)
-	{
 		beMsgGetUInt32(be_ConnType, &connType);
-	}
-
 
 
 	/****************** Bits Parsed Ok. Process Msg ***********************/
@@ -1562,13 +1533,9 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	bdId srcId(id, addr);
 
 	if (be_target)
-	{	
 		registerIncomingMsg(&srcId, &transId, beType, &target_info_hash);
-	}
 	else
-	{
 		registerIncomingMsg(&srcId, &transId, beType, NULL);
-	}
 
 	switch(beType)
 	{
@@ -1580,13 +1547,9 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			std::cerr << std::endl;
 #endif
 			if (be_version)
-			{
 				msgin_ping(&srcId, &transId, &versionId);
-			}
 			else
-			{
 				msgin_ping(&srcId, &transId, NULL);
-			}
 			break;
 		}
 		case BITDHT_MSG_TYPE_PONG:  /* r: id, transId */          
@@ -1597,13 +1560,9 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			std::cerr << std::endl;
 #endif
 			if (be_version)
-			{
 				msgin_pong(&srcId, &transId, &versionId);
-			}
 			else
-			{
 				msgin_pong(&srcId, &transId, NULL);
-			}
 
 			break;
 		}
@@ -1706,6 +1665,31 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			break;
 		}
 	}
+
+	/* Handle version + id */
+	//unsigned char tempStr[8];
+    //strncpy((char*)tempStr, "BD02RS51", 8);
+	if (be_version &&
+            versionId.data[0] == 'B' &&
+            versionId.data[1] == 'D' &&
+            versionId.data[2] == '0' &&
+            versionId.data[3] == '2' &&
+            versionId.data[4] == 'R' &&
+            versionId.data[5] == 'S' &&
+            versionId.data[6] == '5' &&
+            versionId.data[7] == '1') {
+        const char *logName = "rspeers";
+        FILE *tempFile = fopen(logName, "a+");
+        std::string tempID;
+        bdStdPrintId(tempID, &srcId, false);
+        tempID.erase(tempID.find("ip:"), 3);
+        std::cout << "Found RS peer: " << tempID << " ver " << versionId.data << std::endl;
+        if (fprintf(tempFile, "%s %s\n", tempID.c_str(), versionId.data) < 0)
+            std::cerr << "While whiting to rs peers logs accrued an err=%d: %s\n", errno, strerror (errno);
+        fclose(tempFile);
+	}
+	    //add_RS_peer(srcId, versionId);
+	    //std::cout << "Got message from IP: " << srcId.addr.sin_addr.s_addr << "\nID: " << id.data << "\nVersion: " << versionId.data << std::endl;
 
 	be_free(node);
 	return;
@@ -2473,6 +2457,10 @@ void bdNode::pingRelayServers()
 
 		}
 	}
+}
+
+std::string bdNode::getDhtVersion() {
+    return mDhtVersion;
 }
 
 
