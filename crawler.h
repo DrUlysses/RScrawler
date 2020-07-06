@@ -11,6 +11,7 @@ public:
     ~Crawler();
 
     virtual void run();
+    virtual void stop();
 
     void setRegions(int start, int end);
 
@@ -18,6 +19,7 @@ private:
     bdMutex crwlrMutex;
     void iteration();
 
+    bool isAlive = true;
     bdNodeId peerId;
     std::string bootstrapfile = "/home/ulysses/RS_NEW/RS/libbitdht/src/bitdht/bdboot.txt";
     uint16_t port = 6775;

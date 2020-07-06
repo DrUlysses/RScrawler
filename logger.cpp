@@ -17,26 +17,28 @@ Logger::~Logger() noexcept {
     return;
 }
 
+void Logger::stop() {
+    isAlive = false;
+}
+
 #define TICK_PAUSE	5
 
 /*** Overloaded from iThread ***/
 
 void Logger::run() {
-    while (true) {
+    while (isAlive) {
         {
             bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
             Logger::iteration();
-        }
-        std::remove(DHT_FILENAME);
-        FILE *logsFile = fopen(DHT_FILENAME, "w");
-        std::map<bdNodeId, bdFilteredPeer>::iterator it;
-        for (it = discoveredPeers.begin(); it != discoveredPeers.end(); it++)
-            fprintf(logsFile, "%s %s %u %lu\n", it->first.data, bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str(), it->second.mFilterFlags, it->second.mLastSeen);
-        /*std::map<bdId, bdToken>::iterator it1;
-        for (it1 = RSPeers.begin(); it1 != RSPeers.end(); it1++)
-            fprintf(logsFile, "%s %s %s", it1->first.id.data, bdnet_inet_ntoa(it1->first.addr.sin_addr).c_str(), it1->second.data);*/
-        fclose(logsFile);
 
+            std::remove(DHT_FILENAME);
+            FILE *logsFile = fopen(DHT_FILENAME, "w");
+            std::map<bdNodeId, bdFilteredPeer>::iterator it;
+            for (it = discoveredPeers.begin(); it != discoveredPeers.end(); it++)
+                fprintf(logsFile, "%s %s %u %lu\n", it->first.data, bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str(),
+                        it->second.mFilterFlags, it->second.mLastSeen);
+            fclose(logsFile);
+        }
         sleep(TICK_PAUSE);
     }
 }
@@ -64,7 +66,6 @@ void Logger::iteration() {
             else {
                 switch (counter) {
                     case 0:
-                        *id.data = *accum.c_str();
                         memcpy(id.data, accum.c_str(), sizeof(id.data));
                         counter++;
                         accum = "";
@@ -101,19 +102,19 @@ void Logger::iteration() {
             discoveredPeers[id] = tempPeer;
         }
     }
+    logsFile.close();
 }
 
 void Logger::sortRsPeers() {
     std::string line;
     std::string addr_str;
-    uint32_t status;
-    struct sockaddr_in addr;
-    bdNodeId id;
-    time_t timeStamp;
+    bdId id;
+    bdToken version;
+    std::map<bdId, bdToken> RSPeers;
 
-    std::ifstream logsFile(LOG_FILENAME);
+    std::ifstream logsFile(RS_PEERS_FILENAME);
     if (!logsFile) {
-        std::cerr << "Failed to open dht logs file" << std::endl;
+        std::cerr << "Failed to open RS peers list file" << std::endl;
         return;
     }
     while (std::getline(logsFile, line)) {
@@ -126,8 +127,7 @@ void Logger::sortRsPeers() {
             else {
                 switch (counter) {
                     case 0:
-                        *id.data = *accum.c_str();
-                        memcpy(id.data, accum.c_str(), sizeof(id.data));
+                        memcpy(id.id.data, accum.c_str(), sizeof(id.id));
                         counter++;
                         accum = "";
                         break;
@@ -138,13 +138,7 @@ void Logger::sortRsPeers() {
                         accum = "";
                         break;
                     case 2:
-                        status = (uint32_t) std::stoul(accum);
-                        counter++;
-                        accum = "";
-                        break;
-                    case 3:
-                        accum += line[i];
-                        timeStamp = (time_t) std::stoul(accum);
+                        memcpy(version.data, accum.c_str(), sizeof(version.data));
                         counter++;
                         accum = "";
                         break;
@@ -154,22 +148,15 @@ void Logger::sortRsPeers() {
 
         char addr_c_str[addr_str.length()];
         memcpy(addr_c_str, addr_str.c_str(), sizeof(addr_str));
-        if (bdnet_inet_aton(addr_c_str, &(addr.sin_addr)) && this != NULL) {
-            bdFilteredPeer tempPeer;
-            tempPeer.mAddr = addr;
-            tempPeer.mFilterFlags = status;
-            tempPeer.mLastSeen = timeStamp;
+        if (bdnet_inet_aton(addr_c_str, &(id.addr.sin_addr)))
+            RSPeers[id] = version;
 
-            discoveredPeers[id] = tempPeer;
-        }
     }
-    FILE *logsFile = fopen(DHT_FILENAME, "w");
-    std::map<bdNodeId, bdFilteredPeer>::iterator it;
-    for (it = discoveredPeers.begin(); it != discoveredPeers.end(); it++)
-        fprintf(logsFile, "%s %s %u %lu\n", it->first.data, bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str(), it->second.mFilterFlags, it->second.mLastSeen);
-    /*std::map<bdId, bdToken>::iterator it1;
-    for (it1 = RSPeers.begin(); it1 != RSPeers.end(); it1++)
-        fprintf(logsFile, "%s %s %s", it1->first.id.data, bdnet_inet_ntoa(it1->first.addr.sin_addr).c_str(), it1->second.data);*/
-    fclose(logsFile);
+    logsFile.close();
+    FILE *filtered = fopen(FILTERED_FILENAME, "w");
+    std::map<bdId, bdToken>::iterator it;
+    for (it = RSPeers.begin(); it != RSPeers.end(); it++)
+        fprintf(filtered, "%s %s %s\n", it->first.id.data, bdnet_inet_ntoa(it->first.addr.sin_addr).c_str(), it->second.data);
+    fclose(filtered);
 }
 

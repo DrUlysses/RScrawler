@@ -4,7 +4,7 @@
 #include "crawler.h"
 
 #define TICK_PAUSE 480
-#define SEARCH_SHOTS_COUNT 10
+#define SEARCH_SHOTS_COUNT 5
 #define SEARCH_ROUNDS_COUNT 3
 
 Crawler::Crawler() : crwlrMutex(true) {
@@ -25,13 +25,19 @@ Crawler::~Crawler() noexcept {
     return;
 }
 
+void Crawler::stop() {
+    bdStackMutex stackMutex(crwlrMutex);
+    dhtHandler->shutdown();
+    isAlive = false;
+}
+
 void Crawler::run() {
     {
         bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
         BitDhtHandler dht(&peerId, port, appId, bootstrapfile);
         dhtHandler = &dht;
     }
-    while(1) {
+    while(isAlive) {
         {
             bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
             Crawler::iteration();

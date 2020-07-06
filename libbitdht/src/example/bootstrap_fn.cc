@@ -28,8 +28,13 @@ void bdSingleSourceFindPeer(BitDhtHandler &dht, bdNodeId ownID, uint16_t &peer_p
     for (short i = 0; i < searchRounds; i++) {
         printSummary(query, dht, toCheckList);
         std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
-        /*if (toCheckList.size() == 0)
-            searchRounds++;*/
+        if (toCheckList.size() == 0) {
+            std::cout << "Retrying to find any initial peers\n";
+            bdStdRandomIdFromRegion(&searchId, regionStart, regionEnd);
+            bdSingleShotFindPeer(dht, searchId, query);
+            printSummary(query, dht, toCheckList);
+            std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
+        }
         std::list<bdNodeId>::iterator toCheckListIterator;
         for (toCheckListIterator = toCheckList.begin(); toCheckListIterator != toCheckList.end(); toCheckListIterator++) {
             bdSingleShotFindPeer(dht, (*toCheckListIterator), query);
@@ -38,8 +43,6 @@ void bdSingleSourceFindPeer(BitDhtHandler &dht, bdNodeId ownID, uint16_t &peer_p
 
     printSummary(query, dht, toCheckList);
     std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
-
-    dht.shutdown();
 }
 
 void bdSingleShotFindPeer(BitDhtHandler &dht, bdNodeId searchID, std::map<bdNodeId, bdQueryStatus> &query) {

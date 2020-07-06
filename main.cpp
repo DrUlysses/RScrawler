@@ -9,7 +9,7 @@
 #include "crawler.h"
 
 #define CRAWLERS_COUNT 3
-#define CRAWL_DURATION 3600// in seconds
+#define CRAWL_DURATION 10 // in seconds
 
 void args(char *name) {
     std::cerr << std::endl << "Dht Single Shot Searcher" << std::endl;
@@ -23,8 +23,8 @@ int main(int argc, char **argv) {
     Logger *logger = new Logger();
     logger->start();
 
+    // Creates cr_count + 1 then destroys one. Why? I don't know
     std::vector<Crawler> crawlers(CRAWLERS_COUNT);
-
     std::fill(crawlers.begin(), crawlers.end(), Crawler());
 
     int regionStart = 0;
@@ -39,15 +39,20 @@ int main(int argc, char **argv) {
 
     sleep(CRAWL_DURATION);
 
-    for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
+    for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
+        bdStackMutex stackMutex(crawlers[i].mMutex);
         crawlers[i].stop();
+    }
 
-    logger->stop();
+    {
+        bdStackMutex stackMutex(logger->mMutex);
+        logger->stop();
+    }
 
-    logger.
+    logger->sortRsPeers();
 
-    std::cerr << "Crawls finished";
+    std::cerr << "Crawls are finished";
     std::cerr << std::endl;
 
-    return 1;
+    return 0;
 }
