@@ -182,13 +182,9 @@ std::string bdStdConvertToPrintable(std::string input)
     {
         /* sensible chars */
         if ((input[i] > 31) && (input[i] < 127))
-        {
                 out += input[i];
-        }
         else
-        {
             bd_sprintf_append(out, "[0x%x]", (uint32_t) input[i]);
-        }
     }
     return out;
 }
@@ -203,14 +199,10 @@ void bdStdPrintNodeId(std::ostream &out, const bdNodeId *a)
 void bdStdPrintNodeId(std::string &out, const bdNodeId *a, bool append)
 {
 	if (!append)
-	{
 		out.clear();
-	}
 
 	for(int i = 0; i < BITDHT_KEY_LEN; i++)
-	{
 		bd_sprintf_append(out, "%02x", (uint32_t) (a->data)[i]);
-	}
 }
 
 void bdStdPrintId(std::ostream &out, const bdId *a)

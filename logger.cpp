@@ -8,6 +8,10 @@
 #include <sstream>
 #include <iterator>
 #include <cstring>
+#include <algorithm>
+
+#define TICK_PAUSE	5
+#define USED_IDS_FILENAME "my_ids"
 
 Logger::Logger() : dhtMutex(true) {
     bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
@@ -21,10 +25,7 @@ void Logger::stop() {
     isAlive = false;
 }
 
-#define TICK_PAUSE	5
-
 /*** Overloaded from iThread ***/
-
 void Logger::run() {
     while (isAlive) {
         {
@@ -105,6 +106,8 @@ void Logger::iteration() {
     logsFile.close();
 }
 
+#include <bdstddht.h>
+
 void Logger::sortRsPeers() {
     std::string line;
     std::string addr_str;
@@ -127,7 +130,7 @@ void Logger::sortRsPeers() {
             else {
                 switch (counter) {
                     case 0:
-                        memcpy(id.id.data, accum.c_str(), sizeof(id.id));
+                        bdStdLoadNodeId(&id.id, accum);
                         counter++;
                         accum = "";
                         break;
@@ -153,10 +156,26 @@ void Logger::sortRsPeers() {
 
     }
     logsFile.close();
-    FILE *filtered = fopen(FILTERED_FILENAME, "w");
+
+    std::ifstream myIDs(USED_IDS_FILENAME);
+    if (!myIDs) {
+        std::cerr << "Failed to open my IDs file" << std::endl;
+        return;
+    }
+    std::list<std::string> myIDsList;
+    while (std::getline(logsFile, line))
+        myIDsList.push_back(line);
+    myIDs.close();
+
+    FILE *filtered = fopen(FILTERED_FILENAME, "a+");
     std::map<bdId, bdToken>::iterator it;
-    for (it = RSPeers.begin(); it != RSPeers.end(); it++)
-        fprintf(filtered, "%s %s %s\n", it->first.id.data, bdnet_inet_ntoa(it->first.addr.sin_addr).c_str(), it->second.data);
+    for (it = RSPeers.begin(); it != RSPeers.end(); it++) {
+        bdStdPrintNodeId(line, &it->first.id, false);
+        if (std::find(myIDsList.begin(), myIDsList.end(), line) == myIDsList.end()) {
+            fprintf(filtered, "%s %s %s\n", line.c_str(), bdnet_inet_ntoa(it->first.addr.sin_addr).c_str(),
+                    it->second.data);
+        }
+    }
     fclose(filtered);
 }
 

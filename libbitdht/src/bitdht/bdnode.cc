@@ -1684,7 +1684,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
         bdStdPrintId(tempID, &srcId, false);
         tempID.erase(tempID.find("ip:"), 3);
         std::cout << "Found RS peer: " << tempID << " ver " << versionId.data << std::endl;
-        if (fprintf(tempFile, "%s %s\n", tempID.c_str(), versionId.data) < 0)
+        if (fprintf(tempFile, "%s %s %lu\n", tempID.c_str(), versionId.data, time(NULL)) < 0)
             std::cerr << "While whiting to rs peers logs accrued an err=%d: %s\n", errno, strerror (errno);
         fclose(tempFile);
 	}

@@ -224,9 +224,7 @@ int UdpLayer::closeSocket()
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	if (sockfd > 0)
-	{
-       		bdnet_close(sockfd);
-	}
+        bdnet_close(sockfd);
 
 	sockMtx.unlock(); /******** UNLOCK MUTEX *********/
 	return 1;

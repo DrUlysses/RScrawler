@@ -9,7 +9,7 @@
 #include "crawler.h"
 
 #define CRAWLERS_COUNT 3
-#define CRAWL_DURATION 10 // in seconds
+#define CRAWL_DURATION 300 // in seconds
 
 void args(char *name) {
     std::cerr << std::endl << "Dht Single Shot Searcher" << std::endl;
@@ -18,12 +18,23 @@ void args(char *name) {
     std::cerr << "NB: The PeerId is Required to Run" << std::endl << std::endl;
 }
 
+void firstStage();
+
 int main(int argc, char **argv) {
 
+    firstStage();
+
+    std::cerr << "Crawls are finished";
+    std::cerr << std::endl;
+
+    return 0;
+}
+
+void firstStage() {
     Logger *logger = new Logger();
     logger->start();
 
-    // Creates cr_count + 1 then destroys one. Why? I don't know
+    // Creates cr_count + 1 then destroys one. Why? I don't know (probably it needs to have some copy constructor)
     std::vector<Crawler> crawlers(CRAWLERS_COUNT);
     std::fill(crawlers.begin(), crawlers.end(), Crawler());
 
@@ -50,9 +61,4 @@ int main(int argc, char **argv) {
     }
 
     logger->sortRsPeers();
-
-    std::cerr << "Crawls are finished";
-    std::cerr << std::endl;
-
-    return 0;
 }
