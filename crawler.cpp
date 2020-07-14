@@ -17,11 +17,11 @@ Crawler::Crawler() : crwlrMutex(true) {
     std::cerr << "Starting with ownID: ";
     bdStdPrintNodeId(std::cerr, &peerId);
     std::cerr << std::endl;
-    FILE *myids = fopen(USED_IDS_FILENAME, "a+");
+    FILE *myIDs = fopen(USED_IDS_FILENAME, "a+");
     std::string stringID;
     bdStdPrintNodeId(stringID, &peerId, false);
-    fprintf(myids, "%s\n", stringID.c_str());
-    fclose(myids);
+    fprintf(myIDs, "%s\n", stringID.c_str());
+    fclose(myIDs);
     crwlrMutex.unlock();
 }
 
@@ -38,8 +38,15 @@ void Crawler::stop() {
     isAlive = false;
 }
 
-void Crawler::run() {
+void Crawler::disable() {
+    isAlive = false;
+}
 
+void Crawler::enable() {
+    isAlive = true;
+}
+
+void Crawler::run() {
     {
         bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
         BitDhtHandler dht(&peerId, port, appId, bootstrapfile);
@@ -48,19 +55,71 @@ void Crawler::run() {
     while(isAlive) {
         {
             bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
-            Crawler::iteration();
+            if (currentStage == 0)
+                Crawler::iterationFirstStage();
+            else
+                Crawler::iterationSecondStage();
         }
 
         sleep(TICK_PAUSE);
     }
 }
 
-void Crawler::iteration() {
+void Crawler::iterationFirstStage() {
     // Start random requests from separate threads
-    bdSingleSourceFindPeer(*dhtHandler, peerId, port, SEARCH_SHOTS_COUNT, SEARCH_ROUNDS_COUNT, regionStart, regionEnd);
+    if (!readyToCheck)
+        bdSingleSourceFindPeers(*dhtHandler, SEARCH_SHOTS_COUNT, SEARCH_ROUNDS_COUNT, regionStart, regionEnd, toCheckPeerList);
+    else
+        bdCheckPeersFromList(*dhtHandler, toCheckPeerList);
+}
+
+void Crawler::iterationSecondStage() {
+    if (toCheckPeerList.size() > 0) {
+        std::map<bdNodeId, std::pair<std::string, time_t>> statuses = bdFindPeers(*dhtHandler, toCheckPeerList);
+        std::map<bdNodeId, std::pair<std::string, time_t>>::iterator it;
+        std::string tempFileName;
+        std::string folderPrefix = "statuses_database/";
+        bdNodeId tempID;
+        for (it = statuses.begin(); it != statuses.end(); it++) {
+            tempID = it->first;
+            bdStdLoadNodeId(&tempID, tempFileName);
+            tempFileName = folderPrefix + tempFileName;
+            FILE *idInfo = fopen(tempFileName.c_str(), "a+");
+            fprintf(idInfo, "%s %lu\n", it->second.first.c_str(), it->second.second);
+            fclose(idInfo);
+        }
+    }
+}
+
+void Crawler::extractToCheckList(std::list<bdNodeId> peers) {
+    for (std::list<bdNodeId>::iterator it = peers.begin(); it != peers.end(); it++) {
+        uint32_t *a_data = (uint32_t *) it->data;
+        if (a_data[0] >= regionStart && a_data[0] < regionEnd)
+            toCheckPeerList.push_back(*it);
+    }
+    readyToCheck = true;
 }
 
 void Crawler::setRegions(int start, int end) {
     this->regionStart = start;
     this->regionEnd = end;
+}
+
+void Crawler::setStage(bool stage) {
+    currentStage = stage;
+}
+
+std::list<bdNodeId> Crawler::getToCheckList() {
+    std::list<bdNodeId> res;
+    std::list<bdNodeId> newOne;
+    for (std::list<bdNodeId>::iterator it = toCheckPeerList.begin(); it != toCheckPeerList.end(); it++) {
+        uint32_t *a_data = (uint32_t *) it->data;
+        if (a_data[0] < regionStart && a_data[0] >= regionEnd)
+            res.push_back(*it);
+        else
+            newOne.push_back(*it);
+    }
+    toCheckPeerList.clear();
+    toCheckPeerList.merge(newOne);
+    return res;
 }

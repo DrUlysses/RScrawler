@@ -13,16 +13,21 @@
 #define TICK_PAUSE	5
 #define USED_IDS_FILENAME "my_ids"
 
+std::map<bdNodeId, bdFilteredPeer> Logger::discoveredPeers = {};
+
 Logger::Logger() : dhtMutex(true) {
-    bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
+    //bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
+    //std::map<bdNodeId, bdFilteredPeer> Logger::discoveredPeers = {};
 }
 
 Logger::~Logger() noexcept {
     return;
 }
 
-void Logger::stop() {
+void Logger::disable() {
     isAlive = false;
+    bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
+    sortRsPeers();
 }
 
 /*** Overloaded from iThread ***/
@@ -34,8 +39,7 @@ void Logger::run() {
 
             std::remove(DHT_FILENAME);
             FILE *logsFile = fopen(DHT_FILENAME, "w");
-            std::map<bdNodeId, bdFilteredPeer>::iterator it;
-            for (it = discoveredPeers.begin(); it != discoveredPeers.end(); it++)
+            for (std::map<bdNodeId, bdFilteredPeer>::iterator it = Logger::discoveredPeers.begin(); it != Logger::discoveredPeers.end(); it++)
                 fprintf(logsFile, "%s %s %u %lu\n", it->first.data, bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str(),
                         it->second.mFilterFlags, it->second.mLastSeen);
             fclose(logsFile);
@@ -100,7 +104,7 @@ void Logger::iteration() {
             tempPeer.mFilterFlags = status;
             tempPeer.mLastSeen = timeStamp;
 
-            discoveredPeers[id] = tempPeer;
+            Logger::discoveredPeers[id] = tempPeer;
         }
     }
     logsFile.close();
@@ -108,7 +112,7 @@ void Logger::iteration() {
 
 #include <bdstddht.h>
 
-void Logger::sortRsPeers() {
+void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
     std::string line;
     std::string addr_str;
     bdId id;
@@ -148,14 +152,14 @@ void Logger::sortRsPeers() {
                 }
             }
         }
-
         char addr_c_str[addr_str.length()];
         memcpy(addr_c_str, addr_str.c_str(), sizeof(addr_str));
         if (bdnet_inet_aton(addr_c_str, &(id.addr.sin_addr)))
             RSPeers[id] = version;
-
     }
     logsFile.close();
+
+    //result = new std::list<bdId>[RSPeers.size()]();
 
     std::ifstream myIDs(USED_IDS_FILENAME);
     if (!myIDs) {
@@ -170,12 +174,25 @@ void Logger::sortRsPeers() {
     FILE *filtered = fopen(FILTERED_FILENAME, "a+");
     std::map<bdId, bdToken>::iterator it;
     for (it = RSPeers.begin(); it != RSPeers.end(); it++) {
+        /*if (result != nullptr)
+            result->push_back(it->first);*/
         bdStdPrintNodeId(line, &it->first.id, false);
         if (std::find(myIDsList.begin(), myIDsList.end(), line) == myIDsList.end()) {
             fprintf(filtered, "%s %s %s\n", line.c_str(), bdnet_inet_ntoa(it->first.addr.sin_addr).c_str(),
                     it->second.data);
+            bdFilteredPeer tempPeer;
+            tempPeer.mAddr = it->first.addr;
+            Logger::discoveredPeers[it->first.id] = tempPeer;
         }
     }
     fclose(filtered);
+    return;
+}
+
+std::list<bdNodeId> Logger::getDiscoveredPeers() {
+    std::list<bdNodeId> res;
+    for (std::map<bdNodeId, bdFilteredPeer>::iterator it = Logger::discoveredPeers.begin(); it != Logger::discoveredPeers.end(); it++)
+        res.push_back(it->first);
+    return res;
 }
 

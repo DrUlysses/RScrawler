@@ -311,7 +311,7 @@ int BitDhtHandler::PeerCallback(const bdId *id, uint32_t status)
             std::string tempID;
             bdStdPrintId(tempID, id, false);
             tempID.erase(tempID.find("ip:"), 3);
-            if (fprintf(tempFile, "%s %u %lu\n", tempID.c_str(), status, time(NULL)) < 0)
+            if (fprintf(tempFile, "%s\n", tempID.c_str()) < 0)
                 std::cerr << "While whiting to dht logs accrued an err=%d: %s\n", errno, strerror (errno);
             fclose(tempFile);
 

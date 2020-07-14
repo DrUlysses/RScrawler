@@ -143,9 +143,7 @@ int  bdStdLoadNodeId(bdNodeId *id, std::string input)
 	uint8_t *a_data = (uint8_t *) id->data;
 	uint32_t reqlen = BITDHT_KEY_LEN * 2;
 	if (input.size() < reqlen)
-	{
 		return 0;
-	}
 
 	for(int i = 0; i < BITDHT_KEY_LEN; i++)
 	{

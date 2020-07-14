@@ -12,15 +12,24 @@ public:
 
     virtual void run();
     virtual void stop();
+    void disable();
+    void enable();
 
+    void setStage(bool stage);
     void setRegions(int start, int end);
+    void extractToCheckList(std::list<bdNodeId> peers);
+    std::list<bdNodeId> getToCheckList();
 
 private:
     bdMutex crwlrMutex;
-    void iteration();
+    void iterationFirstStage();
+    void iterationSecondStage();
 
+    std::list<bdNodeId> toCheckPeerList;
+    bool readyToCheck = false;
     bool isAlive = true;
     bdNodeId peerId;
+    bool currentStage;
     std::string bootstrapfile = "/home/ulysses/RS_NEW/RS/libbitdht/src/bitdht/bdboot.txt";
     uint16_t port = 6775;
     std::string appId = "RS51";

@@ -14,8 +14,11 @@
  *
  */
 
-void bdSingleSourceFindPeer(BitDhtHandler &dht, bdNodeId ownID, uint16_t &port, short shotsCount, short searchRounds, int regionStart, int regionEnd);
+void bdSingleSourceFindPeers(BitDhtHandler &dht, short shotsCount, short searchRounds, int regionStart, int regionEnd, std::list<bdNodeId>& toCheckList);
 void bdSingleShotFindPeer(BitDhtHandler &dht, bdNodeId searchID, std::map<bdNodeId, bdQueryStatus> &query);
+std::map<bdNodeId, std::pair<std::string, time_t>> bdFindPeers(BitDhtHandler &dht, std::list<bdNodeId> peers);
+std::pair<std::string, time_t> bdSingleShotFindStatus(BitDhtHandler &dht, bdNodeId searchID);
+void bdCheckPeersFromList(BitDhtHandler &dht, std::list<bdNodeId>& toCheckList);
 
-void printSummary(std::map<bdNodeId, bdQueryStatus> &query, BitDhtHandler &dht, std::list<bdNodeId> &toCheckList);
+void updateQueries(std::map<bdNodeId, bdQueryStatus> &query, BitDhtHandler &dht, std::list<bdNodeId> &toCheckList);
 std::string dhtStatusToString(uint32_t code);

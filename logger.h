@@ -4,6 +4,7 @@
 #include <util/bdthreads.h>
 #include <bdfilter.h>
 #include <bdobj.h>
+#include <vector>
 
 #define LOG_FILENAME "dhtlogs"
 #define DHT_FILENAME "foundDHTs"
@@ -16,14 +17,16 @@ public:
     ~Logger();
 
     virtual void run();
-    virtual void stop();
+    void disable();
 
-    void sortRsPeers();
+    void sortRsPeers(std::list<bdId>* result = nullptr);
+    std::list<bdNodeId> getDiscoveredPeers();
+    bdMutex dhtMutex;
 
 private:
     bool isAlive = true;
-    bdMutex dhtMutex;
-    std::map<bdNodeId, bdFilteredPeer> discoveredPeers;
+    bool isSecondStage = false;
+    static std::map<bdNodeId, bdFilteredPeer> discoveredPeers;
     void iteration();
 
 };

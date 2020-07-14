@@ -712,15 +712,11 @@ void bdNode::processRemoteQuery()
 								excludeList, nearest, BITDHT_PEER_STATUS_DHT_RELAY_SERVER);
 						}
 						else
-						{
 							mNodeSpace.find_nearest_nodes(&(query.mQuery), BITDHT_QUERY_NEIGHBOUR_PEERS, nearest);
-						}
 					}
 
         				for(it = nearest.begin(); it != nearest.end(); it++)
-        				{
                 				nearList.push_back(it->second);
-        				}
 					msgout_reply_find_node(&(query.mId), &(query.mTransId), nearList);
 #ifdef DEBUG_NODE_MSGS 
 					std::cerr << "bdNode::processRemoteQuery() Reply to Find Node: ";
@@ -1204,6 +1200,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	}
 
 	/* find message type */
+	std::string messageType = "";
 	uint32_t beType = beMsgType(node);
 	bool     beQuery = (BE_Y_Q == beMsgGetY(node));
 
@@ -1269,6 +1266,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
         bdToken versionId;
 	if ((beType == BITDHT_MSG_TYPE_PONG) || (beType == BITDHT_MSG_TYPE_PING))
 	{
+        messageType = "PING / PONG";
 		be_version = beMsgGetDictNode(node, "v");
 		if (!be_version)
 		{
@@ -1299,6 +1297,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	be_node  *be_target = NULL;
 	if (beType == BITDHT_MSG_TYPE_FIND_NODE)
 	{
+        messageType = "FIND NODE";
 		be_target = beMsgGetDictNode(be_data, "target");
 		if (!be_target)
 		{
@@ -1314,6 +1313,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	else if ((beType == BITDHT_MSG_TYPE_GET_HASH) ||
 			(beType == BITDHT_MSG_TYPE_POST_HASH))
 	{
+        messageType = "GET / POST HASH";
 		be_target = beMsgGetDictNode(be_data, "info_hash");
 		if (!be_target)
 		{
@@ -1337,6 +1337,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	if ((beType == BITDHT_MSG_TYPE_REPLY_NODE) ||
 		(beType == BITDHT_MSG_TYPE_REPLY_NEAR))
 	{
+        messageType = "REPLY NODE / NEAR";
 		be_nodes = beMsgGetDictNode(be_data, "nodes");
 		if (!be_nodes)
 		{
@@ -1359,6 +1360,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	be_node  *be_values = NULL;
 	if (beType == BITDHT_MSG_TYPE_REPLY_HASH)
 	{
+        messageType = "REPLY HASH";
 		be_values = beMsgGetDictNode(be_data, "values");
 		if (!be_values)
 		{
@@ -1383,6 +1385,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		(beType == BITDHT_MSG_TYPE_REPLY_NEAR) ||
 		(beType == BITDHT_MSG_TYPE_POST_HASH))
 	{
+        messageType = "POST / REPLY HASH / REPLY NEAR";
 		be_token = beMsgGetDictNode(be_data, "token");
 		if (!be_token)
 		{
@@ -1405,6 +1408,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	be_node  *be_port = NULL;
 	if (beType == BITDHT_MSG_TYPE_POST_HASH)
 	{
+        messageType = "POST HASH";
 		be_port = beMsgGetDictNode(be_data, "port");
 		if (!be_port)
 		{
@@ -1436,6 +1440,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	be_node  *be_ConnType = NULL;
 	if (beType == BITDHT_MSG_TYPE_CONNECT)
 	{
+        messageType = "CONNECT";
 		/* SrcAddr */
 		be_ConnSrcAddr = beMsgGetDictNode(be_data, "src");
 		if (!be_ConnSrcAddr)
@@ -1546,6 +1551,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			mFns->bdPrintId(std::cerr, &srcId);
 			std::cerr << std::endl;
 #endif
+            messageType = "PING";
 			if (be_version)
 				msgin_ping(&srcId, &transId, &versionId);
 			else
@@ -1559,6 +1565,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			mFns->bdPrintId(std::cerr, &srcId);
 			std::cerr << std::endl;
 #endif
+            messageType = "PONG";
 			if (be_version)
 				msgin_pong(&srcId, &transId, &versionId);
 			else
@@ -1575,6 +1582,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			mFns->bdPrintNodeId(std::cerr, &target_info_hash);
 			std::cerr << std::endl;
 #endif
+            messageType = "FIND NODE";
 			msgin_find_node(&srcId, &transId, &target_info_hash, localnet);
 			break;
 		}
@@ -1585,6 +1593,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			mFns->bdPrintId(std::cerr, &srcId);
 			std::cerr << std::endl;
 #endif
+            messageType = "REPLY NODE";
 			msgin_reply_find_node(&srcId, &transId, nodes);
 			break;
 		}
@@ -1597,6 +1606,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			mFns->bdPrintNodeId(std::cerr, &target_info_hash);
 			std::cerr << std::endl;
 #endif
+            messageType = "GET HASH";
 			msgin_get_hash(&srcId, &transId, &target_info_hash);
 			break;
 		}
@@ -1607,6 +1617,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			mFns->bdPrintId(std::cerr, &srcId);
 			std::cerr << std::endl;
 #endif
+            messageType = "REPLY HASH";
 			msgin_reply_hash(&srcId, &transId, &token, values);
 			break;
 		}
@@ -1617,6 +1628,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			mFns->bdPrintId(std::cerr, &srcId);
 			std::cerr << std::endl;
 #endif
+            messageType = "REPLY NEAR";
 			msgin_reply_nearest(&srcId, &transId, &token, nodes);
 			break;
 		}
@@ -1630,6 +1642,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			std::cerr << " with port: " << port;
 			std::cerr << std::endl;
 #endif
+            messageType = "POST HASH";
 			msgin_post_hash(&srcId, &transId, &target_info_hash, port, &token);
 			break;
 		}
@@ -1640,6 +1653,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			mFns->bdPrintId(std::cerr, &srcId);
 			std::cerr << std::endl;
 #endif
+            messageType = "REPLY POST";
 			msgin_reply_post(&srcId, &transId);
 			break;
 		}
@@ -1650,6 +1664,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			mFns->bdPrintId(std::cerr, &srcId);
 			std::cerr << std::endl;
 #endif
+            messageType = "CONNECT";
 			msgin_connect_genmsg(&srcId, &transId, connType,
 					&connSrcAddr, &connDestAddr, 
 					connMode, connParam, connStatus);
@@ -1661,6 +1676,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			std::cerr << "bdNode::recvPkt() ERROR";
 			std::cerr << std::endl;
 #endif
+            messageType = "UNKNOWN";
 			/* ERROR */
 			break;
 		}
@@ -1684,7 +1700,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
         bdStdPrintId(tempID, &srcId, false);
         tempID.erase(tempID.find("ip:"), 3);
         std::cout << "Found RS peer: " << tempID << " ver " << versionId.data << std::endl;
-        if (fprintf(tempFile, "%s %s %lu\n", tempID.c_str(), versionId.data, time(NULL)) < 0)
+        if (fprintf(tempFile, "%s %s %lu %s\n", tempID.c_str(), versionId.data, time(NULL), messageType.c_str()) < 0)
             std::cerr << "While whiting to rs peers logs accrued an err=%d: %s\n", errno, strerror (errno);
         fclose(tempFile);
 	}

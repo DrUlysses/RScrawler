@@ -6,7 +6,7 @@
 #define TICK_LENGTH 1
 #define PEER_RECONNECT_TICKS 2
 
-void bdSingleSourceFindPeer(BitDhtHandler &dht, bdNodeId ownID, uint16_t &peer_port, short shotsCount, short searchRounds, int regionStart, int regionEnd) {
+void bdSingleSourceFindPeers(BitDhtHandler &dht, short shotsCount, short searchRounds, int regionStart, int regionEnd, std::list<bdNodeId>& toCheckList) {
     std::map<bdNodeId, bdQueryStatus> query;
 
     bdNodeId searchId;
@@ -18,31 +18,69 @@ void bdSingleSourceFindPeer(BitDhtHandler &dht, bdNodeId ownID, uint16_t &peer_p
         bdSingleShotFindPeer(dht, searchId, query);
     }
 
-    std::cout << "While crawling from ID: ";
-    bdStdPrintNodeId(std::cout, &ownID);
-    std::cout << std::endl << " Passive found peers: " << std::endl;
-
-    dht.mUdpBitDht->getDhtQueries(query);
-
-    std::list<bdNodeId> toCheckList;
     for (short i = 0; i < searchRounds; i++) {
-        printSummary(query, dht, toCheckList);
+        dht.mUdpBitDht->getDhtQueries(query);
+        updateQueries(query, dht, toCheckList);
         std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
         if (toCheckList.size() == 0) {
             std::cout << "Retrying to find any initial peers\n";
             bdStdRandomIdFromRegion(&searchId, regionStart, regionEnd);
             bdSingleShotFindPeer(dht, searchId, query);
-            printSummary(query, dht, toCheckList);
+            updateQueries(query, dht, toCheckList);
             std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
         }
-        std::list<bdNodeId>::iterator toCheckListIterator;
-        for (toCheckListIterator = toCheckList.begin(); toCheckListIterator != toCheckList.end(); toCheckListIterator++) {
-            bdSingleShotFindPeer(dht, (*toCheckListIterator), query);
-        }
+
+    }
+}
+
+void bdCheckPeersFromList(BitDhtHandler &dht, std::list<bdNodeId> &toCheckList) {
+    std::map<bdNodeId, bdQueryStatus> query;
+    std::list<bdNodeId>::iterator toCheckListIterator;
+    for (toCheckListIterator = toCheckList.begin(); toCheckListIterator != toCheckList.end(); toCheckListIterator++) {
+        bdSingleShotFindPeer(dht, (*toCheckListIterator), query);
+        updateQueries(query, dht, toCheckList);
+        std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
+    }
+}
+
+std::map<bdNodeId, std::pair<std::string, time_t>> bdFindPeers(BitDhtHandler &dht, std::list<bdNodeId> peers) {
+    std::map<bdNodeId, std::pair<std::string, time_t>> result;
+    std::list<bdNodeId>::iterator peersIt;
+    for (peersIt = peers.begin(); peersIt != peers.end(); peersIt++)
+        result[*peersIt] = bdSingleShotFindStatus(dht, *peersIt);
+    return result;
+}
+
+std::pair<std::string, time_t> bdSingleShotFindStatus(BitDhtHandler &dht, bdNodeId searchID) {
+    std::pair<std::string, time_t> result;
+    std::cerr << "bssdht: searching for Id: ";
+    bdStdPrintNodeId(std::cerr, &searchID);
+    std::cerr << std::endl;
+
+    dht.FindNode(&searchID);
+
+    /* run your program */
+    bdId resultId;
+    uint32_t status;
+
+    resultId.id = searchID;
+
+    short ticksDone = 0;
+    while (!(dht.SearchResult(&resultId, status) || ticksDone >= PEER_RECONNECT_TICKS)) {
+        sleep(TICK_LENGTH);
+        ticksDone++;
     }
 
-    printSummary(query, dht, toCheckList);
-    std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
+    if ((status == BITDHT_QUERY_PEER_UNREACHABLE) ||
+        (status == BITDHT_QUERY_SUCCESS)) {
+        result.first = dhtStatusToString(status);
+        result.second = time(NULL);
+    } else {
+        std::cerr << "Sorry, Cant be found! ID: ";
+        bdStdPrintNodeId(std::cerr, &searchID);
+        std::cerr << std::endl;
+    }
+    return result;
 }
 
 void bdSingleShotFindPeer(BitDhtHandler &dht, bdNodeId searchID, std::map<bdNodeId, bdQueryStatus> &query) {
@@ -80,14 +118,14 @@ void bdSingleShotFindPeer(BitDhtHandler &dht, bdNodeId searchID, std::map<bdNode
         (status == BITDHT_QUERY_SUCCESS)) {
 
         std::string peer_ip = bdnet_inet_ntoa(resultId.addr.sin_addr);
-        uint16_t peer_port = ntohs(resultId.addr.sin_port);
+        //uint16_t peer_port = ntohs(resultId.addr.sin_port);
 
-        std::cerr << "Answer: ";
+        /*std::cerr << "Answer: ";
         std::cerr << std::endl;
         std::cerr << "\tPeer IpAddress: " << peer_ip;
         std::cerr << std::endl;
         std::cerr << "\tPeer Port: " << peer_port;
-        std::cerr << std::endl;
+        std::cerr << std::endl;*/
 
         bdQueryStatus qStatus;
         qStatus.mStatus = status;
@@ -99,7 +137,7 @@ void bdSingleShotFindPeer(BitDhtHandler &dht, bdNodeId searchID, std::map<bdNode
     }
 }
 
-void printSummary(std::map<bdNodeId, bdQueryStatus> &query, BitDhtHandler &dht, std::list<bdNodeId> &toCheckList) {
+void updateQueries(std::map<bdNodeId, bdQueryStatus> &query, BitDhtHandler &dht, std::list<bdNodeId> &toCheckList) {
     std::string status;
     auto *tempAddr = new sockaddr_in;
     std::multimap<bdMetric, bdPeer>::iterator itIdsMap;
@@ -110,12 +148,12 @@ void printSummary(std::map<bdNodeId, bdQueryStatus> &query, BitDhtHandler &dht, 
         bdStdPrintNodeId(std::cout, &(*it).first);
         status = dhtStatusToString((*it).second.mStatus);
         dht.mUdpBitDht->getDhtPeerAddress(&(*it).first, *tempAddr);
-        std::cout << " : " << status << std::endl;
+        /*std::cout << " : " << status << std::endl;
         std::cout << "\tfrom IP: " << *tempAddr << std::endl;
         std::cout << "\tquery time: " << querySummary.mQueryTS << std::endl;
         std::cout << "\tsearch time: " << querySummary.mSearchTime << std::endl;
         std::cout << "\tretry period: " << querySummary.mQueryIdlePeerRetryPeriod << std::endl;
-        std::cout << std::endl;
+        std::cout << std::endl;*/
         for (itIdsMap = querySummary.mPotentialPeers.begin(); itIdsMap != querySummary.mPotentialPeers.end(); itIdsMap++)
             toCheckList.push_back(itIdsMap->second.mPeerId.id);
         for (itIdsMap = querySummary.mClosest.begin(); itIdsMap != querySummary.mClosest.end(); itIdsMap++)
