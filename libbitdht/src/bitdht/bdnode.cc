@@ -73,13 +73,11 @@ bdNode::bdNode(bdNodeId *ownId, std::string dhtVersion, const std::string& bootf
           mQueryMgr(NULL),
           mConnMgr(NULL),
           mOwnId(*ownId), mDhtVersion(dhtVersion), mStore(bootfile, fns), mFns(fns),
-          mFriendList(ownId), mHistory(HISTORY_PERIOD)
-{
+          mFriendList(ownId), mHistory(HISTORY_PERIOD) {
 	init(); /* (uses this pointers) stuff it - do it here! */
 }
 
-void bdNode::init()
-{
+void bdNode::init() {
 	mQueryMgr = new bdQueryManager(&mNodeSpace, mFns, this);
 	mConnMgr = new bdConnectManager(&mOwnId, &mNodeSpace, mQueryMgr, mFns, this);
 
@@ -90,8 +88,7 @@ void bdNode::init()
 	setNodeDhtMode(BITDHT_MODE_TRAFFIC_DEFAULT);
 
 }
-bool bdNode::getFilteredPeers(std::list<bdFilteredPeer>& peers)
-{
+bool bdNode::getFilteredPeers(std::list<bdFilteredPeer>& peers) {
     mFilterPeers.getFilteredPeers(peers) ;
     return true ;
 }
@@ -105,8 +102,7 @@ bool bdNode::getFilteredPeers(std::list<bdFilteredPeer>& peers)
  */
 
 #define ATTACH_NUMBER 5
-void bdNode::setNodeOptions(uint32_t optFlags)
-{
+void bdNode::setNodeOptions(uint32_t optFlags) {
 	mNodeOptionFlags = optFlags;
 	if (optFlags & BITDHT_OPTIONS_MAINTAIN_UNSTABLE_PORT)
 		mNodeSpace.setAttachedFlag(BITDHT_PEER_STATUS_DHT_ENGINE | BITDHT_PEER_STATUS_DHT_ENGINE_VERSION, ATTACH_NUMBER);
@@ -125,8 +121,7 @@ void bdNode::setNodeOptions(uint32_t optFlags)
  */
 
 
-uint32_t bdNode::setNodeDhtMode(uint32_t dhtFlags)
-{
+uint32_t bdNode::setNodeDhtMode(uint32_t dhtFlags) {
 	std::cerr << "bdNode::setNodeDhtMode(" << dhtFlags << "), origFlags: " << mNodeDhtMode;
 	std::cerr << std::endl;
 
@@ -134,10 +129,8 @@ uint32_t bdNode::setNodeDhtMode(uint32_t dhtFlags)
 
 
 	uint32_t traffic = dhtFlags &  BITDHT_MODE_TRAFFIC_MASK;
-	if (traffic)
-	{
-		switch(traffic)
-		{
+	if (traffic) {
+		switch(traffic) {
 			default:
 			case BITDHT_MODE_TRAFFIC_LOW:
 				mMaxAllowedMsgs = BDNODE_LOW_MSG_RATE;
@@ -159,11 +152,9 @@ uint32_t bdNode::setNodeDhtMode(uint32_t dhtFlags)
 	}
 
 	uint32_t relay = dhtFlags & BITDHT_MODE_RELAYSERVER_MASK;
-	if ((relay) && (relay != (origFlags & BITDHT_MODE_RELAYSERVER_MASK)))
-	{
+	if ((relay) && (relay != (origFlags & BITDHT_MODE_RELAYSERVER_MASK))) {
 		/* changed */
-		switch(relay)
-		{
+		switch(relay) {
 			default:
 			case BITDHT_MODE_RELAYSERVERS_IGNORED:
 				mRelayMode = BITDHT_RELAYS_OFF;
@@ -198,29 +189,25 @@ uint32_t bdNode::setNodeDhtMode(uint32_t dhtFlags)
 }
 
 
-void bdNode::getOwnId(bdNodeId *id)
-{
+void bdNode::getOwnId(bdNodeId *id) {
 	*id = mOwnId;
 }
 
 /***** Startup / Shutdown ******/
-void bdNode::restartNode()
-{
+void bdNode::restartNode() {
 	mAccount.resetStats();
 
 	mStore.reloadFromStore();
 
 	/* setup */
 	bdPeer peer;
-	while(mStore.getPeer(&peer))
-	{
+	while(mStore.getPeer(&peer)) {
 		addPotentialPeer(&(peer.mPeerId), NULL);
 	}
 }
 
 
-void bdNode::shutdownNode()
-{
+void bdNode::shutdownNode() {
 	/* clear the queries */
 	mQueryMgr->shutdownQueries();
 	mConnMgr->shutdownConnections();
@@ -236,8 +223,7 @@ void bdNode::shutdownNode()
 	mStore.clear();
 
 	/* clean up any outgoing messages */
-	while(mOutgoingMsgs.size() > 0)
-	{
+	while(mOutgoingMsgs.size() > 0) {
 		bdNodeNetMsg *msg = mOutgoingMsgs.front();
 		mOutgoingMsgs.pop_front();
 
@@ -248,18 +234,15 @@ void bdNode::shutdownNode()
 
 
 /* Crappy initial store... use bdspace as answer */
-void bdNode::updateStore()
-{
+void bdNode::updateStore() {
     mStore.writeStore();
 }
 
-bool bdNode::addressBanned(const sockaddr_in& raddr)
-{
+bool bdNode::addressBanned(const sockaddr_in& raddr) {
     return !mFilterPeers.addrOkay(const_cast<sockaddr_in*>(&raddr)) ;
 }
 
-void bdNode::printState()
-{
+void bdNode::printState() {
 	std::cerr << "bdNode::printState() for Peer: ";
 	mFns->bdPrintNodeId(std::cerr, &mOwnId);
 	std::cerr << std::endl;
@@ -288,11 +271,9 @@ void bdNode::printState()
 	mAccount.printStats(std::cerr);
 }
 
-void bdNode::iterationOff()
-{
+void bdNode::iterationOff() {
 	/* clean up any incoming messages */
-	while(mIncomingMsgs.size() > 0)
-	{
+	while(mIncomingMsgs.size() > 0) {
 		bdNodeNetMsg *msg = mIncomingMsgs.front();
 		mIncomingMsgs.pop_front();
 
@@ -301,8 +282,7 @@ void bdNode::iterationOff()
 	}
 }
 
-void bdNode::iteration()
-{
+void bdNode::iteration() {
 #ifdef DEBUG_NODE_MULTIPEER 
 	std::cerr << "bdNode::iteration() of Peer: ";
 	mFns->bdPrintNodeId(std::cerr, &mOwnId);
@@ -310,8 +290,7 @@ void bdNode::iteration()
 #endif
 
 	/* process incoming msgs */
-	while(mIncomingMsgs.size() > 0)
-	{
+	while(mIncomingMsgs.size() > 0) {
 		bdNodeNetMsg *msg = mIncomingMsgs.front();
 		mIncomingMsgs.pop_front();
 
@@ -340,8 +319,7 @@ void bdNode::iteration()
 #define BDNODE_MAX_POTENTIAL_PEERS_MULTIPLIER 	5
 
 	/* Disable Queries if our Ping Queue is too long */
-	if (mPotentialPeers.size() > mMaxAllowedMsgs * BDNODE_MAX_POTENTIAL_PEERS_MULTIPLIER)
-	{
+	if (mPotentialPeers.size() > mMaxAllowedMsgs * BDNODE_MAX_POTENTIAL_PEERS_MULTIPLIER) {
 #ifdef DEBUG_NODE_MULTIPEER 
 		std::cerr << "bdNode::iteration() Disabling Queries until PotentialPeer Queue reduced";
 		std::cerr << std::endl;
@@ -350,8 +328,7 @@ void bdNode::iteration()
 	}
 	
 
-	while((mPotentialPeers.size() > 0) && (sentMsgs < allowedPings))
-	{
+	while((mPotentialPeers.size() > 0) && (sentMsgs < allowedPings)) {
 		/* check history ... is we have pinged them already...
 		 * then simulate / pretend we have received a pong,
 		 * and don't bother sending another ping.
@@ -364,8 +341,7 @@ void bdNode::iteration()
 		/* don't send too many queries ... check history first */
 #if 0
 #ifdef USE_HISTORY
-		if (mHistory.validPeer(&pid))
-		{
+		if (mHistory.validPeer(&pid)) {
 			/* just add as peer */
 
 #ifdef DEBUG_NODE_MSGS 
@@ -415,8 +391,7 @@ void bdNode::iteration()
 	std::list<bdId>::iterator oit;
 	mNodeSpace.scanOutOfDatePeers(peerIds);
 
-	for(oit = peerIds.begin(); oit != peerIds.end(); oit++)
-	{
+	for (oit = peerIds.begin(); oit != peerIds.end(); oit++) {
 		send_ping(&(*oit));
 		mAccount.incCounter(BDACCOUNT_MSG_OUTOFDATEPING, true);
 
@@ -439,8 +414,7 @@ void bdNode::iteration()
  ***************************************************************************************
  ***************************************************************************************/
 
-void bdNode::send_ping(bdId *id)
-{
+void bdNode::send_ping(bdId *id) {
 	bdToken transId;
 	genNewTransId(&transId);
 
@@ -448,8 +422,7 @@ void bdNode::send_ping(bdId *id)
 }
 
 
-void bdNode::send_query(bdId *id, bdNodeId *targetNodeId, bool localnet)
-{
+void bdNode::send_query(bdId *id, bdNodeId *targetNodeId, bool localnet) {
 	/* push out query */
 	bdToken transId;
 	genNewTransId(&transId);
@@ -466,8 +439,7 @@ void bdNode::send_query(bdId *id, bdNodeId *targetNodeId, bool localnet)
 }
 
 
-void bdNode::send_connect_msg(bdId *id, int msgtype, bdId *srcAddr, bdId *destAddr, int mode, int param, int status)
-{
+void bdNode::send_connect_msg(bdId *id, int msgtype, bdId *srcAddr, bdId *destAddr, int mode, int param, int status) {
 	/* push out query */
 	bdToken transId;
 	genNewTransId(&transId);
@@ -482,13 +454,11 @@ void bdNode::send_connect_msg(bdId *id, int msgtype, bdId *srcAddr, bdId *destAd
 }
 
 
-void bdNode::checkPotentialPeer(bdId *id, bdId *src)
-{
+void bdNode::checkPotentialPeer(bdId *id, bdId *src) {
 	/* Check BadPeer Filters for Potential Peers too */
 
 	/* first check the filters */
-        if (!mFilterPeers.addrOkay(&(id->addr)))
-	{
+        if (!mFilterPeers.addrOkay(&(id->addr))) {
 #ifdef DEBUG_NODE_MSGS 
 		std::cerr << "bdNode::checkPotentialPeer(";
 		mFns->bdPrintId(std::cerr, id);
@@ -501,13 +471,10 @@ void bdNode::checkPotentialPeer(bdId *id, bdId *src)
 
 	/* is it masquarading? */
 	bdFriendEntry entry;
-	if (mFriendList.findPeerEntry(&(id->id), entry))
-	{
+	if (mFriendList.findPeerEntry(&(id->id), entry)) {
 		struct sockaddr_in knownAddr;
-		if (entry.addrKnown(&knownAddr))
-		{
-			if (knownAddr.sin_addr.s_addr != id->addr.sin_addr.s_addr)
-			{
+		if (entry.addrKnown(&knownAddr)) {
+			if (knownAddr.sin_addr.s_addr != id->addr.sin_addr.s_addr) {
 #ifndef DISABLE_BAD_PEER_FILTER	
 				std::cerr << "bdNode::checkPotentialPeer(";
 				mFns->bdPrintId(std::cerr, id);
@@ -531,8 +498,7 @@ void bdNode::checkPotentialPeer(bdId *id, bdId *src)
 
 	bool isWorthyPeer = mQueryMgr->checkPotentialPeer(id, src);
 
-	if (isWorthyPeer)
-	{
+	if (isWorthyPeer) {
 		addPotentialPeer(id, src);
 
 	}
@@ -545,15 +511,13 @@ void bdNode::checkPotentialPeer(bdId *id, bdId *src)
 }
 
 
-void bdNode::addPotentialPeer(bdId *id, bdId * /*src*/)
-{
+void bdNode::addPotentialPeer(bdId *id, bdId * /*src*/) {
 	mPotentialPeers.push_back(*id);
 }
 
         // virtual so manager can do callback.
         // peer flags defined in bdiface.h
-void bdNode::addPeer(const bdId *id, uint32_t peerflags)
-{
+void bdNode::addPeer(const bdId *id, uint32_t peerflags) {
 
 #ifdef DEBUG_NODE_ACTIONS 
 	fprintf(stderr, "bdNode::addPeer(");
@@ -562,8 +526,7 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 #endif
 
 	/* first check the filters */
-        if (mFilterPeers.checkPeer(id, peerflags))
-	{
+        if (mFilterPeers.checkPeer(id, peerflags)) {
 		std::cerr << "bdNode::addPeer(";
 		mFns->bdPrintId(std::cerr, id);
 		std::cerr << ", " << std::hex << peerflags << std::dec;
@@ -582,16 +545,13 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 	/* next we check if it is a friend, whitelist etc, and adjust flags */
 	bdFriendEntry entry;
 
-	if (mFriendList.findPeerEntry(&(id->id), entry))
-	{
+	if (mFriendList.findPeerEntry(&(id->id), entry)) {
 		/* found! */
 		peerflags |= entry.getPeerFlags(); // translates internal into general ones.
 
 		struct sockaddr_in knownAddr;
-		if (entry.addrKnown(&knownAddr))
-		{
-			if (knownAddr.sin_addr.s_addr != id->addr.sin_addr.s_addr)
-			{
+		if (entry.addrKnown(&knownAddr)) {
+			if (knownAddr.sin_addr.s_addr != id->addr.sin_addr.s_addr) {
 #ifndef DISABLE_BAD_PEER_FILTER	
 				std::cerr << "bdNode::addPeer(";
 				mFns->bdPrintId(std::cerr, id);
@@ -638,8 +598,7 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 //#define DISPLAY_BITDHTNODES	1
 #ifdef DISPLAY_BITDHTNODES
 	/* TEMP to extract IDS for BloomFilter */
-	if (peerflags & BITDHT_PEER_STATUS_DHT_ENGINE)
-	{
+	if (peerflags & BITDHT_PEER_STATUS_DHT_ENGINE) {
 		std::cerr << "bdNode::addPeer() FOUND BITDHT PEER";
 		std::cerr << std::endl;
 		mFns->bdPrintNodeId(std::cerr, &(id->id));
@@ -651,18 +610,15 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 /************************************ Process Remote Query *************************/
 
 /* increased the allowed processing rate from 1/sec => 5/sec */
-void bdNode::processRemoteQuery()
-{
+void bdNode::processRemoteQuery() {
 	int nProcessed = 0;
 	time_t oldTS = time(NULL) - BITDHT_MAX_REMOTE_QUERY_AGE;
-	while(nProcessed < MAX_REMOTE_PROCESS_PER_CYCLE)
-	{
+	while(nProcessed < MAX_REMOTE_PROCESS_PER_CYCLE) {
 		/* extra exit clause */
 		if (mRemoteQueries.size() < 1) 
 		{
 #ifdef USE_HISTORY
-			if (nProcessed)
-			{
+			if (nProcessed) {
 				mQueryHistory.cleanupOldMsgs();
 			}
 #endif
@@ -679,13 +635,11 @@ void bdNode::processRemoteQuery()
 #endif
 	
 		/* discard older ones (stops queue getting overloaded) */
-		if ((query.mQueryTS > oldTS) && (!badPeer))
-		{
+		if ((query.mQueryTS > oldTS) && (!badPeer)) {
 			/* recent enough to process! */
 			nProcessed++;
 
-			switch(query.mQueryType)
-			{
+			switch(query.mQueryType) {
 				case BD_QUERY_NEIGHBOURS:
 				case BD_QUERY_LOCALNET:
 				{
@@ -695,8 +649,7 @@ void bdNode::processRemoteQuery()
         				std::multimap<bdMetric, bdId> nearest;
         				std::multimap<bdMetric, bdId>::iterator it;
 
-					if (query.mQueryType == BD_QUERY_LOCALNET)
-					{
+					if (query.mQueryType == BD_QUERY_LOCALNET) {
 						std::list<bdId> excludeList;
 						mNodeSpace.find_nearest_nodes_with_flags(&(query.mQuery), 
 							BITDHT_QUERY_NEIGHBOUR_PEERS, 
@@ -704,8 +657,7 @@ void bdNode::processRemoteQuery()
 					}
 					else
 					{
-						if (mRelayMode == BITDHT_RELAYS_SERVER)
-						{
+						if (mRelayMode == BITDHT_RELAYS_SERVER) {
 							std::list<bdId> excludeList;
 							mNodeSpace.find_nearest_nodes_with_flags(&(query.mQuery), 
 								BITDHT_QUERY_NEIGHBOUR_PEERS, 
@@ -715,7 +667,7 @@ void bdNode::processRemoteQuery()
 							mNodeSpace.find_nearest_nodes(&(query.mQuery), BITDHT_QUERY_NEIGHBOUR_PEERS, nearest);
 					}
 
-        				for(it = nearest.begin(); it != nearest.end(); it++)
+        				for (it = nearest.begin(); it != nearest.end(); it++)
                 				nearList.push_back(it->second);
 					msgout_reply_find_node(&(query.mId), &(query.mTransId), nearList);
 #ifdef DEBUG_NODE_MSGS 
@@ -758,8 +710,7 @@ void bdNode::processRemoteQuery()
 		}
 		else
 		{
-			if (badPeer)
-			{
+			if (badPeer) {
 				std::cerr << "bdNode::processRemoteQuery() Query from BadPeer: Discarding: ";
 			}
 #ifdef DEBUG_NODE_MSGS 
@@ -790,18 +741,15 @@ void bdNode::processRemoteQuery()
 /************************************ Message Buffering ****************************/
 
         /* interaction with outside world */
-int     bdNode::outgoingMsg(struct sockaddr_in *addr, char *msg, int *len)
-{
-	if (mOutgoingMsgs.size() > 0)
-	{
+int     bdNode::outgoingMsg(struct sockaddr_in *addr, char *msg, int *len) {
+	if (mOutgoingMsgs.size() > 0) {
 		bdNodeNetMsg *bdmsg = mOutgoingMsgs.front();
 		//bdmsg->print(std::cerr);
 		mOutgoingMsgs.pop_front();
 		//bdmsg->print(std::cerr);
 
 		/* truncate if necessary */
-		if (bdmsg->mSize < *len)
-		{
+		if (bdmsg->mSize < *len) {
 			//std::cerr << "bdNode::outgoingMsg space(" << *len << ") msgsize(" << bdmsg->mSize << ")";
 			//std::cerr << std::endl;
 			*len = bdmsg->mSize;
@@ -825,11 +773,9 @@ int     bdNode::outgoingMsg(struct sockaddr_in *addr, char *msg, int *len)
 	return 0;
 }
 
-void    bdNode::incomingMsg(struct sockaddr_in *addr, char *msg, int len)
-{
+void    bdNode::incomingMsg(struct sockaddr_in *addr, char *msg, int len) {
 	/* check against the filter */
-    if (mFilterPeers.addrOkay(addr))
-	{
+    if (mFilterPeers.addrOkay(addr)) {
 		bdNodeNetMsg *bdmsg = new bdNodeNetMsg(msg, len, addr);
 		mIncomingMsgs.push_back(bdmsg);
 	}
@@ -846,8 +792,7 @@ void    bdNode::incomingMsg(struct sockaddr_in *addr, char *msg, int len)
 
 /* Outgoing Messages */
 
-void bdNode::msgout_ping(bdId *id, bdToken *transId)
-{
+void bdNode::msgout_ping(bdId *id, bdToken *transId) {
 #ifdef DEBUG_NODE_MSGOUT
 	std::cerr << "bdNode::msgout_ping() TransId: ";
 	bdPrintTransId(std::cerr, transId);
@@ -884,8 +829,7 @@ void bdNode::msgout_ping(bdId *id, bdToken *transId)
 }
 
 
-void bdNode::msgout_pong(bdId *id, bdToken *transId)
-{
+void bdNode::msgout_pong(bdId *id, bdToken *transId) {
 #ifdef DEBUG_NODE_MSGOUT
 	std::cerr << "bdNode::msgout_pong() TransId: ";
 	bdPrintTransId(std::cerr, transId);
@@ -917,8 +861,7 @@ void bdNode::msgout_pong(bdId *id, bdToken *transId)
 }
 
 
-void bdNode::msgout_find_node(bdId *id, bdToken *transId, bdNodeId *query, bool localnet)
-{
+void bdNode::msgout_find_node(bdId *id, bdToken *transId, bdNodeId *query, bool localnet) {
 #ifdef DEBUG_NODE_MSGOUT
 	std::cerr << "bdNode::msgout_find_node() TransId: ";
 	bdPrintTransId(std::cerr, transId);
@@ -944,8 +887,7 @@ void bdNode::msgout_find_node(bdId *id, bdToken *transId, bdNodeId *query, bool 
 
 }
 
-void bdNode::msgout_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &peers)
-{
+void bdNode::msgout_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &peers) {
         char msg[10240];
         int avail = 10240;
 
@@ -964,8 +906,7 @@ void bdNode::msgout_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> 
 	mFns->bdPrintId(std::cerr, id);
 	std::cerr << " Peers:";
 	std::list<bdId>::iterator it;
-	for(it = peers.begin(); it != peers.end(); it++)
-	{
+	for (it = peers.begin(); it != peers.end(); it++) {
 		std::cerr << " ";
 		mFns->bdPrintId(std::cerr, &(*it));
 	}
@@ -978,8 +919,7 @@ void bdNode::msgout_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> 
  *
  *****/
 
-void bdNode::msgout_get_hash(bdId *id, bdToken *transId, bdNodeId *info_hash)
-{
+void bdNode::msgout_get_hash(bdId *id, bdToken *transId, bdNodeId *info_hash) {
 #ifdef DEBUG_NODE_MSGOUT
 	std::cerr << "bdNode::msgout_get_hash() TransId: ";
 	bdPrintTransId(std::cerr, transId);
@@ -1004,8 +944,7 @@ void bdNode::msgout_get_hash(bdId *id, bdToken *transId, bdNodeId *info_hash)
 
 }
 
-void bdNode::msgout_reply_hash(bdId *id, bdToken *transId, bdToken *token, std::list<std::string> &values)
-{
+void bdNode::msgout_reply_hash(bdId *id, bdToken *transId, bdToken *token, std::list<std::string> &values) {
 #ifdef DEBUG_NODE_MSGOUT
 	std::cerr << "bdNode::msgout_reply_hash() TransId: ";
 	bdPrintTransId(std::cerr, transId);
@@ -1016,8 +955,7 @@ void bdNode::msgout_reply_hash(bdId *id, bdToken *transId, bdToken *token, std::
 
 	std::cerr << " Peers: ";
 	std::list<std::string>::iterator it;
-	for(it = values.begin(); it != values.end(); it++)
-	{
+	for (it = values.begin(); it != values.end(); it++) {
 		std::cerr << " ";
 		bdPrintCompactPeerId(std::cerr, *it);
 	}
@@ -1037,8 +975,7 @@ void bdNode::msgout_reply_hash(bdId *id, bdToken *transId, bdToken *token, std::
 
 }
 
-void bdNode::msgout_reply_nearest(bdId *id, bdToken *transId, bdToken *token, std::list<bdId> &nodes)
-{
+void bdNode::msgout_reply_nearest(bdId *id, bdToken *transId, bdToken *token, std::list<bdId> &nodes) {
 #ifdef DEBUG_NODE_MSGOUT
 	std::cerr << "bdNode::msgout_reply_nearest() TransId: ";
 	bdPrintTransId(std::cerr, transId);
@@ -1049,8 +986,7 @@ void bdNode::msgout_reply_nearest(bdId *id, bdToken *transId, bdToken *token, st
 	std::cerr << " Nodes:";
 
 	std::list<bdId>::iterator it;
-	for(it = nodes.begin(); it != nodes.end(); it++)
-	{
+	for (it = nodes.begin(); it != nodes.end(); it++) {
 		std::cerr << " ";
 		mFns->bdPrintId(std::cerr, &(*it));
 	}
@@ -1072,8 +1008,7 @@ void bdNode::msgout_reply_nearest(bdId *id, bdToken *transId, bdToken *token, st
 
 }
 
-void bdNode::msgout_post_hash(bdId *id, bdToken *transId, bdNodeId *info_hash, uint32_t port, bdToken *token)
-{
+void bdNode::msgout_post_hash(bdId *id, bdToken *transId, bdNodeId *info_hash, uint32_t port, bdToken *token) {
 #ifdef DEBUG_NODE_MSGOUT
 	std::cerr << "bdNode::msgout_post_hash() TransId: ";
 	bdPrintTransId(std::cerr, transId);
@@ -1101,8 +1036,7 @@ void bdNode::msgout_post_hash(bdId *id, bdToken *transId, bdNodeId *info_hash, u
 
 }
 
-void bdNode::msgout_reply_post(bdId *id, bdToken *transId)
-{
+void bdNode::msgout_reply_post(bdId *id, bdToken *transId) {
 #ifdef DEBUG_NODE_MSGOUT
 	std::cerr << "bdNode::msgout_reply_post() TransId: ";
 	bdPrintTransId(std::cerr, transId);
@@ -1125,14 +1059,12 @@ void bdNode::msgout_reply_post(bdId *id, bdToken *transId)
 }
 
 
-void    bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
-{
+void    bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr) {
 	//fprintf(stderr, "bdNode::sendPkt(%d) to %s:%d\n", 
 	//		len, inet_ntoa(addr.sin_addr), htons(addr.sin_port));
 
 	/* filter outgoing packets */
-        if (mFilterPeers.addrOkay(&addr))
-	{
+        if (mFilterPeers.addrOkay(&addr)) {
 		bdNodeNetMsg *bdmsg = new bdNodeNetMsg(msg, len, &addr);
 		//bdmsg->print(std::cerr);
 		mOutgoingMsgs.push_back(bdmsg);
@@ -1154,14 +1086,11 @@ void    bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
  * parse message, and get on with it!
  */
 
-void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
-{
+void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
 #ifdef DEBUG_NODE_PARSE
 	std::cerr << "bdNode::recvPkt() msg[" << len << "] = ";
-	for(int i = 0; i < len; i++)
-	{
-		if ((msg[i] > 31) && (msg[i] < 127))
-		{
+	for (int i = 0; i < len; i++) {
+		if ((msg[i] > 31) && (msg[i] < 127)) {
 			std::cerr << msg[i];
 		}
 		else
@@ -1174,8 +1103,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 
 	/* convert to a be_node */
 	be_node *node = be_decoden(msg, len);
-	if (!node)
-	{
+	if (!node) {
 		/* invalid decode */
 #ifdef DEBUG_NODE_PARSE
 		std::cerr << "bdNode::recvPkt() Failure to decode. Dropping Msg";
@@ -1183,10 +1111,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		std::cerr << "message length: " << len;
 		std::cerr << std::endl;
 		std::cerr << "msg[] = ";
-		for(int i = 0; i < len; i++)
-		{
-			if ((msg[i] > 31) && (msg[i] < 127))
-			{
+		for (int i = 0; i < len; i++) {
+			if ((msg[i] > 31) && (msg[i] < 127)) {
 				std::cerr << msg[i];
 			}
 			else
@@ -1204,8 +1130,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	uint32_t beType = beMsgType(node);
 	bool     beQuery = (BE_Y_Q == beMsgGetY(node));
 
-	if (!beType)
-	{
+	if (!beType) {
 #ifdef DEBUG_NODE_PARSE
 		std::cerr << "bdNode::recvPkt() Invalid Message Type. Dropping Msg";
 		std::cerr << std::endl;
@@ -1238,8 +1163,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		dictkey[0] = 'a';
 
 	be_node *be_data = beMsgGetDictNode(node, dictkey);
-	if (!be_data)
-	{
+	if (!be_data) {
 #ifdef DEBUG_NODE_PARSE
 		std::cerr << "bdNode::recvPkt() Missing Data Body. Dropping Msg";
 		std::cerr << std::endl;
@@ -1251,8 +1175,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	/************************** handle id (all) ***************************/
     be_node *be_id = beMsgGetDictNode(be_data, "id");
 	bdNodeId id;
-	if(!be_id || !beMsgGetNodeId(be_id, id))
-	{
+	if (!be_id || !beMsgGetNodeId(be_id, id)) {
 #ifdef DEBUG_NODE_PARSE
 		std::cerr << "bdNode::recvPkt() Missing Peer Id. Dropping Msg";
 		std::cerr << std::endl;
@@ -1264,12 +1187,10 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	/************************ handle version (optional:pong) **************/
         be_node *be_version = NULL;
         bdToken versionId;
-	if ((beType == BITDHT_MSG_TYPE_PONG) || (beType == BITDHT_MSG_TYPE_PING))
-	{
+	if ((beType == BITDHT_MSG_TYPE_PONG) || (beType == BITDHT_MSG_TYPE_PING)) {
         messageType = "PING / PONG";
 		be_version = beMsgGetDictNode(node, "v");
-		if (!be_version)
-		{
+		if (!be_version) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() NOTE: PONG missing Optional Version.";
 			std::cerr << std::endl;
@@ -1283,8 +1204,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	/************************ handle options (optional:bitdht extension) **************/
 	be_node  *be_options = beMsgGetDictNode(node, "o");
 	bool localnet = false;
-	if (be_options)
-	{
+	if (be_options) {
 #ifdef DEBUG_NODE_PARSE
 		std::cerr << "bdNode::recvPkt() Found Options Node, localnet";
 		std::cerr << std::endl;
@@ -1295,12 +1215,10 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	/*********** handle target (query) or info_hash (get_hash) ************/
 	bdNodeId target_info_hash;
 	be_node  *be_target = NULL;
-	if (beType == BITDHT_MSG_TYPE_FIND_NODE)
-	{
+	if (beType == BITDHT_MSG_TYPE_FIND_NODE) {
         messageType = "FIND NODE";
 		be_target = beMsgGetDictNode(be_data, "target");
-		if (!be_target)
-		{
+		if (!be_target) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() Missing Target / Info_Hash. Dropping Msg";
 			std::cerr << std::endl;
@@ -1311,12 +1229,10 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 
 	}
 	else if ((beType == BITDHT_MSG_TYPE_GET_HASH) ||
-			(beType == BITDHT_MSG_TYPE_POST_HASH))
-	{
+			(beType == BITDHT_MSG_TYPE_POST_HASH)) {
         messageType = "GET / POST HASH";
 		be_target = beMsgGetDictNode(be_data, "info_hash");
-		if (!be_target)
-		{
+		if (!be_target) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() Missing Target / Info_Hash. Dropping Msg";
 			std::cerr << std::endl;
@@ -1326,8 +1242,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		}
 	}
 
-	if (be_target)
-	{
+	if (be_target) {
 		beMsgGetNodeId(be_target, target_info_hash);
 	}
 
@@ -1335,12 +1250,10 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	std::list<bdId> nodes;
 	be_node  *be_nodes = NULL;
 	if ((beType == BITDHT_MSG_TYPE_REPLY_NODE) ||
-		(beType == BITDHT_MSG_TYPE_REPLY_NEAR))
-	{
+		(beType == BITDHT_MSG_TYPE_REPLY_NEAR)) {
         messageType = "REPLY NODE / NEAR";
 		be_nodes = beMsgGetDictNode(be_data, "nodes");
-		if (!be_nodes)
-		{
+		if (!be_nodes) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() Missing Nodes. Dropping Msg";
 			std::cerr << std::endl;
@@ -1350,20 +1263,17 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		}
 	}
 
-	if (be_nodes)
-	{
+	if (be_nodes) {
 		beMsgGetListBdIds(be_nodes, nodes);
 	}
 
 	/******************* handle values (reply_hash) ***********************/
 	std::list<std::string> values;
 	be_node  *be_values = NULL;
-	if (beType == BITDHT_MSG_TYPE_REPLY_HASH)
-	{
+	if (beType == BITDHT_MSG_TYPE_REPLY_HASH) {
         messageType = "REPLY HASH";
 		be_values = beMsgGetDictNode(be_data, "values");
-		if (!be_values)
-		{
+		if (!be_values) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() Missing Values. Dropping Msg";
 			std::cerr << std::endl;
@@ -1373,8 +1283,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		}
 	}
 
-	if (be_values)
-	{
+	if (be_values) {
 		beMsgGetListStrings(be_values, values);
 	}
 
@@ -1383,12 +1292,10 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	be_node  *be_token = NULL;
 	if ((beType == BITDHT_MSG_TYPE_REPLY_HASH) ||
 		(beType == BITDHT_MSG_TYPE_REPLY_NEAR) ||
-		(beType == BITDHT_MSG_TYPE_POST_HASH))
-	{
+		(beType == BITDHT_MSG_TYPE_POST_HASH)) {
         messageType = "POST / REPLY HASH / REPLY NEAR";
 		be_token = beMsgGetDictNode(be_data, "token");
-		if (!be_token)
-		{
+		if (!be_token) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() Missing Token. Dropping Msg";
 			std::cerr << std::endl;
@@ -1398,20 +1305,17 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		}
 	}
 
-	if (be_token)
-	{
+	if (be_token) {
 		beMsgGetToken(be_transId, transId);
 	}
 
 	/****************** handle port (post hash) ***************************/
         uint32_t port;
 	be_node  *be_port = NULL;
-	if (beType == BITDHT_MSG_TYPE_POST_HASH)
-	{
+	if (beType == BITDHT_MSG_TYPE_POST_HASH) {
         messageType = "POST HASH";
 		be_port = beMsgGetDictNode(be_data, "port");
-		if (!be_port)
-		{
+		if (!be_port) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() POST_HASH Missing Port. Dropping Msg";
 			std::cerr << std::endl;
@@ -1438,13 +1342,11 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	be_node  *be_ConnParam = NULL;
 	be_node  *be_ConnStatus = NULL;
 	be_node  *be_ConnType = NULL;
-	if (beType == BITDHT_MSG_TYPE_CONNECT)
-	{
+	if (beType == BITDHT_MSG_TYPE_CONNECT) {
         messageType = "CONNECT";
 		/* SrcAddr */
 		be_ConnSrcAddr = beMsgGetDictNode(be_data, "src");
-		if (!be_ConnSrcAddr)
-		{
+		if (!be_ConnSrcAddr) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() CONNECT Missing SrcAddr. Dropping Msg";
 			std::cerr << std::endl;
@@ -1455,8 +1357,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 
 		/* DestAddr */
 		be_ConnDestAddr = beMsgGetDictNode(be_data, "dest");
-		if (!be_ConnDestAddr)
-		{
+		if (!be_ConnDestAddr) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() CONNECT Missing DestAddr. Dropping Msg";
 			std::cerr << std::endl;
@@ -1467,8 +1368,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 
 		/* Mode */
 		be_ConnMode = beMsgGetDictNode(be_data, "mode");
-		if (!be_ConnMode)
-		{
+		if (!be_ConnMode) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() CONNECT Missing Mode. Dropping Msg";
 			std::cerr << std::endl;
@@ -1479,8 +1379,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 
 		/* Param */
 		be_ConnParam = beMsgGetDictNode(be_data, "param");
-		if (!be_ConnParam)
-		{
+		if (!be_ConnParam) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() CONNECT Missing Param. Dropping Msg";
 			std::cerr << std::endl;
@@ -1491,8 +1390,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 
 		/* Status */
 		be_ConnStatus = beMsgGetDictNode(be_data, "status");
-		if (!be_ConnStatus)
-		{
+		if (!be_ConnStatus) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() CONNECT Missing Status. Dropping Msg";
 			std::cerr << std::endl;
@@ -1503,8 +1401,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 
 		/* Type */
 		be_ConnType = beMsgGetDictNode(be_data, "type");
-		if (!be_ConnType)
-		{
+		if (!be_ConnType) {
 #ifdef DEBUG_NODE_PARSE
 			std::cerr << "bdNode::recvPkt() CONNECT Missing Type. Dropping Msg";
 			std::cerr << std::endl;
@@ -1542,8 +1439,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	else
 		registerIncomingMsg(&srcId, &transId, beType, NULL);
 
-	switch(beType)
-	{
+	switch(beType) {
 		case BITDHT_MSG_TYPE_PING:  /* a: id, transId */
 		{
 #ifdef DEBUG_NODE_MSGS 
@@ -1715,8 +1611,7 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
  * Response: pong(id, token)
  */
 
-void bdNode::msgin_ping(bdId *id, bdToken *transId, bdToken *versionId)
-{
+void bdNode::msgin_ping(bdId *id, bdToken *transId, bdToken *versionId) {
 #ifdef DEBUG_NODE_MSGIN
 	std::cerr << "bdNode::msgin_ping() TransId: ";
 	bdPrintTransId(std::cerr, transId);
@@ -1741,8 +1636,7 @@ void bdNode::msgin_ping(bdId *id, bdToken *transId, bdToken *versionId)
  * Response: store peer.
  */
 
-void bdNode::msgin_pong(bdId *id, bdToken *transId, bdToken *versionId)
-{
+void bdNode::msgin_pong(bdId *id, bdToken *transId, bdToken *versionId) {
 #ifdef DEBUG_NODE_MSGIN
 	std::cerr << "bdNode::msgin_pong() TransId: ";
 	bdPrintTransId(std::cerr, transId);
@@ -1762,8 +1656,7 @@ void bdNode::msgin_pong(bdId *id, bdToken *transId, bdToken *versionId)
 }
 
 
-uint32_t bdNode::parseVersion(bdToken *versionId)
-{
+uint32_t bdNode::parseVersion(bdToken *versionId) {
 	/* recv pong, and peer is alive. add to DHT */
 	//uint32_t vId = 0; // TODO XXX convertBdVersionToVID(versionId);
 
@@ -1773,13 +1666,11 @@ uint32_t bdNode::parseVersion(bdToken *versionId)
 	bool sameAppl = false;
 	bool sameApplVersion = false;
 
-	if (versionId)
-	{
+	if (versionId) {
 		
 #ifdef DEBUG_NODE_MSGIN
 		std::cerr << "bdNode::parseVersion() Peer Version: ";
-		for(int i = 0; i < versionId->len; i++)
-		{
+		for (int i = 0; i < versionId->len; i++) {
 			std::cerr << versionId->data[i];
 		}
 		std::cerr << std::endl;
@@ -1787,10 +1678,8 @@ uint32_t bdNode::parseVersion(bdToken *versionId)
 
 #ifdef USE_HISTORY
 		std::string version;
-		for(int i = 0; i < versionId->len; i++)
-		{
-			if (isalnum(versionId->data[i]))
-			{
+		for (int i = 0; i < versionId->len; i++) {
+			if (isalnum(versionId->data[i])) {
 				version += versionId->data[i];
 			}
 			else
@@ -1803,8 +1692,7 @@ uint32_t bdNode::parseVersion(bdToken *versionId)
 	
 		/* check two bytes */
 		if ((versionId->len >= 2) && (mDhtVersion.size() >= 2) &&
-			(versionId->data[0] == mDhtVersion[0]) && (versionId->data[1] == mDhtVersion[1]))
-		{
+			(versionId->data[0] == mDhtVersion[0]) && (versionId->data[1] == mDhtVersion[1])) {
 			sameDhtEngine = true;
 		}
 	
@@ -1813,22 +1701,18 @@ uint32_t bdNode::parseVersion(bdToken *versionId)
 		 * We have a Major version, and minor version....	
 		 * This flag is set if Major is same, and minor is greater or equal to our version.
 		 */
-		if ((versionId->len >= 4) && (mDhtVersion.size() >= 4))
-		{
+		if ((versionId->len >= 4) && (mDhtVersion.size() >= 4)) {
 			if ((isdigit(versionId->data[2]) && isdigit(versionId->data[3])) && 
-				(versionId->data[2] == mDhtVersion[2]) && (versionId->data[3] >= mDhtVersion[3]))
-			{
+				(versionId->data[2] == mDhtVersion[2]) && (versionId->data[3] >= mDhtVersion[3])) {
 				sameDhtVersion = true;
 			}
 		}
 
-		if ((sameDhtVersion) && (!sameDhtEngine))
-		{
+		if ((sameDhtVersion) && (!sameDhtEngine)) {
 			sameDhtVersion = false;
 #ifdef DEBUG_NODE_MSGIN
 			std::cerr << "bdNode::parseVersion() STRANGE Peer Version: ";
-			for(uint32_t i = 0; i < versionId->len; i++)
-			{
+			for (uint32_t i = 0; i < versionId->len; i++) {
 				std::cerr << versionId->data[i];
 			}
 			std::cerr << std::endl;
@@ -1837,18 +1721,15 @@ uint32_t bdNode::parseVersion(bdToken *versionId)
 	
 		/* check two bytes */
 		if ((versionId->len >= 6) && (mDhtVersion.size() >= 6) &&
-			(versionId->data[4] == mDhtVersion[4]) && (versionId->data[5] == mDhtVersion[5]))
-		{
+			(versionId->data[4] == mDhtVersion[4]) && (versionId->data[5] == mDhtVersion[5])) {
 			sameAppl = true;
 		}
 	
 	
 		/* check two bytes */
-		if ((versionId->len >= 8) && (mDhtVersion.size() >= 8))
-		{
+		if ((versionId->len >= 8) && (mDhtVersion.size() >= 8)) {
 			if ((isdigit(versionId->data[6]) && isdigit(versionId->data[7])) && 
-				(versionId->data[6] == mDhtVersion[6]) && (versionId->data[7] >= mDhtVersion[7]))
-			{
+				(versionId->data[6] == mDhtVersion[6]) && (versionId->data[7] >= mDhtVersion[7])) {
 				sameApplVersion = true;
 			}
 		}
@@ -1863,20 +1744,16 @@ uint32_t bdNode::parseVersion(bdToken *versionId)
 	}
 	
 	uint32_t peerflags = BITDHT_PEER_STATUS_RECV_PONG; /* should have id too */
-	if (sameDhtEngine)
-	{
+	if (sameDhtEngine) {
 		peerflags |= BITDHT_PEER_STATUS_DHT_ENGINE; 
 	}
-	if (sameDhtVersion)
-	{
+	if (sameDhtVersion) {
 		peerflags |= BITDHT_PEER_STATUS_DHT_ENGINE_VERSION; 
 	}
-	if (sameAppl)
-	{
+	if (sameAppl) {
 		peerflags |= BITDHT_PEER_STATUS_DHT_APPL; 
 	}
-	if (sameApplVersion)
-	{
+	if (sameApplVersion) {
 		peerflags |= BITDHT_PEER_STATUS_DHT_APPL_VERSION; 
 	}
 	return peerflags;
@@ -1886,8 +1763,7 @@ uint32_t bdNode::parseVersion(bdToken *versionId)
 
 /* Input: id, token, queryId */
 
-void bdNode::msgin_find_node(bdId *id, bdToken *transId, bdNodeId *query, bool localnet)
-{
+void bdNode::msgin_find_node(bdId *id, bdToken *transId, bdNodeId *query, bool localnet) {
 #ifdef DEBUG_NODE_MSGIN
 	std::cerr << "bdNode::msgin_find_node() TransId: ";
 	bdPrintTransId(std::cerr, transId);
@@ -1903,8 +1779,7 @@ void bdNode::msgin_find_node(bdId *id, bdToken *transId, bdNodeId *query, bool l
 
 	/* store query... */
 	uint32_t query_type = BD_QUERY_NEIGHBOURS;
-	if (localnet)
-	{
+	if (localnet) {
 		query_type = BD_QUERY_LOCALNET;
 	}
 	queueQuery(id, query, transId, query_type);
@@ -1914,8 +1789,7 @@ void bdNode::msgin_find_node(bdId *id, bdToken *transId, bdNodeId *query, bool l
 	addPeer(id, peerflags);
 }
 
-void bdNode::msgin_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &nodes)
-{
+void bdNode::msgin_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &nodes) {
 	std::list<bdId>::iterator it;
 
 #ifdef DEBUG_NODE_MSGS
@@ -1924,8 +1798,7 @@ void bdNode::msgin_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &
 	std::cerr << " From: ";
 	mFns->bdPrintId(std::cerr, id);
 	std::cerr << " Peers:";
-	for(it = nodes.begin(); it != nodes.end(); it++)
-	{
+	for (it = nodes.begin(); it != nodes.end(); it++) {
 		std::cerr << " ";
 		mFns->bdPrintId(std::cerr, &(*it));
 	}
@@ -1937,8 +1810,7 @@ void bdNode::msgin_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &
 	mAccount.incCounter(BDACCOUNT_MSG_REPLYFINDNODE, false);
 
 	/* add neighbours to the potential list */
-	for(it = nodes.begin(); it != nodes.end(); it++)
-	{
+	for (it = nodes.begin(); it != nodes.end(); it++) {
 		checkPotentialPeer(&(*it), id);
 	}
 
@@ -1951,8 +1823,7 @@ void bdNode::msgin_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &
  *
  */
 
-void bdNode::msgin_get_hash(bdId *id, bdToken *transId, bdNodeId *info_hash)
-{
+void bdNode::msgin_get_hash(bdId *id, bdToken *transId, bdNodeId *info_hash) {
 
 	
 #ifdef DEBUG_NODE_MSGIN
@@ -1973,8 +1844,7 @@ void bdNode::msgin_get_hash(bdId *id, bdToken *transId, bdNodeId *info_hash)
 
 }
 
-void bdNode::msgin_reply_hash(bdId *id, bdToken *transId, bdToken *token, std::list<std::string> &values)
-{
+void bdNode::msgin_reply_hash(bdId *id, bdToken *transId, bdToken *token, std::list<std::string> &values) {
 	mAccount.incCounter(BDACCOUNT_MSG_REPLYQUERYHASH, false);
 
 #ifdef DEBUG_NODE_MSGIN
@@ -1987,8 +1857,7 @@ void bdNode::msgin_reply_hash(bdId *id, bdToken *transId, bdToken *token, std::l
 
 	std::cerr << " Peers: ";
 	std::list<std::string>::iterator it;
-	for(it = values.begin(); it != values.end(); it++)
-	{
+	for (it = values.begin(); it != values.end(); it++) {
 		std::cerr << " ";
 		bdPrintCompactPeerId(std::cerr, *it);
 	}
@@ -2001,8 +1870,7 @@ void bdNode::msgin_reply_hash(bdId *id, bdToken *transId, bdToken *token, std::l
 #endif
 }
 
-void bdNode::msgin_reply_nearest(bdId *id, bdToken *transId, bdToken *token, std::list<bdId> &nodes)
-{
+void bdNode::msgin_reply_nearest(bdId *id, bdToken *transId, bdToken *token, std::list<bdId> &nodes) {
 	mAccount.incCounter(BDACCOUNT_MSG_REPLYQUERYHASH, false);
 
 #ifdef DEBUG_NODE_MSGIN
@@ -2015,8 +1883,7 @@ void bdNode::msgin_reply_nearest(bdId *id, bdToken *transId, bdToken *token, std
 	std::cerr << " Nodes:";
 
 	std::list<bdId>::iterator it;
-	for(it = nodes.begin(); it != nodes.end(); it++)
-	{
+	for (it = nodes.begin(); it != nodes.end(); it++) {
 		std::cerr << " ";
 		mFns->bdPrintId(std::cerr, &(*it));
 	}
@@ -2031,8 +1898,7 @@ void bdNode::msgin_reply_nearest(bdId *id, bdToken *transId, bdToken *token, std
 
 
 
-void bdNode::msgin_post_hash(bdId *id,  bdToken *transId,  bdNodeId *info_hash,  uint32_t port, bdToken *token)
-{
+void bdNode::msgin_post_hash(bdId *id,  bdToken *transId,  bdNodeId *info_hash,  uint32_t port, bdToken *token) {
 
 	mAccount.incCounter(BDACCOUNT_MSG_POSTHASH, false);
 
@@ -2058,8 +1924,7 @@ void bdNode::msgin_post_hash(bdId *id,  bdToken *transId,  bdNodeId *info_hash, 
 }
 
 
-void bdNode::msgin_reply_post(bdId *id, bdToken *transId)
-{
+void bdNode::msgin_reply_post(bdId *id, bdToken *transId) {
 	/* generate message, send to udp */
 	mAccount.incCounter(BDACCOUNT_MSG_REPLYPOSTHASH, false);
 
@@ -2082,10 +1947,8 @@ void bdNode::msgin_reply_post(bdId *id, bdToken *transId)
 ************************************************************************************************************/
 
 /* Outgoing Messages */
-std::string getConnectMsgType(int msgtype)
-{
-	switch(msgtype)
-	{
+std::string getConnectMsgType(int msgtype) {
+	switch(msgtype) {
 		case BITDHT_MSG_TYPE_CONNECT_REQUEST:
 			return "ConnectRequest";
 			break;
@@ -2104,8 +1967,7 @@ std::string getConnectMsgType(int msgtype)
 	}
 }
 
-void bdNode::msgout_connect_genmsg(bdId *id, bdToken *transId, int msgtype, bdId *srcAddr, bdId *destAddr, int mode, int param, int status)
-{
+void bdNode::msgout_connect_genmsg(bdId *id, bdToken *transId, int msgtype, bdId *srcAddr, bdId *destAddr, int mode, int param, int status) {
 #ifdef DEBUG_NODE_MSGOUT
 	std::cerr << "bdConnectManager::msgout_connect_genmsg() Type: " << getConnectMsgType(msgtype);
 	std::cerr << " TransId: ";
@@ -2122,8 +1984,7 @@ void bdNode::msgout_connect_genmsg(bdId *id, bdToken *transId, int msgtype, bdId
 	std::cerr << std::endl;
 #endif
 
-	switch(msgtype)
-	{
+	switch(msgtype) {
 		default:
 		case BITDHT_MSG_TYPE_CONNECT_REQUEST:
 			mAccount.incCounter(BDACCOUNT_MSG_CONNECTREQUEST, true);
@@ -2151,8 +2012,7 @@ void bdNode::msgout_connect_genmsg(bdId *id, bdToken *transId, int msgtype, bdId
 
 
 void bdNode::msgin_connect_genmsg(bdId *id, bdToken *transId, int msgtype, 
-					bdId *srcAddr, bdId *destAddr, int mode, int param, int status)
-{
+					bdId *srcAddr, bdId *destAddr, int mode, int param, int status) {
 	std::list<bdId>::iterator it;
 
 #ifdef DEBUG_NODE_MSGS
@@ -2175,8 +2035,7 @@ void bdNode::msgin_connect_genmsg(bdId *id, bdToken *transId, int msgtype,
 
 	/* switch to actual work functions */
 	uint32_t peerflags = 0;
-	switch(msgtype)
-	{
+	switch(msgtype) {
 		case BITDHT_MSG_TYPE_CONNECT_REQUEST:
 			peerflags = BITDHT_PEER_STATUS_RECV_CONNECT_MSG; 
 			mAccount.incCounter(BDACCOUNT_MSG_CONNECTREQUEST, false);
@@ -2227,8 +2086,7 @@ void bdNode::msgin_connect_genmsg(bdId *id, bdToken *transId, int msgtype,
 
 /****************** Other Functions ******************/
 
-void bdNode::genNewToken(bdToken *token)
-{
+void bdNode::genNewToken(bdToken *token) {
 #ifdef DEBUG_NODE_ACTIONS 
 	fprintf(stderr, "bdNode::genNewToken()");
 	fprintf(stderr, ")\n");
@@ -2243,8 +2101,7 @@ void bdNode::genNewToken(bdToken *token)
 	if (len > BITDHT_TOKEN_MAX_LEN)
 		len = BITDHT_TOKEN_MAX_LEN;
 
-	for(int i = 0; i < len; i++)
-	{
+	for (int i = 0; i < len; i++) {
 		token->data[i] = num[i];
 	}
 	token->len = len;
@@ -2252,8 +2109,7 @@ void bdNode::genNewToken(bdToken *token)
 }
 
 uint32_t transIdCounter = 0;
-void bdNode::genNewTransId(bdToken *token)
-{
+void bdNode::genNewTransId(bdToken *token) {
 	/* generate message, send to udp */
 #ifdef DEBUG_NODE_ACTIONS 
 	fprintf(stderr, "bdNode::genNewTransId()");
@@ -2266,8 +2122,7 @@ void bdNode::genNewTransId(bdToken *token)
 	if (len > BITDHT_TOKEN_MAX_LEN)
 		len = BITDHT_TOKEN_MAX_LEN;
 
-	for(int i = 0; i < len; i++)
-	{
+	for (int i = 0; i < len; i++) {
 		token->data[i] = num[i];
 	}
 	token->len = len;
@@ -2275,8 +2130,7 @@ void bdNode::genNewTransId(bdToken *token)
 
 
 /* Store Remote Query for processing */
-int bdNode::queueQuery(bdId *id, bdNodeId *query, bdToken *transId, uint32_t query_type)
-{
+int bdNode::queueQuery(bdId *id, bdNodeId *query, bdToken *transId, uint32_t query_type) {
 #ifdef DEBUG_NODE_ACTIONS 
 	std::cerr << "bdnode::queueQuery()" << std::endl;
 #endif
@@ -2288,8 +2142,7 @@ int bdNode::queueQuery(bdId *id, bdNodeId *query, bdToken *transId, uint32_t que
 
 /*************** Register Transaction Ids *************/
 
-void bdNode::registerOutgoingMsg(bdId *id, bdToken *transId, uint32_t msgType, bdNodeId *aboutId)
-{
+void bdNode::registerOutgoingMsg(bdId *id, bdToken *transId, uint32_t msgType, bdNodeId *aboutId) {
 	
 #ifdef DEBUG_MSG_CHECKS
 	std::cerr << "bdNode::registerOutgoingMsg(";
@@ -2304,19 +2157,16 @@ void bdNode::registerOutgoingMsg(bdId *id, bdToken *transId, uint32_t msgType, b
 #ifdef USE_HISTORY
 
 	// splitting up - to see if we can isolate the crash causes.
-	switch(msgType)
-	{
+	switch(msgType) {
 		// disabled types (which appear to crash it!)
 		case BITDHT_MSG_TYPE_PING:
-			if (!id)
-			{
+			if (!id) {
 				return;
 			}
 			if ((id->id.data[0] == 0)
 			  && (id->id.data[1] == 0)
 			  && (id->id.data[2] == 0)
-			  && (id->id.data[3] == 0))
-			{
+			  && (id->id.data[3] == 0)) {
 				return;
 			}
 			break;
@@ -2358,8 +2208,7 @@ void bdNode::registerOutgoingMsg(bdId *id, bdToken *transId, uint32_t msgType, b
 
 
 
-uint32_t bdNode::registerIncomingMsg(bdId *id, bdToken *transId, uint32_t msgType, bdNodeId *aboutId)
-{
+uint32_t bdNode::registerIncomingMsg(bdId *id, bdToken *transId, uint32_t msgType, bdNodeId *aboutId) {
 	
 #ifdef DEBUG_MSG_CHECKS
 	std::cerr << "bdNode::registerIncomingMsg(";
@@ -2381,8 +2230,7 @@ uint32_t bdNode::registerIncomingMsg(bdId *id, bdToken *transId, uint32_t msgTyp
 	return 0;
 }
 
-void bdNode::cleanupTransIdRegister()
-{
+void bdNode::cleanupTransIdRegister() {
 	return;
 }
 
@@ -2391,12 +2239,10 @@ void bdNode::cleanupTransIdRegister()
 /*************** Internal Msg Storage *****************/
 
 bdNodeNetMsg::bdNodeNetMsg(char *msg, int len, struct sockaddr_in *in_addr)
-	:data(NULL), mSize(len), addr(*in_addr)
-{
+	:data(NULL), mSize(len), addr(*in_addr) {
 	data = (char *) malloc(len);
     
-    	if(data == NULL)
-        {
+    	if (data == NULL) {
             std::cerr << "(EE) " << __PRETTY_FUNCTION__ << ": ERROR. cannot allocate memory for " << len << " bytes." << std::endl;
             return ;
         }
@@ -2405,16 +2251,14 @@ bdNodeNetMsg::bdNodeNetMsg(char *msg, int len, struct sockaddr_in *in_addr)
 	//print(std::cerr);
 }
 
-void bdNodeNetMsg::print(std::ostream &out)
-{
+void bdNodeNetMsg::print(std::ostream &out) {
 	out << "bdNodeNetMsg::print(" << mSize << ") to "
 			<< bdnet_inet_ntoa(addr.sin_addr) << ":" << htons(addr.sin_port);
 	out << std::endl;
 }
 
 
-bdNodeNetMsg::~bdNodeNetMsg()
-{
+bdNodeNetMsg::~bdNodeNetMsg() {
 	free(data);
 }
 
@@ -2422,24 +2266,21 @@ bdNodeNetMsg::~bdNodeNetMsg()
 
 /**************** In/Out of Relay Mode ******************/
 
-void bdNode::dropRelayServers()
-{
+void bdNode::dropRelayServers() {
 	/* We leave them there... just drop the flags */
 	uint32_t flags = BITDHT_PEER_STATUS_DHT_RELAY_SERVER;
 	std::list<bdNodeId> peerList;
 	std::list<bdNodeId>::iterator it;
 
 	mFriendList.findPeersWithFlags(flags, peerList);
-	for(it = peerList.begin(); it != peerList.end(); it++)
-	{
+	for (it = peerList.begin(); it != peerList.end(); it++) {
 		mFriendList.removePeer(&(*it));
 	}
 
 	mNodeSpace.clean_node_flags(flags);
 }
 
-void bdNode::pingRelayServers()
-{
+void bdNode::pingRelayServers() {
 	/* if Relay's have been switched on, do search/ping to locate servers */
 #ifdef DEBUG_NODE_MSGS
 	std::cerr << "bdNode::pingRelayServers()";
@@ -2453,10 +2294,8 @@ void bdNode::pingRelayServers()
 	std::list<bdNodeId>::iterator it;
 
 	mFriendList.findPeersWithFlags(flags, peerList);
-	for(it = peerList.begin(); it != peerList.end(); it++)
-	{
-		if (doSearch)
-		{
+	for (it = peerList.begin(); it != peerList.end(); it++) {
+		if (doSearch) {
 			uint32_t qflags = BITDHT_QFLAGS_INTERNAL | BITDHT_QFLAGS_DISGUISE;
 			mQueryMgr->addQuery(&(*it), qflags);
 

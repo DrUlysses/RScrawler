@@ -33,16 +33,14 @@
 	#include <iostream>
 #endif
 
-extern "C" void* bdthread_init(void* p)
-{
+extern "C" void* bdthread_init(void* p) {
 #ifdef DEBUG_THREADS
 	std::cerr << "bdthread_init()";
 	std::cerr << std::endl;
 #endif
 
   bdThread *thread = (bdThread *) p;
-  if (!thread)
-  {
+  if (!thread) {
 #ifdef DEBUG_THREADS
 	std::cerr << "bdthread_init() Error Invalid thread pointer.";
 	std::cerr << std::endl;
@@ -54,8 +52,7 @@ extern "C" void* bdthread_init(void* p)
 }
 
 
-pthread_t  createThread(bdThread &thread)
-{
+pthread_t  createThread(bdThread &thread) {
     pthread_t tid;
     void  *data = (void *) (&thread);
 
@@ -90,8 +87,7 @@ pthread_t  createThread(bdThread &thread)
 
 }
 
-bdThread::bdThread()
-{
+bdThread::bdThread() {
 
 #ifdef DEBUG_THREADS
     	std::cerr << "bdThread::bdThread()";
@@ -124,7 +120,7 @@ void bdThread::join() /* waits for the the mTid thread to stop */
 #if defined(_WIN32) || defined(__MINGW32__) || defined(__APPLE__)
 	/* Its a struct in Windows compile and the member .p ist checked in the pthreads library */
 #else
-	if(mTid > 0)
+	if (mTid > 0)
 #endif
 		pthread_join(mTid, NULL);
 

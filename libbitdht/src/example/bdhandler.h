@@ -40,39 +40,38 @@ class BitDhtIntCallback;
 
 class BssResult
 {
-        public:
+    public:
 	bdId id;
-        uint32_t mode;		// single shot
+    uint32_t mode;		    // single shot
 	uint32_t status;        // SEARCHING, FAILURE, FOUND, MULTIPLE HITS.
 };
 
 #define BSS_SINGLE_SHOT 0x0001
 
 
-class BitDhtHandler
-{
+class BitDhtHandler {
 
-	public:
+public:
 
 	BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, std::string bootstrapfile);
 
-void    enable(bool on);  
-void    shutdown(); /* blocking call */
-void	restart();
+    void enable(bool on);
+    void shutdown(); /* blocking call */
+    void restart();
 
-bool    getEnabled();
-bool    getActive();
+    bool getEnabled();
+    bool getActive();
 
-bool	FindNode(bdNodeId *peerId);
-bool	DropNode(bdNodeId *peerId);
+    bool FindNode(bdNodeId *peerId);
+    bool DropNode(bdNodeId *peerId);
 
-virtual int 	NodeCallback(const bdId *id, uint32_t peerflags);			
-virtual int 	PeerCallback(const bdId *id, uint32_t status);
-virtual int 	ValueCallback(const bdNodeId *id, std::string key, uint32_t status);
+    virtual int NodeCallback(const bdId *id, uint32_t peerflags);
+    virtual int PeerCallback(const bdId *id, uint32_t status);
+    virtual int ValueCallback(const bdNodeId *id, std::string key, uint32_t status);
 
-bool    SearchResult(bdId *id, uint32_t &status);
+    bool SearchResult(bdId *id, uint32_t &status);
 
-UdpBitDht *mUdpBitDht;
+    UdpBitDht *mUdpBitDht;
 
 private:
 

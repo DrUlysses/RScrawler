@@ -35,8 +35,7 @@
 **/
 #define BDFILTER_ENTRY_DROP_PERIOD	(7 * 24 * 3600)
 
-bdFilter::bdFilter(const std::string &fname, const bdNodeId *ownid,  uint32_t filterFlags, bdDhtFunctions *fns, bdNodeManager *manager)
-{
+bdFilter::bdFilter(const std::string &fname, const bdNodeId *ownid,  uint32_t filterFlags, bdDhtFunctions *fns, bdNodeManager *manager) {
 	/* */
     mOwnId = *ownid;
     mFns = fns;
@@ -48,20 +47,17 @@ bdFilter::bdFilter(const std::string &fname, const bdNodeId *ownid,  uint32_t fi
     mNodeManager = manager;
 }
 
-void bdFilter::writeBannedIpFile()
-{
+void bdFilter::writeBannedIpFile() {
     std::string filetmp = mFilename + ".tmp" ;
 
     FILE *fd = fopen(filetmp.c_str(), "w");
 
-    if (!fd)
-    {
+    if (!fd) {
         std::cerr << "(EE) bdFilter::writeBannedIpFile() FAILED to Open File " << mFilename << std::endl;
         return;
     }
 
-    for( std::map<uint32_t,bdFilteredPeer>::iterator it=mFiltered.begin();it!=mFiltered.end();++it)
-    {
+    for ( std::map<uint32_t,bdFilteredPeer>::iterator it=mFiltered.begin();it!=mFiltered.end();++it) {
         fprintf(fd, "%s %u %lu %lu\n", bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str(), it->second.mFilterFlags, it->second.mFilterTS, it->second.mLastSeen) ;
 #ifdef DEBUG_FILTER
         fprintf(stderr, "Storing Peer Address: %s \n", bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str()) ;
@@ -70,7 +66,7 @@ void bdFilter::writeBannedIpFile()
     }
     fclose(fd);
 
-    if(!bdFile::renameFile(filetmp, mFilename))
+    if (!bdFile::renameFile(filetmp, mFilename))
         std::cerr << "Could not rename file !!" << std::endl;
 #ifdef DEBUG_FILTER
     else
@@ -78,8 +74,7 @@ void bdFilter::writeBannedIpFile()
 #endif
 }
 
-void bdFilter::loadBannedIpFile()
-{
+void bdFilter::loadBannedIpFile() {
         char line[10240];
         char addr_str[10240];
 
@@ -89,22 +84,18 @@ void bdFilter::loadBannedIpFile()
 
     FILE *fd = fopen(mFilename.c_str(),"r") ;
 
-    if(fd == NULL)
-    {
+    if (fd == NULL) {
         std::cerr << "(EE) Cannot load filter file " << mFilename << std::endl;
         return ;
     }
 
-        while(line == fgets(line, 10240, fd))
-        {
+        while(line == fgets(line, 10240, fd)) {
         uint32_t filter_flags ;
         unsigned long long int filter_ts ;
         unsigned long long int last_seen ;
 
-            if (4 == sscanf(line, "%s %u %llu %llu", addr_str, &filter_flags, &filter_ts, &last_seen))
-            {
-                if (bdnet_inet_aton(addr_str, &(addr.sin_addr)))
-                {
+            if (4 == sscanf(line, "%s %u %llu %llu", addr_str, &filter_flags, &filter_ts, &last_seen)) {
+                if (bdnet_inet_aton(addr_str, &(addr.sin_addr))) {
                     addr.sin_port = 0;
 
                     bdFilteredPeer peer;
@@ -131,33 +122,27 @@ void bdFilter::loadBannedIpFile()
 //	return (answer.size() > 0);
 //}
 
-bool bdFilter::filteredIPs(std::list<struct sockaddr_in> &answer)
-{
+bool bdFilter::filteredIPs(std::list<struct sockaddr_in> &answer) {
     std::map<uint32_t,bdFilteredPeer>::iterator it;
-	for(it = mFiltered.begin(); it != mFiltered.end(); it++)
-	{
+	for (it = mFiltered.begin(); it != mFiltered.end(); it++) {
         answer.push_back(it->second.mAddr);
 	}
 	return (answer.size() > 0);
 }
 
-int bdFilter::checkPeer(const bdId *id, uint32_t mode)
-{
+int bdFilter::checkPeer(const bdId *id, uint32_t mode) {
 	bool add = false;
 	uint32_t flags = 0;
 	if ((mFilterFlags & BITDHT_FILTER_REASON_OWNID) && 
-			isOwnIdWithoutBitDhtFlags(id, mode))
-	{
+			isOwnIdWithoutBitDhtFlags(id, mode)) {
 		add = true;
 		flags |= BITDHT_FILTER_REASON_OWNID;
 	}
 
-	if (add)
-	{
+	if (add) {
         bool isNew = addPeerToFilter(id->addr, flags);
 
-		if (isNew)
-		{
+		if (isNew) {
 			return 1;
 		}
 	}
@@ -165,12 +150,10 @@ int bdFilter::checkPeer(const bdId *id, uint32_t mode)
 	return 0;
 }
 
-int bdFilter::addPeerToFilter(const struct sockaddr_in& addr, uint32_t flags)
-{
+int bdFilter::addPeerToFilter(const struct sockaddr_in& addr, uint32_t flags) {
     std::map<uint32_t,bdFilteredPeer>::iterator it = mFiltered.find(addr.sin_addr.s_addr) ;
 
-    if(it != mFiltered.end())
-	{
+    if (it != mFiltered.end()) {
             it->second.mLastSeen = time(NULL);
             it->second.mFilterFlags |= flags;
     }
@@ -199,7 +182,7 @@ int bdFilter::addPeerToFilter(const struct sockaddr_in& addr, uint32_t flags)
 
 // void bdFilter::loadFilteredPeers(const std::list<bdFilteredPeer>& peers)
 // {
-//     for(std::list<bdFilteredPeer>::iterator it = peers.begin(); it != peers.end();++it)
+//     for (std::list<bdFilteredPeer>::iterator it = peers.begin(); it != peers.end();++it)
 //     {
 // #ifdef DEBUG_FILTER
 //         std::cerr << "Loading filtered peer " << inet_ntoa(it->mAddr.sin_addr) << " Flags: " << it->mFilterFlags << " FilterTS: "
@@ -209,19 +192,17 @@ int bdFilter::addPeerToFilter(const struct sockaddr_in& addr, uint32_t flags)
 //         mFiltered[saddr] = *it ;
 //     }
 // }
-void bdFilter::getFilteredPeers(std::list<bdFilteredPeer>& peers)
-{
-    for(std::map<uint32_t,bdFilteredPeer>::iterator it = mFiltered.begin(); it != mFiltered.end();++it)
+void bdFilter::getFilteredPeers(std::list<bdFilteredPeer>& peers) {
+    for (std::map<uint32_t,bdFilteredPeer>::iterator it = mFiltered.begin(); it != mFiltered.end();++it)
         peers.push_back(it->second) ;
 }
 /* fast check if the addr is in the structure */
-int bdFilter::addrOkay(struct sockaddr_in *addr)
-{
+int bdFilter::addrOkay(struct sockaddr_in *addr) {
 	// first check upper layer
 	bool isAvailable, isBanned;
 	mNodeManager->doIsBannedCallback(addr, &isAvailable, &isBanned);
 
-	if(isAvailable) {
+	if (isAvailable) {
 #ifdef DEBUG_FILTER
 		std::cerr << "bdFilter::addrOkay addr: " << inet_ntoa(addr->sin_addr) << " result from upper layer: " << (isBanned ? "banned" : "ok") << std::endl;
 #endif
@@ -242,12 +223,9 @@ int bdFilter::addrOkay(struct sockaddr_in *addr)
 }
 
 
-bool bdFilter::isOwnIdWithoutBitDhtFlags(const bdId *id, uint32_t peerFlags)
-{
-	if (peerFlags & BITDHT_PEER_STATUS_RECV_PONG)
-	{
-		if (peerFlags & BITDHT_PEER_STATUS_DHT_ENGINE)
-		{
+bool bdFilter::isOwnIdWithoutBitDhtFlags(const bdId *id, uint32_t peerFlags) {
+	if (peerFlags & BITDHT_PEER_STATUS_RECV_PONG) {
+		if (peerFlags & BITDHT_PEER_STATUS_DHT_ENGINE) {
 			/* okay! */
 			return false;
 		}
@@ -258,8 +236,7 @@ bool bdFilter::isOwnIdWithoutBitDhtFlags(const bdId *id, uint32_t peerFlags)
 		int bucket = mFns->bdBucketDistance(&dist);
 
 		/* if they match us... kill it */
-		if (bucket == 0)
-		{
+		if (bucket == 0) {
 			return true;
 		}
 	}
@@ -272,8 +249,7 @@ bool bdFilter::isOwnIdWithoutBitDhtFlags(const bdId *id, uint32_t peerFlags)
  * remove it from the list.
  */
 
-bool bdFilter::cleanupFilter()
-{
+bool bdFilter::cleanupFilter() {
 #ifdef DEBUG_FILTER
     std::cerr << "bdFilter: Checking current filter List:" << std::endl;
 #endif
@@ -281,8 +257,7 @@ bool bdFilter::cleanupFilter()
 	time_t now = time(NULL);
 	time_t dropTime = now - BDFILTER_ENTRY_DROP_PERIOD;
 
-    for(std::map<uint32_t,bdFilteredPeer>::iterator it = mFiltered.begin(); it != mFiltered.end();)
-    {
+    for (std::map<uint32_t,bdFilteredPeer>::iterator it = mFiltered.begin(); it != mFiltered.end();) {
 #ifdef DEBUG_FILTER
         std::cerr << "\t" << bdnet_inet_ntoa(it->second.mAddr.sin_addr);
         std::cerr << " Flags: " << it->second.mFilterFlags;
@@ -290,8 +265,7 @@ bool bdFilter::cleanupFilter()
         std::cerr << " LastSeen: " << now - it->second.mLastSeen;
 #endif
 
-        if (it->second.mLastSeen < dropTime)
-        {
+        if (it->second.mLastSeen < dropTime) {
             /* remove from filter */
 #ifdef DEBUG_FILTER
             std::cerr << " OLD DROPPING" << std::endl;

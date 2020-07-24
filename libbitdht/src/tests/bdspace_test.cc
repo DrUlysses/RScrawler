@@ -30,8 +30,7 @@
 #define N_PEERS_TO_ADD 10000
 #define N_PEERS_TO_PRINT 1000
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
 	/* create some ids */
 	bdNodeId ownId;
@@ -40,15 +39,13 @@ int main(int argc, char **argv)
 
 	bdSpace space(&ownId, fns);
 	int i = 0;
-	for (i = 0; i < N_PEERS_TO_ADD; i++)
-	{
+	for (i = 0; i < N_PEERS_TO_ADD; i++) {
 		bdId tmpId;
 		bdStdRandomId(&tmpId);
 
 		space.add_peer(&tmpId, 0);
 
-		if (i % N_PEERS_TO_PRINT == 0)
-		{
+		if (i % N_PEERS_TO_PRINT == 0) {
 			space.printDHT();
 		}
 	}

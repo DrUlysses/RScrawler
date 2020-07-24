@@ -9,51 +9,53 @@
 #define USED_IDS_FILENAME "my_ids"
 
 Crawler::Crawler() : crwlrMutex(true) {
-    //bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
-    crwlrMutex.lock();
+
+}
+
+void Crawler::init() {
+    bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+    peerId = new bdNodeId();
     std::cerr << "Crawler object created\n";
     //peerId = RsPeerId::random().toStdString();
-    bdStdRandomNodeId(&peerId);
+    bdStdRandomNodeId(peerId);
     std::cerr << "Starting with ownID: ";
-    bdStdPrintNodeId(std::cerr, &peerId);
+    bdStdPrintNodeId(std::cerr, peerId);
     std::cerr << std::endl;
     FILE *myIDs = fopen(USED_IDS_FILENAME, "a+");
     std::string stringID;
-    bdStdPrintNodeId(stringID, &peerId, false);
+    bdStdPrintNodeId(stringID, peerId, false);
     fprintf(myIDs, "%s\n", stringID.c_str());
     fclose(myIDs);
-    crwlrMutex.unlock();
 }
 
 Crawler::~Crawler() noexcept {
     std::cerr << "Crawler object destroyed, id: ";
-    bdStdPrintNodeId(std::cerr, &peerId);
+    bdStdPrintNodeId(std::cerr, peerId);
     std::cerr << std::endl;
     return;
 }
 
 void Crawler::stop() {
+    isAlive = false;
     bdStackMutex stackMutex(crwlrMutex);
     dhtHandler->shutdown();
-    isAlive = false;
 }
 
 void Crawler::disable() {
-    isAlive = false;
+    isActive = false;
 }
 
 void Crawler::enable() {
-    isAlive = true;
+    isActive = true;
 }
 
 void Crawler::run() {
     {
         bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
-        BitDhtHandler dht(&peerId, port, appId, bootstrapfile);
-        dhtHandler = &dht;
+        dhtHandler = new BitDhtHandler(peerId, port, appId, bootstrapfile);
     }
     while(isAlive) {
-        {
+        if (isActive) {
             bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
             if (currentStage == 0)
                 Crawler::iterationFirstStage();
@@ -69,12 +71,15 @@ void Crawler::iterationFirstStage() {
     // Start random requests from separate threads
     if (!readyToCheck)
         bdSingleSourceFindPeers(*dhtHandler, SEARCH_SHOTS_COUNT, SEARCH_ROUNDS_COUNT, regionStart, regionEnd, toCheckPeerList);
-    else
+    else {
         bdCheckPeersFromList(*dhtHandler, toCheckPeerList);
+        readyToCheck = false;
+    }
 }
 
 void Crawler::iterationSecondStage() {
     if (toCheckPeerList.size() > 0) {
+        time_t tempTime = time(NULL);
         std::map<bdNodeId, std::pair<std::string, time_t>> statuses = bdFindPeers(*dhtHandler, toCheckPeerList);
         std::map<bdNodeId, std::pair<std::string, time_t>>::iterator it;
         std::string tempFileName;
@@ -88,6 +93,8 @@ void Crawler::iterationSecondStage() {
             fprintf(idInfo, "%s %lu\n", it->second.first.c_str(), it->second.second);
             fclose(idInfo);
         }
+        tempTime = time(NULL) - tempTime;
+        printf("Finished status check and save in (sec): %lu\n", tempTime);
     }
 }
 
@@ -107,6 +114,10 @@ void Crawler::setRegions(int start, int end) {
 
 void Crawler::setStage(bool stage) {
     currentStage = stage;
+}
+
+void Crawler::setPort(uint16_t newPort) {
+    port = newPort;
 }
 
 std::list<bdNodeId> Crawler::getToCheckList() {

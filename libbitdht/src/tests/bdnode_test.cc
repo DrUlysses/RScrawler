@@ -34,8 +34,7 @@
 #define N_PEERS_TO_PRINT 1
 #define N_QUERIES 2
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
 	/* create some ids */
 	bdDhtFunctions *fns = new bdStdDht();
@@ -46,8 +45,7 @@ int main(int argc, char **argv)
 	bdNode node(&ownId, "bdTEST","./dht.log", fns);
 
 	int i = 0;
-	for (i = 0; i < N_PEERS_TO_ADD_INIT; i++)
-	{
+	for (i = 0; i < N_PEERS_TO_ADD_INIT; i++) {
 		bdId tmpId;
 		bdStdRandomId(&tmpId);
 
@@ -57,8 +55,7 @@ int main(int argc, char **argv)
 	node.printState();
 
 #if 0
-	for(i = 0; i < N_QUERIES; i++)
-	{
+	for (i = 0; i < N_QUERIES; i++) {
 		/* create a query */
 		bdNodeId queryId;
 		bdStdRandomNodeId(&queryId);
@@ -69,15 +66,13 @@ int main(int argc, char **argv)
 
 	node.printState();
 
-	for (i = 0; i < N_PEERS_TO_ADD; i++)
-	{
+	for (i = 0; i < N_PEERS_TO_ADD; i++) {
 		bdId tmpId;
 		bdStdRandomId(&tmpId);
 
 		node.addPeer(&tmpId, 0);
 
-		if (i % N_PEERS_TO_PRINT == 0)
-		{
+		if (i % N_PEERS_TO_PRINT == 0) {
 			node.printState();
 			node.iteration();
 			sleep(5);

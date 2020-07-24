@@ -24,8 +24,7 @@
 
 #include "rsdebug.h"
 
-std::ostream &operator<<(std::ostream& out, const std::error_condition& err)
-{
+std::ostream &operator<<(std::ostream& out, const std::error_condition& err) {
 	return out << " error: " << err.value() << " " << err.message()
 	           << " category: " << err.category().name();
 }
@@ -155,11 +154,11 @@ std::ostream &operator<<(std::ostream& out, const std::error_condition& err)
 //{
 //	// skipp when log level is set to 'None'
 //	// NB: when default is set to 'None' the later check will always fail -> no need to check it here
-//	if(info->lvl == RsLog::None)
+//	if (info->lvl == RsLog::None)
 //		return;
 //
 //	bool process = info->lvl == RsLog::Default ? (lvl <= defaultLevel) : lvl <= info->lvl;
-//	if(!process)
+//	if (!process)
 //		return;
 //
 //	{

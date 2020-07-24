@@ -9,6 +9,7 @@
 #include <iterator>
 #include <cstring>
 #include <algorithm>
+#include <bdstddht.h>
 
 #define TICK_PAUSE	5
 #define USED_IDS_FILENAME "my_ids"
@@ -24,24 +25,35 @@ Logger::~Logger() noexcept {
     return;
 }
 
-void Logger::disable() {
+void Logger::stop() {
     isAlive = false;
+}
+
+void Logger::disable() {
+    isActive = false;
     bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
     sortRsPeers();
+}
+
+void Logger::enable() {
+    isActive = true;
 }
 
 /*** Overloaded from iThread ***/
 void Logger::run() {
     while (isAlive) {
-        {
+        if (isActive) {
             bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
             Logger::iteration();
 
             std::remove(DHT_FILENAME);
             FILE *logsFile = fopen(DHT_FILENAME, "w");
-            for (std::map<bdNodeId, bdFilteredPeer>::iterator it = Logger::discoveredPeers.begin(); it != Logger::discoveredPeers.end(); it++)
-                fprintf(logsFile, "%s %s %u %lu\n", it->first.data, bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str(),
+            std::string tempID;
+            for (std::map<bdNodeId, bdFilteredPeer>::iterator it = Logger::discoveredPeers.begin(); it != Logger::discoveredPeers.end(); it++) {
+                bdStdPrintNodeId(tempID, &it->first, false);
+                fprintf(logsFile, "%s %s %u %lu\n", tempID.c_str(), bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str(),
                         it->second.mFilterFlags, it->second.mLastSeen);
+            }
             fclose(logsFile);
         }
         sleep(TICK_PAUSE);
@@ -109,8 +121,6 @@ void Logger::iteration() {
     }
     logsFile.close();
 }
-
-#include <bdstddht.h>
 
 void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
     std::string line;

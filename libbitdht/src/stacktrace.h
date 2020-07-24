@@ -47,10 +47,8 @@ static inline void print_stacktrace(
 #include <cxxabi.h>
 
 static inline void print_stacktrace(
-        bool demangle, FILE* out, unsigned int maxFrames )
-{
-	if(!out)
-	{
+        bool demangle, FILE* out, unsigned int maxFrames ) {
+	if (!out) {
 		fprintf(stderr, "print_stacktrace invalid output file!\n");
 		return;
 	}
@@ -63,17 +61,14 @@ static inline void print_stacktrace(
 	// retrieve current stack addresses
 	int addrlen = backtrace(addrlist, sizeof(addrlist) / sizeof(void*));
 
-	if (addrlen == 0)
-	{
+	if (addrlen == 0) {
 		fprintf(out, "  <empty, possibly corrupt>\n");
 		return;
 	}
 
-	if(!demangle)
-	{
+	if (!demangle) {
 		int outFd = fileno(out);
-		if(outFd < 0)
-		{
+		if (outFd < 0) {
 			fprintf(stderr, "print_stacktrace invalid output file descriptor!\n");
 			return;
 		}
@@ -92,26 +87,22 @@ static inline void print_stacktrace(
 
 	// iterate over the returned symbol lines. skip the first, it is the
 	// address of this function.
-	for (int i = 1; i < addrlen; i++)
-	{
+	for (int i = 1; i < addrlen; i++) {
 		char *begin_name = 0, *begin_offset = 0, *end_offset = 0;
 
 		/* find parentheses and +address offset surrounding the mangled
 		 * name: ./module(function+0x15c) [0x8048a6d] */
-		for (char *p = symbollist[i]; *p; ++p)
-		{
+		for (char *p = symbollist[i]; *p; ++p) {
 			if (*p == '(') begin_name = p;
 			else if (*p == '+') begin_offset = p;
-			else if (*p == ')' && begin_offset)
-			{
+			else if (*p == ')' && begin_offset) {
 				end_offset = p;
 				break;
 			}
 		}
 
 		if ( begin_name && begin_offset && end_offset
-		     && begin_name < begin_offset )
-		{
+		     && begin_name < begin_offset ) {
 			*begin_name++ = '\0';
 			*begin_offset++ = '\0';
 			*end_offset = '\0';
@@ -123,8 +114,7 @@ static inline void print_stacktrace(
 			int status;
 			char* ret = abi::__cxa_demangle(
 			            begin_name, funcname, &funcnamesize, &status );
-			if (status == 0)
-			{
+			if (status == 0) {
 				funcname = ret; // use possibly realloc()-ed string
 				fprintf( out, "  %s : %s+%s\n",
 				         symbollist[i], funcname, begin_offset );
@@ -164,12 +154,10 @@ struct RsAndroidBacktraceState
 };
 
 static inline _Unwind_Reason_Code android_unwind_callback(
-        struct _Unwind_Context* context, void* arg )
-{
+        struct _Unwind_Context* context, void* arg ) {
 	RsAndroidBacktraceState* state = static_cast<RsAndroidBacktraceState*>(arg);
 	uintptr_t pc = _Unwind_GetIP(context);
-	if(pc)
-	{
+	if (pc) {
 		if (state->current == state->end) return _URC_END_OF_STACK;
 
 		*state->current++ = reinterpret_cast<void*>(pc);
@@ -178,8 +166,7 @@ static inline _Unwind_Reason_Code android_unwind_callback(
 }
 
 static inline void print_stacktrace(
-        bool demangle, FILE* /*out*/, unsigned int /*maxFrames*/)
-{
+        bool demangle, FILE* /*out*/, unsigned int /*maxFrames*/) {
 	constexpr int max = 5000;
 	void* buffer[max];
 
@@ -194,36 +181,33 @@ static inline void print_stacktrace(
 
 	// Skip first frame which is print_stacktrace
 	int count = static_cast<int>(state.current - buffer);
-	for(int idx = 1; idx < count; ++idx)
-	{
+	for (int idx = 1; idx < count; ++idx) {
 		const void* addr = buffer[idx];
 
 		/* Ignore null addresses.
 		 * They sometimes happen when using _Unwind_Backtrace()
 		 * with compiler optimizations, when the Link Register is overwritten by
 		 * the inner stack frames. */
-		if(!addr) continue;
+		if (!addr) continue;
 
 		/* Ignore duplicate addresses.
 		 * They sometimes happen when using _Unwind_Backtrace() with compiler
 		 * optimizations. */
-		if(addr == buffer[idx-1]) continue;
+		if (addr == buffer[idx-1]) continue;
 
 		Dl_info info;
-		if( !(dladdr(addr, &info) && info.dli_sname) )
-		{
+		if ( !(dladdr(addr, &info) && info.dli_sname) ) {
 			RsDbg() << idx << " " << addr << " " << info.dli_fname
 			        << " symbol not found" << std::endl;
 			continue;
 		}
 
-		if(demangle)
-		{
+		if (demangle) {
 			int status = 0;
 			char* demangled = __cxxabiv1::__cxa_demangle(
 			            info.dli_sname, nullptr, nullptr, &status );
 
-			if(demangled && (status == 0))
+			if (demangled && (status == 0))
 				RsDbg() << idx << " " << addr << " " << demangled << std::endl;
 			else
 				RsDbg() << idx << " " << addr << " "
@@ -244,8 +228,7 @@ static inline void print_stacktrace(
 #else // defined(__linux__) && defined(__GLIBC__)
 
 static inline void print_stacktrace(
-        bool /*demangle*/, FILE* out, unsigned int /*max_frames*/ )
-{
+        bool /*demangle*/, FILE* out, unsigned int /*max_frames*/ ) {
 	/** Notify the user which signal was caught. We use printf, because this
 	 * is the most basic output function. Once you get a crash, it is
 	 * possible that more complex output systems like streams and the like
@@ -261,8 +244,7 @@ static inline void print_stacktrace(
  */
 struct CrashStackTrace
 {
-	CrashStackTrace()
-	{
+	CrashStackTrace() {
 		signal(SIGABRT, &CrashStackTrace::abortHandler);
 		signal(SIGSEGV, &CrashStackTrace::abortHandler);
 		signal(SIGILL,  &CrashStackTrace::abortHandler);
@@ -273,12 +255,10 @@ struct CrashStackTrace
 	}
 
 	[[ noreturn ]]
-	static void abortHandler(int signum)
-	{
+	static void abortHandler(int signum) {
 		// associate each signal with a signal name string.
 		const char* name = nullptr;
-		switch(signum)
-		{
+		switch(signum) {
 		case SIGABRT: name = "SIGABRT";  break;
 		case SIGSEGV: name = "SIGSEGV";  break;
 		case SIGILL:  name = "SIGILL";   break;
@@ -294,7 +274,7 @@ struct CrashStackTrace
 		 * possible that more complex output systems like streams and the like
 		 * may be corrupted. So we make the most basic call possible to the
 		 * lowest level, most standard print function. */
-		if(name)
+		if (name)
 			fprintf(stderr, "Caught signal %d (%s)\n", signum, name);
 		else
 			fprintf(stderr, "Caught signal %d\n", signum);

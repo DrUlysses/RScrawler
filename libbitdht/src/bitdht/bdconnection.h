@@ -164,8 +164,7 @@ public:
 class bdConnectionRequest
 {
 public:
-	bdConnectionRequest() : mMode(0), mState(0), mStateTS(0), mPauseTS(0), mErrCode(0), mDelay(0), mRequestTS(0), mRecycled(0), mCurrentSrcType(0)
-	{
+	bdConnectionRequest() : mMode(0), mState(0), mStateTS(0), mPauseTS(0), mErrCode(0), mDelay(0), mRequestTS(0), mRecycled(0), mCurrentSrcType(0) {
 		bdsockaddr_clear(&mLocalAddr);
 	}
 

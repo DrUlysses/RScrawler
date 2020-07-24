@@ -30,8 +30,7 @@
 //#define DEBUG_STORE 1
 
 bdStore::bdStore(std::string file, bdDhtFunctions *fns)
-	:mFns(fns)
-{
+	:mFns(fns) {
 #ifdef DEBUG_STORE
 	std::cerr << "bdStore::bdStore(" << file << ")";
 	std::cerr << std::endl;
@@ -43,20 +42,17 @@ bdStore::bdStore(std::string file, bdDhtFunctions *fns)
 	reloadFromStore();
 }
 
-int bdStore::clear()
-{
+int bdStore::clear() {
 	mIndex = 0;
 	store.clear();
 	return 1;
 }
 
-int bdStore::reloadFromStore()
-{
+int bdStore::reloadFromStore() {
 	clear();
 
 	FILE *fd = fopen(mStoreFile.c_str(), "r");
-	if (!fd)
-	{
+	if (!fd) {
 		fprintf(stderr, "Failed to Open File: %s ... No Peers\n", mStoreFile.c_str());
 		return 0;
 	}
@@ -68,12 +64,9 @@ int bdStore::reloadFromStore()
 	addr.sin_family = PF_INET;
 	unsigned short port;
 
-	while(line == fgets(line, 10240, fd))
-	{
-		if (2 == sscanf(line, "%s %hd", addr_str, &port))
-		{
-			if (bdnet_inet_aton(addr_str, &(addr.sin_addr)))
-			{
+	while(line == fgets(line, 10240, fd)) {
+		if (2 == sscanf(line, "%s %hd", addr_str, &port)) {
+			if (bdnet_inet_aton(addr_str, &(addr.sin_addr))) {
 				addr.sin_port = htons(port);
 				bdPeer peer;
 				bdZeroNodeId(&(peer.mPeerId.id));
@@ -99,17 +92,15 @@ int bdStore::reloadFromStore()
 }
 
 // This is a very ugly function!
-int 	bdStore::getPeer(bdPeer *peer)
-{
+int 	bdStore::getPeer(bdPeer *peer) {
 #ifdef DEBUG_STORE
 	fprintf(stderr, "bdStore::getPeer() %ld Peers left\n", (long) store.size());
 #endif
 
 	std::list<bdPeer>::iterator it;
 	int i = 0;
-	for(it = store.begin(); (it != store.end()) && (i < mIndex); it++, i++) ; /* empty loop */
-	if (it != store.end())
-	{
+	for (it = store.begin(); (it != store.end()) && (i < mIndex); it++, i++) ; /* empty loop */
+	if (it != store.end()) {
 		*peer = *it;
 		mIndex++;
 		return 1;
@@ -117,19 +108,15 @@ int 	bdStore::getPeer(bdPeer *peer)
 	return 0;
 }
 
-int     bdStore::filterIpList(const std::list<struct sockaddr_in> &filteredIPs)
-{
+int     bdStore::filterIpList(const std::list<struct sockaddr_in> &filteredIPs) {
 	// Nasty O(n^2) iteration over 500 entries!!!. 
 	// hope its not used to often.
 
 	std::list<struct sockaddr_in>::const_iterator it;
-	for(it = filteredIPs.begin(); it != filteredIPs.end(); it++)
-	{
+	for (it = filteredIPs.begin(); it != filteredIPs.end(); it++) {
 		std::list<bdPeer>::iterator sit;
-		for(sit = store.begin(); sit != store.end();)
-		{
-			if (it->sin_addr.s_addr == sit->mPeerId.addr.sin_addr.s_addr)
-			{
+		for (sit = store.begin(); sit != store.end();) {
+			if (it->sin_addr.s_addr == sit->mPeerId.addr.sin_addr.s_addr) {
 				std::cerr << "bdStore::filterIpList() Found Bad entry in Store. Erasing!";
 				std::cerr << std::endl;
 
@@ -149,8 +136,7 @@ int     bdStore::filterIpList(const std::list<struct sockaddr_in> &filteredIPs)
 #define MAX_ENTRIES 500
 
 	/* maintain a sorted list */
-void	bdStore::addStore(bdPeer *peer)
-{
+void	bdStore::addStore(bdPeer *peer) {
 #ifdef DEBUG_STORE
 	std::cerr << "bdStore::addStore() ";
 	mFns->bdPrintId(std::cerr, &(peer->mPeerId));
@@ -160,11 +146,9 @@ void	bdStore::addStore(bdPeer *peer)
 	/* remove old entry */
 
 	std::list<bdPeer>::iterator it;
-	for(it = store.begin(); it != store.end(); )
-	{
+	for (it = store.begin(); it != store.end(); ) {
 		if ((it->mPeerId.addr.sin_addr.s_addr == peer->mPeerId.addr.sin_addr.s_addr) &&
-		    (it->mPeerId.addr.sin_port == peer->mPeerId.addr.sin_port))
-		{
+		    (it->mPeerId.addr.sin_port == peer->mPeerId.addr.sin_port)) {
 #ifdef DEBUG_STORE
 			std::cerr << "bdStore::addStore() Removed Existing Entry: ";
 			mFns->bdPrintId(std::cerr, &(it->mPeerId));
@@ -184,8 +168,7 @@ void	bdStore::addStore(bdPeer *peer)
 #endif
 	store.push_back(*peer);
 
-	while(store.size() > MAX_ENTRIES)
-	{
+	while(store.size() > MAX_ENTRIES) {
 #ifdef DEBUG_STORE
 		std::cerr << "bdStore::addStore() pop_front()";
 		std::cerr << std::endl;
@@ -194,15 +177,13 @@ void	bdStore::addStore(bdPeer *peer)
 	}
 }
 
-void	bdStore::writeStore(std::string file)
-{
+void	bdStore::writeStore(std::string file) {
 	/* write out store */
 #ifdef DEBUG_STORE
 	fprintf(stderr, "bdStore::writeStore(%s) =  %d entries\n", file.c_str(), store.size());
 #endif
 
-	if (store.size() < 0.9 * MAX_ENTRIES)
-	{
+	if (store.size() < 0.9 * MAX_ENTRIES) {
 		/* don't save yet! */
 #ifdef DEBUG_STORE
 		fprintf(stderr, "bdStore::writeStore() Delaying until more entries\n");
@@ -214,8 +195,7 @@ void	bdStore::writeStore(std::string file)
 
 	FILE *fd = fopen(filetmp.c_str(), "w");
 
-	if (!fd)
-	{
+	if (!fd) {
 #ifdef DEBUG_STORE
 #endif
 		fprintf(stderr, "bdStore::writeStore() FAILED to Open File\n");
@@ -223,8 +203,7 @@ void	bdStore::writeStore(std::string file)
 	}
 	
 	std::list<bdPeer>::iterator it;
-	for(it = store.begin(); it != store.end(); it++)
-	{
+	for (it = store.begin(); it != store.end(); it++) {
 		fprintf(fd, "%s %d\n", bdnet_inet_ntoa(it->mPeerId.addr.sin_addr).c_str(), ntohs(it->mPeerId.addr.sin_port));
 #ifdef DEBUG_STORE
 		fprintf(stderr, "Storing Peer Address: %s %d\n", inet_ntoa(it->mPeerId.addr.sin_addr), ntohs(it->mPeerId.addr.sin_port));
@@ -233,7 +212,7 @@ void	bdStore::writeStore(std::string file)
 	}
 	fclose(fd);
 
-	if(!bdFile::renameFile(filetmp, file))
+	if (!bdFile::renameFile(filetmp, file))
 		std::cerr << "Could not rename file !!" << std::endl;
 #ifdef DEBUG_STORE
 	else
@@ -241,11 +220,9 @@ void	bdStore::writeStore(std::string file)
 #endif
 }
 
-void	bdStore::writeStore()
-{
+void	bdStore::writeStore() {
 #if 0
-	if (mStoreFile == "")
-	{
+	if (mStoreFile == "") {
 		return;
 	}
 #endif

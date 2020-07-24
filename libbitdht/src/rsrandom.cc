@@ -49,8 +49,7 @@ static bool auto_seed = RsRandom::seed(
 #	endif // def WIN_PTHREADS_H
 #endif
 
-bool RsRandom::seed(uint32_t s)
-{
+bool RsRandom::seed(uint32_t s) {
 	RS_STACK_MUTEX(rndMtx);
 
 	MT.resize(N,0) ;	// because MT might not be already resized
@@ -70,18 +69,15 @@ bool RsRandom::seed(uint32_t s)
 	return true ;
 }
 
-void RsRandom::random_bytes(unsigned char *data,uint32_t size)
-{
+void RsRandom::random_bytes(unsigned char *data,uint32_t size) {
 	RAND_bytes(data,size) ;
 }
-void RsRandom::locked_next_state()
-{
+void RsRandom::locked_next_state() {
 	RAND_bytes((unsigned char *)&MT[0],N*sizeof(uint32_t)) ;
 	index = 0 ;
 }
 
-uint32_t RsRandom::random_u32()
-{
+uint32_t RsRandom::random_u32() {
 	uint32_t y;
 
 	{
@@ -89,7 +85,7 @@ uint32_t RsRandom::random_u32()
 
 		index++ ;
 
-		if(index >= N)
+		if (index >= N)
 			locked_next_state();
 
 		y = MT[index] ;
@@ -106,26 +102,22 @@ uint32_t RsRandom::random_u32()
 	return y;
 }
 
-uint64_t RsRandom::random_u64()
-{
+uint64_t RsRandom::random_u64() {
 	return ((uint64_t)random_u32() << 32ul) + random_u32() ;
 }
 
-float RsRandom::random_f32()
-{
+float RsRandom::random_f32() {
 	return random_u32() / (float)(~(uint32_t)0) ;
 }
 
-double RsRandom::random_f64()
-{
+double RsRandom::random_f64() {
 	return random_u64() / (double)(~(uint64_t)0) ;
 }
 
-std::string RsRandom::random_alphaNumericString(uint32_t len)
-{
+std::string RsRandom::random_alphaNumericString(uint32_t len) {
 	std::string s = "" ;
 
-	for(uint32_t i=0;i<len;++i)
+	for (uint32_t i=0;i<len;++i)
 		s += (char)( (random_u32()%94) + 33) ;
 
 	return s ;

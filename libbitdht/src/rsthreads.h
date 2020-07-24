@@ -107,8 +107,7 @@ class RsStackMutex
 {
 public:
 
-	RsStackMutex(RsMutex &mtx) : mMtx(mtx)
-	{
+	RsStackMutex(RsMutex &mtx) : mMtx(mtx) {
 		mMtx.lock();
 #ifdef RSMUTEX_DEBUG
 		double ts = getCurrentTS();
@@ -138,7 +137,7 @@ public:
 #ifdef RSMUTEX_DEBUG
 		ts = getCurrentTS();
 
-		if(ts - _time_stamp > 1.0)
+		if (ts - _time_stamp > 1.0)
 			std::cerr << "Mutex " << (void*)&mMtx << " \"" << mtx.name() << "\""
 			          << " waited for " << ts - _time_stamp
 			          << " seconds in thread " << pthread_self()
@@ -148,14 +147,13 @@ public:
 #endif
 	}
 
-	~RsStackMutex()
-	{
+	~RsStackMutex() {
 		mMtx.unlock();
 
 #ifdef RSMUTEX_DEBUG
 		double ts = getCurrentTS();
 
-		    if(ts - _time_stamp > 1.0)
+		    if (ts - _time_stamp > 1.0)
 				std::cerr << "Mutex " << (void*)&mMtx << " \"" << mMtx.name()
 				          << "\"" << " locked for " << ts - _time_stamp
 				          << " seconds in thread " << pthread_self()
@@ -230,8 +228,7 @@ public:
 	 *	and return nothing but can capture
 	 * This can be easly optimized later by using a thread pool
 	 */
-	static void async(const std::function<void()>& fn)
-	{ std::thread(fn).detach(); }
+	static void async(const std::function<void()>& fn) { std::thread(fn).detach(); }
 
 	/** @return RsThread full name */
 	const std::string& threadName() { return mFullName; }
@@ -306,7 +303,7 @@ public:
 	 * Subclasses must implement this method, it will be called in a loop once
 	 * the thread is started, so repetitive work (like checking if data is
 	 * available on a socket) should be done here, at the end of this method
-	 * sleep_for(...) or similar function should be called or the CPU will
+	 * sleep_for (...) or similar function should be called or the CPU will
 	 * be used as much as possible also if there is nothing to do.
 	 */
 	virtual void threadTick() = 0;

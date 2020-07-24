@@ -30,11 +30,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	/* load store */
-	if (argc < 2)
-	{
+	if (argc < 2) {
 		fprintf(stderr, "Missing Store File\n");
 		exit(1);
 	}

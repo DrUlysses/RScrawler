@@ -40,8 +40,7 @@
 
 #define MAX_MESSAGE_LEN	10240
 
-int args(char *name)
-{
+int args(char *name) {
 	std::cerr << "Usage: " << name;
 	std::cerr << " -p <port> ";
 	std::cerr << " -b </path/to/bootfile> ";
@@ -60,8 +59,7 @@ int args(char *name)
 
 #define DEF_BOOTFILE	"bdboot.txt"
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	int c;
 	int port = DEF_PORT;
 	std::string bootfile = DEF_BOOTFILE;
@@ -72,10 +70,8 @@ int main(int argc, char **argv)
 	bool doThreadJoin = false;
 	int noQueries = 0;
 
-	while((c = getopt(argc, argv,"rjp:b:u:q:")) != -1)
-	{
-		switch (c)
-		{
+	while((c = getopt(argc, argv,"rjp:b:u:q:")) != -1) {
+		switch (c) {
 			case 'r':
 				doRestart = true;
 				break;
@@ -85,8 +81,7 @@ int main(int argc, char **argv)
 			case 'p':
 			{
 				int tmp_port = atoi(optarg);
-				if ((tmp_port > MIN_DEF_PORT) && (tmp_port < MAX_DEF_PORT))
-				{
+				if ((tmp_port > MIN_DEF_PORT) && (tmp_port < MAX_DEF_PORT)) {
 					port = tmp_port;
 					std::cerr << "Port: " << port;
 					std::cerr << std::endl;
@@ -142,16 +137,13 @@ int main(int argc, char **argv)
 	/* start off with a random id! */
 	bdStdRandomNodeId(&id);
 
-	if (setUid)
-	{
+	if (setUid) {
 		int len = uid.size();
-		if (len > 20)
-		{
+		if (len > 20) {
 			len = 20;
 		}
 
-		for(int i = 0; i < len; i++)
-		{
+		for (int i = 0; i < len; i++) {
 			id.data[i] = uid[i];
 		}
 	}
@@ -198,10 +190,8 @@ int main(int argc, char **argv)
 	bitdht->startDht();
 
 
-	if (doRandomQueries)
-	{
-		for(int i = 0; i < noQueries; i++)
-		{
+	if (doRandomQueries) {
+		for (int i = 0; i < noQueries; i++) {
 			bdNodeId rndId;
 			bdStdRandomNodeId(&rndId);
 
@@ -214,8 +204,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	while(1)
-	{
+	while(1) {
 		sleep(60);
 
 		std::cerr << "BitDht State: ";
@@ -230,17 +219,14 @@ int main(int argc, char **argv)
 		std::cerr << bitdht->statsBDVersionSize();
 		std::cerr << std::endl;
 
-		if (++count == 2)
-		{
+		if (++count == 2) {
 			/* switch to one-shot searchs */
 			mode = 0;
 		}
 
-		if (doThreadJoin)
-		{
+		if (doThreadJoin) {
 			/* change address */
-			if (count % 2 == 0)
-			{
+			if (count % 2 == 0) {
 
 		std::cerr << "Resetting UdpStack: ";
 		std::cerr << std::endl;
@@ -248,12 +234,9 @@ int main(int argc, char **argv)
 				udpstack->resetAddress(local);
 			}
 		}
-		if (doRestart)
-		{
-			if (count % 2 == 1)
-			{
-				if (running)
-				{
+		if (doRestart) {
+			if (count % 2 == 1) {
+				if (running) {
 
 			std::cerr << "Stopping Dht: ";
 			std::cerr << std::endl;

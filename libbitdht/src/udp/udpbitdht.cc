@@ -55,7 +55,7 @@
 
 UdpBitDht::UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string appVersion, std::string bootstrapfile, const std::string& filteredipfile, bdDhtFunctions *fns)
 	:UdpSubReceiver(pub), dhtMtx(true)//, mFns(fns)
-{
+	{
 	std::string usedVersion;
 
 #ifdef BITDHT_VERSION_IDENTIFER
@@ -86,16 +86,14 @@ UdpBitDht::~UdpBitDht()
 
         /***** Functions to Call down to bdNodeManager ****/
         /* Friend Tracking */
-void UdpBitDht::addBadPeer(const struct sockaddr_in &addr, uint32_t source, uint32_t reason, uint32_t age)
-{
+void UdpBitDht::addBadPeer(const struct sockaddr_in &addr, uint32_t source, uint32_t reason, uint32_t age) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	mBitDhtManager->addBadPeer(addr, source, reason, age);
 }
 
 
-void UdpBitDht::updateKnownPeer(const bdId *id, uint32_t type, uint32_t flags)
-{
+void UdpBitDht::updateKnownPeer(const bdId *id, uint32_t type, uint32_t flags) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	mBitDhtManager->updateKnownPeer(id, type, flags);
@@ -103,44 +101,38 @@ void UdpBitDht::updateKnownPeer(const bdId *id, uint32_t type, uint32_t flags)
 
         /* Request DHT Peer Lookup */
         /* Request Keyword Lookup */
-void UdpBitDht::addFindNode(bdNodeId *id, uint32_t mode)
-{
+void UdpBitDht::addFindNode(bdNodeId *id, uint32_t mode) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	mBitDhtManager->addFindNode(id, mode);
 }
 
-void UdpBitDht::removeFindNode(bdNodeId *id)
-{
+void UdpBitDht::removeFindNode(bdNodeId *id) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	mBitDhtManager->removeFindNode(id);
 }
 
-void UdpBitDht::findDhtValue(bdNodeId *id, std::string key, uint32_t mode)
-{
+void UdpBitDht::findDhtValue(bdNodeId *id, std::string key, uint32_t mode) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	mBitDhtManager->findDhtValue(id, key, mode);
 }
 
         /***** Add / Remove Callback Clients *****/
-void UdpBitDht::addCallback(BitDhtCallback *cb)
-{
+void UdpBitDht::addCallback(BitDhtCallback *cb) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	mBitDhtManager->addCallback(cb);
 }
 
-void UdpBitDht::removeCallback(BitDhtCallback *cb)
-{
+void UdpBitDht::removeCallback(BitDhtCallback *cb) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	mBitDhtManager->removeCallback(cb);
 }
 
-bool UdpBitDht::ConnectionRequest(struct sockaddr_in *laddr, bdNodeId *target, uint32_t mode, uint32_t delay, uint32_t start)
-{
+bool UdpBitDht::ConnectionRequest(struct sockaddr_in *laddr, bdNodeId *target, uint32_t mode, uint32_t delay, uint32_t start) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->ConnectionRequest(laddr, target, mode, delay, start);
@@ -149,44 +141,38 @@ bool UdpBitDht::ConnectionRequest(struct sockaddr_in *laddr, bdNodeId *target, u
 
 
 void UdpBitDht::ConnectionAuth(bdId *srcId, bdId *proxyId, bdId *destId, uint32_t mode, uint32_t loc, 
-								uint32_t bandwidth, uint32_t delay, uint32_t answer)
-{
+								uint32_t bandwidth, uint32_t delay, uint32_t answer) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	mBitDhtManager->ConnectionAuth(srcId, proxyId, destId, mode, loc, bandwidth, delay, answer);
 }
 
-void UdpBitDht::ConnectionOptions(uint32_t allowedModes, uint32_t flags)
-{
+void UdpBitDht::ConnectionOptions(uint32_t allowedModes, uint32_t flags) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	mBitDhtManager->ConnectionOptions(allowedModes, flags);
 }
 
-bool UdpBitDht::setAttachMode(bool on)
-{
+bool UdpBitDht::setAttachMode(bool on) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->setAttachMode(on);
 }
 
 
-int UdpBitDht::getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from)
-{
+int UdpBitDht::getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->getDhtPeerAddress(id, from);
 }
 
-int 	UdpBitDht::getDhtValue(const bdNodeId *id, std::string key, std::string &value)
-{
+int 	UdpBitDht::getDhtValue(const bdNodeId *id, std::string key, std::string &value) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->getDhtValue(id, key, value);
 }
 
-int 	UdpBitDht::getDhtBucket(const int idx, bdBucket &bucket)
-{
+int 	UdpBitDht::getDhtBucket(const int idx, bdBucket &bucket) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->getDhtBucket(idx, bucket);
@@ -194,42 +180,36 @@ int 	UdpBitDht::getDhtBucket(const int idx, bdBucket &bucket)
 
 
 
-int 	UdpBitDht::getDhtQueries(std::map<bdNodeId, bdQueryStatus> &queries)
-{
+int 	UdpBitDht::getDhtQueries(std::map<bdNodeId, bdQueryStatus> &queries) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->getDhtQueries(queries);
 }
 
-int 	UdpBitDht::getDhtQueryStatus(const bdNodeId *id, bdQuerySummary &query)
-{
+int 	UdpBitDht::getDhtQueryStatus(const bdNodeId *id, bdQuerySummary &query) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
     return mBitDhtManager->getDhtQueryStatus(id, query);
 }
 
-bool UdpBitDht::isAddressBanned(const sockaddr_in &raddr)
-{
+bool UdpBitDht::isAddressBanned(const sockaddr_in &raddr) {
     return mBitDhtManager->addressBanned(raddr) ;
 }
 
-bool UdpBitDht::getListOfBannedIps(std::list<bdFilteredPeer>& ipl)
-{
+bool UdpBitDht::getListOfBannedIps(std::list<bdFilteredPeer>& ipl) {
     return mBitDhtManager->getFilteredPeers(ipl) ;
 }
 
 
 
         /* stats and Dht state */
-int UdpBitDht:: startDht()
-{
+int UdpBitDht:: startDht() {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->startDht();
 }
 
-int UdpBitDht:: stopDht()
-{
+int UdpBitDht:: stopDht() {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->stopDht();
@@ -242,22 +222,19 @@ int UdpBitDht::stateDht()
 	return mBitDhtManager->stateDht();
 }
 
-uint32_t UdpBitDht::statsNetworkSize()
-{
+uint32_t UdpBitDht::statsNetworkSize() {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->statsNetworkSize();
 }
 
-uint32_t UdpBitDht::statsBDVersionSize()
-{
+uint32_t UdpBitDht::statsBDVersionSize() {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->statsBDVersionSize();
 }
 
-uint32_t UdpBitDht::setDhtMode(uint32_t dhtFlags)
-{
+uint32_t UdpBitDht::setDhtMode(uint32_t dhtFlags) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->setDhtMode(dhtFlags);
@@ -269,14 +246,12 @@ uint32_t UdpBitDht::setDhtMode(uint32_t dhtFlags)
         /***** Iteration / Loop Management *****/
 
         /*** Overloaded from UdpSubReceiver ***/
-int UdpBitDht::recvPkt(void *data, int size, struct sockaddr_in &from)
-{
+int UdpBitDht::recvPkt(void *data, int size, struct sockaddr_in &from) {
 	/* pass onto bitdht */
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	/* check packet suitability */
-	if (mBitDhtManager->isBitDhtPacket((char *) data, size, from))
-	{
+	if (mBitDhtManager->isBitDhtPacket((char *) data, size, from)) {
 
 		mReadBytes += size;
 		mBitDhtManager->incomingMsg(&from, (char *) data, size);
@@ -285,15 +260,13 @@ int UdpBitDht::recvPkt(void *data, int size, struct sockaddr_in &from)
 	return 0;
 }
 			
-int UdpBitDht::status(std::ostream &out)
-{
+int UdpBitDht::status(std::ostream &out) {
 	out << "UdpBitDht::status()" << std::endl;
 
 	return 1;
 }
 
-void UdpBitDht::clearDataTransferred()
-{
+void UdpBitDht::clearDataTransferred() {
 	/* pass onto bitdht */
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
@@ -302,8 +275,7 @@ void UdpBitDht::clearDataTransferred()
 }
 
 
-void UdpBitDht::getDataTransferred(uint32_t &read, uint32_t &write)
-{
+void UdpBitDht::getDataTransferred(uint32_t &read, uint32_t &write) {
 	{
 		/* pass onto bitdht */
 		bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
@@ -319,12 +291,9 @@ void UdpBitDht::getDataTransferred(uint32_t &read, uint32_t &write)
 #define MAX_MSG_PER_TICK	100
 #define TICK_PAUSE_USEC		20000  /* 20ms secs .. max messages = 50 x 100 = 5000 */
 
-void UdpBitDht::run()
-{
-	while(1)
-	{
-		while(tick())
-		{
+void UdpBitDht::run() {
+	while(1) {
+		while(tick()) {
 			usleep(TICK_PAUSE_USEC);
 		}
 
@@ -337,8 +306,7 @@ void UdpBitDht::run()
 }
 
 
-int UdpBitDht::tick()
-{
+int UdpBitDht::tick() {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	/* pass on messages from the node */
@@ -347,8 +315,7 @@ int UdpBitDht::tick()
 	struct sockaddr_in toAddr;
 	int size = BITDHT_MAX_PKTSIZE;
 
-	while((i < MAX_MSG_PER_TICK) && (mBitDhtManager->outgoingMsg(&toAddr, data, &size)))
-	{
+	while((i < MAX_MSG_PER_TICK) && (mBitDhtManager->outgoingMsg(&toAddr, data, &size))) {
 #ifdef DEBUG_UDP_BITDHT 
 		std::cerr << "UdpBitDht::tick() outgoing msg(" << size << ") to " << toAddr;
 		std::cerr << std::endl;
@@ -362,8 +329,7 @@ int UdpBitDht::tick()
 		size = BITDHT_MAX_PKTSIZE; // reset msg size!
 	}
 
-	if (i == MAX_MSG_PER_TICK)
-	{
+	if (i == MAX_MSG_PER_TICK) {
 		return 1; /* keep on ticking */
 	}
 	return 0;

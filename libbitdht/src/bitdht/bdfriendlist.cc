@@ -30,25 +30,20 @@
  * #define DEBUG_FRIENDLIST	1
  ****/
 
-bdFriendEntry::bdFriendEntry()
-{
+bdFriendEntry::bdFriendEntry() {
 	mFlags = 0;
 	mLastSeen = 0;
 }
 
-bool bdFriendEntry::addrKnown(struct sockaddr_in *addr)
-{
-	if (mFlags & BD_FRIEND_ENTRY_ADDR_OK)
-	{
-		if (mFlags & BD_FRIEND_ENTRY_ONLINE)
-		{
+bool bdFriendEntry::addrKnown(struct sockaddr_in *addr) {
+	if (mFlags & BD_FRIEND_ENTRY_ADDR_OK) {
+		if (mFlags & BD_FRIEND_ENTRY_ONLINE) {
 			*addr = mPeerId.addr;
 			return true;
 		}
 
 		
-		if (time(NULL) - mLastSeen < BD_FRIEND_ENTRY_TIMEOUT)
-		{
+		if (time(NULL) - mLastSeen < BD_FRIEND_ENTRY_TIMEOUT) {
 			*addr = mPeerId.addr;
 			return true;
 		}
@@ -56,14 +51,12 @@ bool bdFriendEntry::addrKnown(struct sockaddr_in *addr)
 	return false;
 }
 
-uint32_t bdFriendEntry::getPeerFlags()
-{
+uint32_t bdFriendEntry::getPeerFlags() {
 	return mFlags & BD_FRIEND_ENTRY_MASK_KNOWN;
 }
 
 
-bdFriendList::bdFriendList(const bdNodeId *ownId)
-{
+bdFriendList::bdFriendList(const bdNodeId *ownId) {
 	bdId tmpId;
 	tmpId.id = *ownId;
 	updatePeer(&tmpId, BD_FRIEND_ENTRY_SELF);
@@ -79,8 +72,7 @@ bdFriendList::bdFriendList(const bdNodeId *ownId)
  *****/
 
 	/* catch-all interface function */
-bool	bdFriendList::updatePeer(const bdId *id, uint32_t flags)
-{
+bool	bdFriendList::updatePeer(const bdId *id, uint32_t flags) {
 #ifdef DEBUG_FRIENDLIST	
 	std::cerr << "bdFriendList::updatePeer() Peer(";
 	bdStdPrintId(std::cerr, id);
@@ -90,8 +82,7 @@ bool	bdFriendList::updatePeer(const bdId *id, uint32_t flags)
 
 	std::map<bdNodeId, bdFriendEntry>::iterator it;
 	it = mPeers.find(id->id);
-	if (it == mPeers.end())
-	{
+	if (it == mPeers.end()) {
 		bdFriendEntry entry;
 		entry.mPeerId.id = id->id;
 		entry.mFlags = 0;
@@ -103,8 +94,7 @@ bool	bdFriendList::updatePeer(const bdId *id, uint32_t flags)
 
 	/* update all */
 	it->second.mFlags = flags;
-	if (it->second.mFlags & (BD_FRIEND_ENTRY_ADDR_OK | BD_FRIEND_ENTRY_ONLINE))
-	{
+	if (it->second.mFlags & (BD_FRIEND_ENTRY_ADDR_OK | BD_FRIEND_ENTRY_ONLINE)) {
 		it->second.mFlags |= BD_FRIEND_ENTRY_ADDR_OK;
 
 		it->second.mPeerId.addr = id->addr;
@@ -113,13 +103,11 @@ bool	bdFriendList::updatePeer(const bdId *id, uint32_t flags)
 	return true;
 }
 
-bool	bdFriendList::removePeer(const bdNodeId *id)
-{
+bool	bdFriendList::removePeer(const bdNodeId *id) {
 	/* see if it exists... */
 	std::map<bdNodeId, bdFriendEntry>::iterator it;
 	it = mPeers.find(*id);
-	if (it == mPeers.end())
-	{
+	if (it == mPeers.end()) {
 #ifdef DEBUG_FRIENDLIST	
 		std::cerr << "bdFriendList::removeFriend() Peer(";
 		bdStdPrintNodeId(std::cerr, id);
@@ -135,13 +123,11 @@ bool	bdFriendList::removePeer(const bdNodeId *id)
 	return true;
 }
 
-bool	bdFriendList::findPeerEntry(const bdNodeId *id, bdFriendEntry &entry)
-{
+bool	bdFriendList::findPeerEntry(const bdNodeId *id, bdFriendEntry &entry) {
 	/* see if it exists... */
 	std::map<bdNodeId, bdFriendEntry>::iterator it;
 	it = mPeers.find(*id);
-	if (it == mPeers.end())
-	{
+	if (it == mPeers.end()) {
 #ifdef DEBUG_FRIENDLIST
 		std::cerr << "bdFriendList::getPeerEntry() Peer(";
 		bdStdPrintNodeId(std::cerr, id);
@@ -159,8 +145,7 @@ bool	bdFriendList::findPeerEntry(const bdNodeId *id, bdFriendEntry &entry)
 }
 
 
-bool    bdFriendList::findPeersWithFlags(uint32_t flags, std::list<bdNodeId> &peerList)
-{
+bool    bdFriendList::findPeersWithFlags(uint32_t flags, std::list<bdNodeId> &peerList) {
 #ifdef DEBUG_FRIENDLIST
 	std::cerr << "bdFriendList::findPeersWithFlags(" << flags << ")";
 	std::cerr << std::endl;
@@ -168,11 +153,9 @@ bool    bdFriendList::findPeersWithFlags(uint32_t flags, std::list<bdNodeId> &pe
 
 	/* see if it exists... */
 	std::map<bdNodeId, bdFriendEntry>::iterator it;
-	for(it = mPeers.begin(); it != mPeers.end(); it++)
-	{
+	for (it = mPeers.begin(); it != mPeers.end(); it++) {
 		/* if they have ALL of the flags we specified */
-		if ((it->second.getPeerFlags() & flags) == flags)
-		{
+		if ((it->second.getPeerFlags() & flags) == flags) {
 #ifdef DEBUG_FRIENDLIST
 			std::cerr << "bdFriendList::findPeersWithFlags() Found: ";
 			bdStdPrintNodeId(std::cerr, id);
@@ -186,16 +169,14 @@ bool    bdFriendList::findPeersWithFlags(uint32_t flags, std::list<bdNodeId> &pe
 
 
 
-bool	bdFriendList::print(std::ostream &out)
-{
+bool	bdFriendList::print(std::ostream &out) {
 	time_t now = time(NULL);
 
 	out << "bdFriendList::print()";
 	out << std::endl;
 
 	std::map<bdNodeId, bdFriendEntry>::iterator it;
-	for(it = mPeers.begin(); it != mPeers.end(); it++)
-	{
+	for (it = mPeers.begin(); it != mPeers.end(); it++) {
 		bdStdPrintId(out, &(it->second.mPeerId));
 		out << " Flags: " << it->second.mFlags;
 		out << " Seen: " << now - it->second.mLastSeen;
@@ -208,13 +189,11 @@ bool	bdFriendList::print(std::ostream &out)
 
 
 
-bdPeerQueue::bdPeerQueue()
-{
+bdPeerQueue::bdPeerQueue() {
 	return;
 }
 
-bool bdPeerQueue::queuePeer(const bdId *id, uint32_t flags)
-{
+bool bdPeerQueue::queuePeer(const bdId *id, uint32_t flags) {
 	bdFriendEntry entry;
 	entry.mPeerId = *id;
 	entry.mFlags = flags;
@@ -224,10 +203,8 @@ bool bdPeerQueue::queuePeer(const bdId *id, uint32_t flags)
 	return true;
 }
 
-bool bdPeerQueue::popPeer(bdId *id, uint32_t &flags)
-{
-	if (mPeerQueue.size() > 0)
-	{
+bool bdPeerQueue::popPeer(bdId *id, uint32_t &flags) {
+	if (mPeerQueue.size() > 0) {
 		bdFriendEntry entry = mPeerQueue.front();
 		mPeerQueue.pop_front();
 		*id = entry.mPeerId;

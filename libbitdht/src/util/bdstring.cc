@@ -33,8 +33,7 @@
 
 #ifdef _WIN32
 // asprintf() and vasprintf() are missing in Win32
-static int vasprintf(char **sptr, const char *fmt, va_list argv)
-{
+static int vasprintf(char **sptr, const char *fmt, va_list argv) {
 	int wanted = __mingw_vsnprintf(*sptr = NULL, 0, fmt, argv);
 	if ((wanted > 0) && ((*sptr = (char*) malloc(wanted + 1)) != NULL)) {
 		return __mingw_vsprintf(*sptr, fmt, argv);
@@ -54,8 +53,7 @@ static int vasprintf(char **sptr, const char *fmt, va_list argv)
 //}
 #endif
 
-int bd_sprintf(std::string &str, const char *fmt, ...)
-{
+int bd_sprintf(std::string &str, const char *fmt, ...) {
 	char *buffer = NULL;
 	va_list ap;
 
@@ -77,8 +75,7 @@ int bd_sprintf(std::string &str, const char *fmt, ...)
 	return retval;
 }
 
-int bd_sprintf_append(std::string &str, const char *fmt, ...)
-{
+int bd_sprintf_append(std::string &str, const char *fmt, ...) {
 	va_list ap;
 	char *buffer = NULL;
 

@@ -41,9 +41,6 @@
 #define BITDHT_KEY_INTLEN 5
 #define BITDHT_KEY_BITLEN 160
 
-
-
-
 #define BITDHT_MAX_PKTSIZE 1024
 
 #define BITDHT_TTL 64
@@ -51,23 +48,22 @@
 #define BITDHT_SEARCH_ONE_SHOT 		1
 #define BITDHT_SEARCH_REPEATING		2
 
-class bdNodeId
-{
-        public:
-        unsigned char data[BITDHT_KEY_LEN];
+class bdNodeId {
+
+public:
+    unsigned char data[BITDHT_KEY_LEN];
 };
 
 class bdMetric: public bdNodeId {};
 
-class bdId
-{
-        public:
+class bdId {
 
-        bdId();
-        bdId(bdNodeId in_id, struct sockaddr_in in_addr);
+public:
+    bdId();
+    bdId(bdNodeId in_id, struct sockaddr_in in_addr);
 
-        struct sockaddr_in addr;
-        bdNodeId id;
+    struct sockaddr_in addr;
+    bdNodeId id;
 };
 
 #define BITDHT_LIKELY_SAME_NO			0x00000000
@@ -77,28 +73,27 @@ class bdId
 #define BITDHT_LIKELY_SAME_IDENTICAL		0x00000008
 
 
-class bdDhtFunctions
-{
-	public:
+class bdDhtFunctions {
+public:
 
-//	bdDhtFunctions();
+    //	bdDhtFunctions();
 	/* setup variables */
-virtual uint16_t bdNumBuckets() = 0;
-virtual uint16_t bdNodesPerBucket() = 0; /* used for bdspace */
-virtual uint16_t bdNumQueryNodes() = 0; /* used for queries */
-virtual uint16_t bdBucketBitSize() = 0;
+    virtual uint16_t bdNumBuckets() = 0;
+    virtual uint16_t bdNodesPerBucket() = 0; /* used for bdspace */
+    virtual uint16_t bdNumQueryNodes() = 0; /* used for queries */
+    virtual uint16_t bdBucketBitSize() = 0;
 
-virtual int bdDistance(const bdNodeId *n1, const bdNodeId *n2, bdMetric *metric) = 0;
-virtual int bdBucketDistance(const bdNodeId *n1, const bdNodeId *n2) = 0;
-virtual int bdBucketDistance(const bdMetric *metric) = 0;
+    virtual int bdDistance(const bdNodeId *n1, const bdNodeId *n2, bdMetric *metric) = 0;
+    virtual int bdBucketDistance(const bdNodeId *n1, const bdNodeId *n2) = 0;
+    virtual int bdBucketDistance(const bdMetric *metric) = 0;
 
-virtual bool bdSimilarId(const bdId *id1, const bdId *id2) = 0;
-virtual bool bdUpdateSimilarId(bdId *dest, const bdId *src) = 0;
+    virtual bool bdSimilarId(const bdId *id1, const bdId *id2) = 0;
+    virtual bool bdUpdateSimilarId(bdId *dest, const bdId *src) = 0;
 
-virtual void bdRandomMidId(const bdNodeId *target, const bdNodeId *other, bdNodeId *mid) = 0;
+    virtual void bdRandomMidId(const bdNodeId *target, const bdNodeId *other, bdNodeId *mid) = 0;
 
-virtual void bdPrintId(std::ostream &out, const bdId *a) = 0;
-virtual void bdPrintNodeId(std::ostream &out, const bdNodeId *a) = 0;
+    virtual void bdPrintId(std::ostream &out, const bdId *a) = 0;
+    virtual void bdPrintNodeId(std::ostream &out, const bdNodeId *a) = 0;
 
 };
 

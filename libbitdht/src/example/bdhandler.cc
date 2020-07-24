@@ -50,46 +50,39 @@
 /* This is a conversion callback class 
  */
 
-class BdCallback: public BitDhtCallback
-{
-	public:
+class BdCallback: public BitDhtCallback {
 
-	BdCallback(BitDhtHandler *parent)
-	:mParent(parent) { return; }
+public:
 
-virtual int dhtNodeCallback(const bdId *id, uint32_t peerflags)
-{
-	return mParent->NodeCallback(id, peerflags);
-}
+    BdCallback(BitDhtHandler *parent) : mParent(parent) { return; }
 
-virtual int dhtPeerCallback(const bdId *id, uint32_t status)
-{
-	return mParent->PeerCallback(id, status);
-}
+    virtual int dhtNodeCallback(const bdId *id, uint32_t peerflags) {
+        return mParent->NodeCallback(id, peerflags);
+    }
 
-virtual int dhtValueCallback(const bdNodeId *id, std::string key, uint32_t status)
-{
-	return mParent->ValueCallback(id, key, status);
-}
+    virtual int dhtPeerCallback(const bdId *id, uint32_t status) {
+        return mParent->PeerCallback(id, status);
+    }
 
-virtual int dhtConnectCallback(const bdId*, const bdId*, const bdId*, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)
-{
-	return 1;
-}
+    virtual int dhtValueCallback(const bdNodeId *id, std::string key, uint32_t status) {
+        return mParent->ValueCallback(id, key, status);
+    }
 
-virtual int dhtInfoCallback(const bdId*, uint32_t, uint32_t, std::string)
-{
-	return 1;
-}
+    virtual int dhtConnectCallback(const bdId*, const bdId*, const bdId*, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t) {
+        return 1;
+    }
 
-	private:
+    virtual int dhtInfoCallback(const bdId*, uint32_t, uint32_t, std::string) {
+        return 1;
+    }
+
+private:
 
 	BitDhtHandler *mParent;
 };
 
 
-BitDhtHandler::BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, std::string bootstrapfile)
-{
+BitDhtHandler::BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, std::string bootstrapfile) {
 	std::cerr << "BitDhtHandler::BitDhtHandler()" << std::endl;
 	std::cerr << "Using Id: ";
 	bdStdPrintNodeId(std::cerr, ownId);
@@ -138,40 +131,31 @@ BitDhtHandler::BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, 
 }
 
 	/* pqiNetAssist - external interface functions */
-void    BitDhtHandler::enable(bool on)
-{
-        std::cerr << "p3BitDht::enable(" << on << ")";
-        std::cerr << std::endl;
-        if (on)
-        {
-                mUdpBitDht->startDht();
-        }
-        else
-        {
-                mUdpBitDht->stopDht();
-        }
+void BitDhtHandler::enable(bool on) {
+    std::cerr << "p3BitDht::enable(" << on << ")";
+    std::cerr << std::endl;
+    if (on)
+        mUdpBitDht->startDht();
+    else
+        mUdpBitDht->stopDht();
 }
 	
-void    BitDhtHandler::shutdown() /* blocking call */
-{
-        mUdpBitDht->stopDht();
+void BitDhtHandler::shutdown() /* blocking call */ {
+    mUdpBitDht->stopDht();
 }
 
 
-void	BitDhtHandler::restart()
-{
-        mUdpBitDht->stopDht();
-        mUdpBitDht->startDht();
+void BitDhtHandler::restart() {
+    mUdpBitDht->stopDht();
+    mUdpBitDht->startDht();
 }
 
-bool    BitDhtHandler::getEnabled()
-{
-        return (mUdpBitDht->stateDht() != 0);
+bool BitDhtHandler::getEnabled() {
+    return (mUdpBitDht->stateDht() != 0);
 }
 
-bool    BitDhtHandler::getActive()
-{
-        return (mUdpBitDht->stateDht() >= BITDHT_MGR_STATE_ACTIVE);
+bool BitDhtHandler::getActive() {
+    return (mUdpBitDht->stateDht() >= BITDHT_MGR_STATE_ACTIVE);
 }
 
 
@@ -179,16 +163,15 @@ bool    BitDhtHandler::getActive()
 
 	/* pqiNetAssistConnect - external interface functions */
 	/* add / remove peers */
-bool 	BitDhtHandler::FindNode(bdNodeId *peerId)
-{
+bool BitDhtHandler::FindNode(bdNodeId *peerId) {
 	BssResult res;
         res.id.id = *peerId;
         res.mode = BSS_SINGLE_SHOT;
         res.status = 0;
 
 	{
-        	bdStackMutex stack(resultsMtx); /********** MUTEX LOCKED *************/
-        	mSearchNodes[*peerId] = res;
+        bdStackMutex stack(resultsMtx); /********** MUTEX LOCKED *************/
+        mSearchNodes[*peerId] = res;
 	}
 
 	/* add in peer */
@@ -197,7 +180,7 @@ bool 	BitDhtHandler::FindNode(bdNodeId *peerId)
 	return true ;
 }
 
-bool 	BitDhtHandler::DropNode(bdNodeId *peerId) {
+bool BitDhtHandler::DropNode(bdNodeId *peerId) {
 	std::cerr << "BitDhtHandler::DropNode(";
 	bdStdPrintNodeId(std::cerr, peerId);
 	std::cerr << ")" << std::endl;
@@ -206,7 +189,7 @@ bool 	BitDhtHandler::DropNode(bdNodeId *peerId) {
 	/* remove in peer */
 	mUdpBitDht->removeFindNode(peerId);
 
-        bdStackMutex stack(resultsMtx); /********** MUTEX LOCKED *************/
+    bdStackMutex stack(resultsMtx); /********** MUTEX LOCKED *************/
 
 	/* find the node from our list */
 	std::map<bdNodeId, BssResult>::iterator it;
@@ -217,12 +200,12 @@ bool 	BitDhtHandler::DropNode(bdNodeId *peerId) {
 
 		mSearchNodes.erase(it);
 	}
-	return true ;
+	return true;
 }
 
 
-bool    BitDhtHandler::SearchResult(bdId *id, uint32_t &status) {
-        bdStackMutex stack(resultsMtx); /********** MUTEX LOCKED *************/
+bool BitDhtHandler::SearchResult(bdId *id, uint32_t &status) {
+    bdStackMutex stack(resultsMtx); /********** MUTEX LOCKED *************/
 
 	/* find the node from our list */
 	std::map<bdNodeId, BssResult>::iterator it;
@@ -246,8 +229,7 @@ bool    BitDhtHandler::SearchResult(bdId *id, uint32_t &status) {
 
 /********************** Callback Functions **************************/
 
-int BitDhtHandler::NodeCallback(const bdId *id, uint32_t peerflags)
-{
+int BitDhtHandler::NodeCallback(const bdId *id, uint32_t peerflags) {
 #ifdef DEBUG_BITDHT
 	std::cerr << "BitDhtHandler::NodeCallback()";
 	bdStdPrintNodeId(std::cerr, &(id->id));
@@ -258,73 +240,79 @@ int BitDhtHandler::NodeCallback(const bdId *id, uint32_t peerflags)
 	return 0;
 }
 
-int BitDhtHandler::PeerCallback(const bdId *id, uint32_t status)
-{
+int BitDhtHandler::PeerCallback(const bdId *id, uint32_t status) {
 	std::cerr << "BitDhtHandler::PeerCallback() NodeId: ";
 	bdStdPrintId(std::cerr, id);
 	std::cerr << std::endl;
 
-        bdStackMutex stack(resultsMtx); /********** MUTEX LOCKED *************/
+    bdStackMutex stack(resultsMtx); /********** MUTEX LOCKED *************/
 
 	/* find the node from our list */
 	std::map<bdNodeId, BssResult>::iterator it;
 	it = mSearchNodes.find(id->id);
-	if (it == mSearchNodes.end())
-	{
+	if (it == mSearchNodes.end()) {
 		std::cerr << "BitDhtHandler::PeerCallback() Unknown NodeId !!! ";
 		std::cerr << std::endl;
-
 		return 1;
 	}
 	it->second.status = status;
 
 	bool connect = false;
-	switch(status)
-	{
-  		case BITDHT_MGR_QUERY_FAILURE:
-			/* do nothing */
-			std::cerr << "BitDhtHandler::PeerCallback() QUERY FAILURE ... do nothin ";
-			std::cerr << std::endl;
-		break;
-
-		case BITDHT_MGR_QUERY_PEER_OFFLINE:
-			/* do nothing */
-			std::cerr << "BitDhtHandler::PeerCallback() QUERY PEER OFFLINE ... do nothin ";
-			std::cerr << std::endl;
+	switch(status) {
+        case BITDHT_MGR_QUERY_FAILURE:
+            /* do nothing */
+            std::cerr << "BitDhtHandler::PeerCallback() QUERY FAILURE ... do nothin ";
+            std::cerr << std::endl;
         break;
 
-		case BITDHT_MGR_QUERY_PEER_UNREACHABLE:
-			/* do nothing */
-			std::cerr << "BitDhtHandler::PeerCallback() QUERY PEER UNREACHABLE ... saving address ";
-			std::cerr << std::endl;
-			it->second.id = *id;
-		break;
+        case BITDHT_MGR_QUERY_PEER_OFFLINE:
+            /* do nothing */
+            std::cerr << "BitDhtHandler::PeerCallback() QUERY PEER OFFLINE ... do nothin ";
+            std::cerr << std::endl;
+        break;
 
-		case BITDHT_MGR_QUERY_PEER_ONLINE:
-			/* do something */
+        case BITDHT_MGR_QUERY_PEER_UNREACHABLE: {
+            /* do nothing */
+            std::cerr << "BitDhtHandler::PeerCallback() QUERY PEER UNREACHABLE ... saving address ";
+            std::cerr << std::endl;
 
-			std::cerr << "BitDhtHandler::PeerCallback() QUERY PEER ONLINE ... saving address";
-			std::cerr << std::endl;
-
-			const char *logName = "dhtlogs";
+            const char *logName = "dhtlogs";
             FILE *tempFile = fopen(logName, "a+");
             std::string tempID;
             bdStdPrintId(tempID, id, false);
             tempID.erase(tempID.find("ip:"), 3);
             if (fprintf(tempFile, "%s\n", tempID.c_str()) < 0)
-                std::cerr << "While whiting to dht logs accrued an err=%d: %s\n", errno, strerror (errno);
+                std::cerr << "While writing to dht logs accrued an err=%d: %s\n", errno, strerror(errno);
             fclose(tempFile);
 
-			it->second.id = *id;
-		break;
+            it->second.id = *id;
+            break;
+        }
+        case BITDHT_MGR_QUERY_PEER_ONLINE: {
+            /* do something */
+
+            std::cerr << "BitDhtHandler::PeerCallback() QUERY PEER ONLINE ... saving address";
+            std::cerr << std::endl;
+
+            const char *logName = "dhtlogs";
+            FILE *tempFile = fopen(logName, "a+");
+            std::string tempID;
+            bdStdPrintId(tempID, id, false);
+            tempID.erase(tempID.find("ip:"), 3);
+            if (fprintf(tempFile, "%s\n", tempID.c_str()) < 0)
+                std::cerr << "While writing to dht logs accrued an err=%d: %s\n", errno, strerror(errno);
+            fclose(tempFile);
+
+            it->second.id = *id;
+            break;
+        }
 	}
 	return 1;
 }
 
 
 
-int BitDhtHandler::ValueCallback(const bdNodeId *id, std::string key, uint32_t status)
-{
+int BitDhtHandler::ValueCallback(const bdNodeId *id, std::string key, uint32_t status) {
 	std::cerr << "BitDhtHandler::ValueCallback() NOOP for NOW";
 	std::cerr << std::endl;
 

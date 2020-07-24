@@ -47,51 +47,54 @@ int main(int argc, char **argv) {
 
 void firstStage(std::vector<Crawler>& crawlers, Logger& logger) {
     logger.start();
-
+    // Setting regions
     int regionStart = 0;
     int regionLength = 32 / CRAWLERS_COUNT;
     int regionEnd = regionLength;
+    uint16_t port = 6775;
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
+        crawlers[i].init();
         crawlers[i].setStage(0);
         crawlers[i].setRegions(regionStart, regionEnd);
+        crawlers[i].setPort(port++);
         crawlers[i].start();
         regionStart = regionEnd + 1;
         regionEnd = i == CRAWLERS_COUNT - 2 ? 32 : regionEnd + regionLength;
     }
-
+    // Waiting for crawlers duty
     sleep(CRAWL_DURATION);
+    // Sorting out of region IDs
     std::list<bdNodeId> tempIDStorage;
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
         tempIDStorage.merge(crawlers[i].getToCheckList());
     tempIDStorage.merge(logger.getDiscoveredPeers());
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
         crawlers[i].extractToCheckList(tempIDStorage);
-
+    // Pause crawling
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
         bdStackMutex stackMutex(crawlers[i].mMutex);
         crawlers[i].disable();
     }
-
     logger.disable();
 }
 
 void secondStage(std::vector<Crawler>& crawlers, Logger& logger) {
-    logger.start();
+    logger.enable();
 
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
         crawlers[i].setStage(1);
         crawlers[i].enable();
     }
-
+    // Sorting out of region IDs
     for (unsigned int i = 0; i < CHECKS_COUNT; i++) {
         logger.sortRsPeers();
         sleep(DURATION_BETWEEN_CHECKS);
         std::list<bdNodeId> tempIDStorage;
-        for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
-            tempIDStorage.merge(crawlers[i].getToCheckList());
+        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
+            tempIDStorage.merge(crawlers[j].getToCheckList());
         tempIDStorage.merge(logger.getDiscoveredPeers());
-        for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
-            crawlers[i].extractToCheckList(tempIDStorage);
+        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
+            crawlers[j].extractToCheckList(tempIDStorage);
     }
 
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
@@ -99,5 +102,5 @@ void secondStage(std::vector<Crawler>& crawlers, Logger& logger) {
         crawlers[i].stop();
     }
 
-    logger.disable();
+    logger.stop();
 }

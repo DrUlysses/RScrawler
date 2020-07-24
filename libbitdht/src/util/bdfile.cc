@@ -34,8 +34,7 @@ namespace librs {
 	} 
 }
 
-bool bdFile::renameFile(const std::string& from, const std::string& to)
-{
+bool bdFile::renameFile(const std::string& from, const std::string& to) {
 	int loops = 0;
 
 #ifdef WIN32

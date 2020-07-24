@@ -77,11 +77,9 @@ bool myFunnyFunction(
  */
 template <class T_SRC, class T_DST>
 bool rs_unique_cast(
-        std::unique_ptr<T_SRC>& src, std::unique_ptr<T_DST>& dst )
-{
+        std::unique_ptr<T_SRC>& src, std::unique_ptr<T_DST>& dst ) {
 	T_DST* dstPtr = dynamic_cast<T_DST*>(src.get());
-	if(dstPtr)
-	{
+	if (dstPtr) {
 		src.release();
 		dst.reset(dstPtr);
 		return true;
@@ -119,7 +117,7 @@ void *rs_malloc(size_t size) ;
 // {
 // 	TemporaryMemoryHolder mem(size) ;
 //
-//		if(mem != NULL)
+//		if (mem != NULL)
 //			[ do something ] ;
 //
 //    memcopy(mem, some_other_memory, size) ;
@@ -131,11 +129,10 @@ void *rs_malloc(size_t size) ;
 class RsTemporaryMemory
 {
 public:
-	explicit RsTemporaryMemory(size_t s)
-    {
+	explicit RsTemporaryMemory(size_t s) {
 	    _mem = (unsigned char *)rs_malloc(s) ;
 
-	    if(_mem)
+	    if (_mem)
 		    _size = s ;
 	    else
 		    _size = 0 ;

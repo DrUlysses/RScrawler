@@ -30,18 +30,15 @@
 
 #define N_TESTS 100
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	/* read from the file */
-	if (argc < 2)
-	{
+	if (argc < 2) {
 		std::cerr << "Missing Hash File";
 		std::cerr << std::endl;
 	}
 
 	FILE *fd = fopen(argv[1], "r");
-	if (!fd)
-	{
+	if (!fd) {
 		std::cerr << "Failed to Open File: " << argv[1];
 		std::cerr << std::endl;
 		return 1;
@@ -52,8 +49,7 @@ int main(int argc, char **argv)
 	bdBloom filter;
 
 	int nHashes = 0;
-	while(fgets(line, 1000-1, fd))
-	{
+	while(fgets(line, 1000-1, fd)) {
 		std::string hash = line;
 		std::cerr << "Read Hash: " << hash;
 		std::cerr << std::endl;

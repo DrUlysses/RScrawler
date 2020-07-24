@@ -60,4 +60,4 @@ private:
 };
 
 /// @deprecated this alias is provided only for code retro-compatibility
-using RSRandom RS_DEPRECATED_FOR(RsRandom) = RsRandom;
+using RSRandom RS_DEPRECATED_for(RsRandom) = RsRandom;

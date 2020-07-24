@@ -42,8 +42,7 @@ class MsgRegister
         MsgRegister(const bdId *inId, uint32_t inMsgType, bool inIncoming, const bdNodeId *inAboutId)
           :id(*inId), msgType(inMsgType), incoming(inIncoming) 
 	{ 
-		if (inAboutId)
-		{
+		if (inAboutId) {
 			aboutId = *inAboutId;
 		}
 		else
@@ -74,8 +73,7 @@ class bdMsgHistoryItem
         bdMsgHistoryItem(uint32_t inMsgType, bool inIncoming, const bdNodeId *inAboutId)
           :msgType(inMsgType), incoming(inIncoming) 
 	{ 
-		if (inAboutId)
-		{
+		if (inAboutId) {
 			aboutId = *inAboutId;
 		}
 		else

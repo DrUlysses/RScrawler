@@ -37,28 +37,23 @@
 
 
 UdpStack::UdpStack(struct sockaddr_in &local)
-	:udpLayer(NULL), laddr(local)
-{
+	:udpLayer(NULL), laddr(local) {
 	openSocket();
 	return;
 }
 
 UdpStack::UdpStack(int testmode, struct sockaddr_in &local)
-	:udpLayer(NULL), laddr(local)
-{
+	:udpLayer(NULL), laddr(local) {
 	std::cerr << "UdpStack::UdpStack() Evoked in TestMode" << std::endl;
-	if (testmode == UDP_TEST_LOSSY_LAYER)
-	{
+	if (testmode == UDP_TEST_LOSSY_LAYER) {
 		std::cerr << "UdpStack::UdpStack() Installing LossyUdpLayer" << std::endl;
 		udpLayer = new LossyUdpLayer(this, laddr, UDP_TEST_LOSSY_FRAC);
 	}
-	else if (testmode == UDP_TEST_RESTRICTED_LAYER)
-	{
+	else if (testmode == UDP_TEST_RESTRICTED_LAYER) {
 		std::cerr << "UdpStack::UdpStack() Installing RestrictedUdpLayer" << std::endl;
 		udpLayer = new RestrictedUdpLayer(this, laddr);
 	}
-	else if (testmode == UDP_TEST_TIMED_LAYER)
-	{
+	else if (testmode == UDP_TEST_TIMED_LAYER) {
 		std::cerr << "UdpStack::UdpStack() Installing TimedUdpLayer" << std::endl;
 		udpLayer = new TimedUdpLayer(this, laddr);
 	}
@@ -76,14 +71,12 @@ UdpLayer *UdpStack::getUdpLayer() /* for testing only */
 	return udpLayer;
 }
 
-bool    UdpStack::getLocalAddress(struct sockaddr_in &local)
-{
+bool    UdpStack::getLocalAddress(struct sockaddr_in &local) {
 	local = laddr;
 	return true;
 }
 
-bool    UdpStack::resetAddress(struct sockaddr_in &local)
-{
+bool    UdpStack::resetAddress(struct sockaddr_in &local) {
 #ifdef DEBUG_UDP_RECV
     std::cerr << "UdpStack::resetAddress(" << local << ")";
 	std::cerr << std::endl;
@@ -96,8 +89,7 @@ bool    UdpStack::resetAddress(struct sockaddr_in &local)
 
 
 /* higher level interface */
-int UdpStack::recvPkt(void *data, int size, struct sockaddr_in &from)
-{
+int UdpStack::recvPkt(void *data, int size, struct sockaddr_in &from) {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
 	std::cerr << "UdpStack::recvPkt(" << size << ") from: " << from;
@@ -107,11 +99,9 @@ int UdpStack::recvPkt(void *data, int size, struct sockaddr_in &from)
         bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
 
         std::list<UdpReceiver *>::iterator it;
-	for(it = mReceivers.begin(); it != mReceivers.end(); it++)
-	{
+	for (it = mReceivers.begin(); it != mReceivers.end(); it++) {
 		// See if they want the packet.
-		if ((*it)->recvPkt(data, size, from))
-		{
+		if ((*it)->recvPkt(data, size, from)) {
 #ifdef DEBUG_UDP_RECV
 			std::cerr << "UdpStack::recvPkt(" << size << ") from: " << from;
 			std::cerr << std::endl;
@@ -122,8 +112,7 @@ int UdpStack::recvPkt(void *data, int size, struct sockaddr_in &from)
 	return 1;
 }
 
-int  UdpStack::sendPkt(const void *data, int size, const struct sockaddr_in &to, int ttl)
-{
+int  UdpStack::sendPkt(const void *data, int size, const struct sockaddr_in &to, int ttl) {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
 	std::cerr << "UdpStack::sendPkt(" << size << ") ttl: " << ttl;
@@ -135,8 +124,7 @@ int  UdpStack::sendPkt(const void *data, int size, const struct sockaddr_in &to,
 	return udpLayer->sendPkt(data, size, to, ttl);
 }
 
-int     UdpStack::status(std::ostream &out)
-{
+int     UdpStack::status(std::ostream &out) {
 	{
 	        bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
 	
@@ -145,8 +133,7 @@ int     UdpStack::status(std::ostream &out)
 		out << "UdpStack::SubReceivers:" << std::endl;
         	std::list<UdpReceiver *>::iterator it;
 		int i = 0;
-		for(it = mReceivers.begin(); it != mReceivers.end(); it++, i++)
-		{
+		for (it = mReceivers.begin(); it != mReceivers.end(); it++, i++) {
 			out << "\tReceiver " << i << " --------------------" << std::endl;
 			(*it)->status(out);
 		}
@@ -167,28 +154,24 @@ int UdpStack::openSocket()
 }
 
 /* monitoring / updates */
-int UdpStack::okay()
-{
+int UdpStack::okay() {
 	return udpLayer->okay();
 }
 
-int UdpStack::close()
-{
+int UdpStack::close() {
 	/* TODO */
 	return 1;
 }
 
 
         /* add a TCPonUDP stream */
-int UdpStack::addReceiver(UdpReceiver *recv)
-{
+int UdpStack::addReceiver(UdpReceiver *recv) {
         bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
 
 	/* check for duplicate */
         std::list<UdpReceiver *>::iterator it;
 	it = std::find(mReceivers.begin(), mReceivers.end(), recv);
-	if (it == mReceivers.end())
-	{
+	if (it == mReceivers.end()) {
 		mReceivers.push_back(recv);
 		return 1;
 	}
@@ -203,15 +186,13 @@ int UdpStack::addReceiver(UdpReceiver *recv)
 	return 0;
 }
 
-int UdpStack::removeReceiver(UdpReceiver *recv)
-{
+int UdpStack::removeReceiver(UdpReceiver *recv) {
         bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
 
 	/* check for duplicate */
         std::list<UdpReceiver *>::iterator it;
 	it = std::find(mReceivers.begin(), mReceivers.end(), recv);
-	if (it != mReceivers.end())
-	{
+	if (it != mReceivers.end()) {
 		mReceivers.erase(it);
 		return 1;
 	}
@@ -236,8 +217,7 @@ UdpSubReceiver::UdpSubReceiver(UdpPublisher *pub)
 	return; 
 }
 
-int  UdpSubReceiver::sendPkt(const void *data, int size, const struct sockaddr_in &to, int ttl)
-{
+int  UdpSubReceiver::sendPkt(const void *data, int size, const struct sockaddr_in &to, int ttl) {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
 	std::cerr << "UdpSubReceiver::sendPkt(" << size << ") ttl: " << ttl;

@@ -30,9 +30,9 @@
 #endif
 
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
-#	define RS_DEPRECATED_FOR(f) __attribute__((__deprecated__("Use '" #f "' instead")))
+#	define RS_DEPRECATED_for(f) __attribute__((__deprecated__("Use '" #f "' instead")))
 #elif defined(_MSC_FULL_VER) && (_MSC_FULL_VER > 140050320)
-#	define RS_DEPRECATED_FOR(f) __declspec(deprecated("is deprecated. Use '" #f "' instead"))
+#	define RS_DEPRECATED_for(f) __declspec(deprecated("is deprecated. Use '" #f "' instead"))
 #else
-#	define RS_DEPRECATED_FOR(f) RS_DEPRECATED
+#	define RS_DEPRECATED_for(f) RS_DEPRECATED
 #endif

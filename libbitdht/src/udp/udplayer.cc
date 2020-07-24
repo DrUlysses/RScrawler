@@ -60,20 +60,17 @@ class   udpPacket
 {
 	public:
 	udpPacket(struct sockaddr_in *addr, void *dta, int dlen)
-	:raddr(*addr), len(dlen)
-	{
+	:raddr(*addr), len(dlen) {
 		data = malloc(len);
         
-        	if(data != NULL)
+        	if (data != NULL)
 			memcpy(data, dta, len);
                 else
                     std::cerr << "(EE) error in memory allocation in " << __PRETTY_FUNCTION__ << std::endl;
 	}
 
-	~udpPacket()
-	{
-		if (data)
-		{
+	~udpPacket() {
+		if (data) {
 			free(data);
 			data = NULL;
 			len = 0;
@@ -86,15 +83,13 @@ class   udpPacket
 };
 
 //std::ostream &operator<<(std::ostream &out, const struct sockaddr_in &addr)
-std::ostream &operator<<(std::ostream &out, struct sockaddr_in &addr)
-{
+std::ostream &operator<<(std::ostream &out, struct sockaddr_in &addr) {
 	out << "[" << bdnet_inet_ntoa(addr.sin_addr) << ":";
 	out << htons(addr.sin_port) << "]";
 	return out;
 }
 
-bool operator==(const struct sockaddr_in &addr, const struct sockaddr_in &addr2)
-{
+bool operator==(const struct sockaddr_in &addr, const struct sockaddr_in &addr2) {
 	if (addr.sin_family != addr2.sin_family)
 		return false;
 	if (addr.sin_addr.s_addr != addr2.sin_addr.s_addr)
@@ -105,8 +100,7 @@ bool operator==(const struct sockaddr_in &addr, const struct sockaddr_in &addr2)
 }
 
 
-bool operator<(const struct sockaddr_in &addr, const struct sockaddr_in &addr2)
-{
+bool operator<(const struct sockaddr_in &addr, const struct sockaddr_in &addr2) {
 	if (addr.sin_family != addr2.sin_family)
 		return (addr.sin_family < addr2.sin_family);
 	if (addr.sin_addr.s_addr != addr2.sin_addr.s_addr)
@@ -116,11 +110,9 @@ bool operator<(const struct sockaddr_in &addr, const struct sockaddr_in &addr2)
 	return false;
 }
 
-std::string printPkt(void *d, int size)
-{
+std::string printPkt(void *d, int size) {
 	std::string out = "Packet:**********************";
-	for(int i = 0; i < size; i++)
-	{
+	for (int i = 0; i < size; i++) {
 		if (i % 16 == 0)
 			out += "\n";
 		bd_sprintf_append(out, "%2x ", (unsigned int) ((unsigned char *) d)[i]);
@@ -130,26 +122,21 @@ std::string printPkt(void *d, int size)
 }
 
 
-std::string printPktOffset(unsigned int offset, void *d, unsigned int size)
-{
+std::string printPktOffset(unsigned int offset, void *d, unsigned int size) {
 	std::string out = "Packet:**********************\n";
 	bd_sprintf_append(out, "Offset: %x -> %x\n", offset, offset + size);
 	out += "Packet:**********************";
 
 	unsigned int j = offset % 16;
-	if (j != 0)
-	{
+	if (j != 0) {
 	  out += "\n";
 	  bd_sprintf_append(out, "%6x: ", (unsigned int) offset - j);
-	  for(unsigned int i = 0; i < j; i++)
-	  {
+	  for (unsigned int i = 0; i < j; i++) {
 		out += "xx ";
 	  }
 	}
-	for(unsigned int i = offset; i < offset + size; i++)
-	{
-		if (i % 16 == 0)
-		{
+	for (unsigned int i = offset; i < offset + size; i++) {
+		if (i % 16 == 0) {
 			out += "\n";
 			bd_sprintf_append(out, "%6x: ", (unsigned int) i);
 		}
@@ -162,14 +149,12 @@ std::string printPktOffset(unsigned int offset, void *d, unsigned int size)
 
 
 UdpLayer::UdpLayer(UdpReceiver *udpr, struct sockaddr_in &local)
-	:recv(udpr), laddr(local), errorState(0), ttl(UDP_DEF_TTL)
-{
+	:recv(udpr), laddr(local), errorState(0), ttl(UDP_DEF_TTL) {
 	openSocket();
 	return;
 }
 
-int     UdpLayer::status(std::ostream &out)
-{
+int     UdpLayer::status(std::ostream &out) {
 	out << "UdpLayer::status()" << std::endl;
 	out << "localaddr: " << laddr << std::endl;
 	out << "sockfd: " << sockfd << std::endl;
@@ -177,8 +162,7 @@ int     UdpLayer::status(std::ostream &out)
 	return 1;
 }
 
-int UdpLayer::reset(struct sockaddr_in &local)
-{
+int UdpLayer::reset(struct sockaddr_in &local) {
 #ifdef DEBUG_UDP_LAYER
 	std::cerr << "UdpLayer::reset()" << std::endl;
 #endif
@@ -218,8 +202,7 @@ int UdpLayer::reset(struct sockaddr_in &local)
 }
 
 
-int UdpLayer::closeSocket()
-{
+int UdpLayer::closeSocket() {
 	/* close socket if open */
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
@@ -230,19 +213,16 @@ int UdpLayer::closeSocket()
 	return 1;
 }
 
-void UdpLayer::run()
-{
+void UdpLayer::run() {
 	return recv_loop();
 }
 
 /* higher level interface */
-void UdpLayer::recv_loop()
-{
+void UdpLayer::recv_loop() {
 	size_t maxsize = 16000;
 	void *inbuf = malloc(maxsize);
 
-	if(inbuf == NULL)
-	{
+	if (inbuf == NULL) {
 		std::cerr << "(EE) Error in memory allocation of size " << maxsize
 		          << " in " << __PRETTY_FUNCTION__ << std::endl;
 		return;
@@ -251,10 +231,8 @@ void UdpLayer::recv_loop()
 	int status;
 	struct timeval timeout;
 
-	while(1)
-	{
-		for(;;)
-		{
+	while(1) {
+		for (;;) {
 			/* check if we need to stop */
 			bool toStop = false;
 			{
@@ -262,8 +240,7 @@ void UdpLayer::recv_loop()
 				toStop = stopThread;
 			}
 
-			if (toStop)
-			{
+			if (toStop) {
 #ifdef DEBUG_UDP_LAYER
 				std::cerr << "UdpLayer::recv_loop() stopping thread" << std::endl;
 #endif
@@ -287,8 +264,7 @@ void UdpLayer::recv_loop()
 
 		int nsize = static_cast<int>(maxsize);
 		struct sockaddr_in from;
-		if (0 < receiveUdpPacket(inbuf, &nsize, from))
-		{
+		if (0 < receiveUdpPacket(inbuf, &nsize, from)) {
 #ifdef DEBUG_UDP_LAYER
 			std::cerr << "UdpLayer::readPkt()  from : " << from << std::endl
 			          << printPkt(inbuf, nsize);
@@ -302,11 +278,9 @@ void UdpLayer::recv_loop()
 }
 
 
-int UdpLayer::sendPkt(const void *data, int size, const sockaddr_in &to, int ttl)
-{
+int UdpLayer::sendPkt(const void *data, int size, const sockaddr_in &to, int ttl) {
 	/* if ttl is different -> set it */
-	if (ttl != getTTL())
-	{
+	if (ttl != getTTL()) {
 		setTTL(ttl);
 	}
 
@@ -355,8 +329,7 @@ int UdpLayer::openSocket()
 		return -1;
 	}
 
-	if (-1 == bdnet_fcntl(sockfd, F_SETFL, O_NONBLOCK))
-	{
+	if (-1 == bdnet_fcntl(sockfd, F_SETFL, O_NONBLOCK)) {
 #ifdef DEBUG_UDP_LAYER
 		std::cerr << "Failed to Make Non-Blocking" << std::endl;
 #endif
@@ -365,8 +338,7 @@ int UdpLayer::openSocket()
 #ifdef UDP_ENABLE_BROADCAST
 	/* Setup socket for broadcast. */
 	int val = 1;
-	if (-1 == setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(int)))
-	{
+	if (-1 == setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(int))) {
 #ifdef DEBUG_UDP_LAYER
 		std::cerr << "Failed to Make Socket Broadcast" << std::endl;
 #endif
@@ -398,8 +370,7 @@ int UdpLayer::openSocket()
 
 }
 
-int UdpLayer::setTTL(int t)
-{
+int UdpLayer::setTTL(int t) {
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	int err = bdnet_setsockopt(sockfd, IPPROTO_IP, IP_TTL, &t, sizeof(int));
@@ -415,8 +386,7 @@ int UdpLayer::setTTL(int t)
 	return err;
 }
 
-int UdpLayer::getTTL()
-{
+int UdpLayer::getTTL() {
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	int t = ttl;
@@ -427,8 +397,7 @@ int UdpLayer::getTTL()
 }
 
 /* monitoring / updates */
-int UdpLayer::okay()
-{
+int UdpLayer::okay() {
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	bool nonFatalError = ((errorState == 0) ||
@@ -438,8 +407,7 @@ int UdpLayer::okay()
 	sockMtx.unlock(); /******** UNLOCK MUTEX *********/
 
 #ifdef DEBUG_UDP_LAYER
-	if (!nonFatalError)
-	{
+	if (!nonFatalError) {
 		std::cerr << "UdpLayer::NOT okay(): Error: " << errorState << std::endl;
 	}
 
@@ -448,16 +416,14 @@ int UdpLayer::okay()
 	return nonFatalError;
 }
 
-int UdpLayer::tick()
-{
+int UdpLayer::tick() {
 #ifdef DEBUG_UDP_LAYER
 	std::cerr << "UdpLayer::tick()" << std::endl;
 #endif
 	return 1;
 }
 
-void    UdpLayer::getDataTransferred(uint32_t &read, uint32_t &write)
-{
+void    UdpLayer::getDataTransferred(uint32_t &read, uint32_t &write) {
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	read = readBytes;
@@ -468,8 +434,7 @@ void    UdpLayer::getDataTransferred(uint32_t &read, uint32_t &write)
 	clearDataTransferred();
 }
 
-void    UdpLayer::clearDataTransferred()
-{
+void    UdpLayer::clearDataTransferred() {
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	readBytes = 0;
@@ -480,8 +445,7 @@ void    UdpLayer::clearDataTransferred()
 
 /******************* Internals *************************************/
 
-int UdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from)
-{
+int UdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from) {
 	struct sockaddr_in fromaddr;
 	socklen_t fromsize = sizeof(fromaddr);
 	int insize = *size;
@@ -491,15 +455,13 @@ int UdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from)
 	insize = bdnet_recvfrom(sockfd,data,insize,0,
 			(struct sockaddr*)&fromaddr,&fromsize);
 
-	if (0 < insize)
-	{
+	if (0 < insize) {
 		readBytes += insize;
 	}
 
 	sockMtx.unlock(); /******** UNLOCK MUTEX *********/
 
-	if (0 < insize)
-	{
+	if (0 < insize) {
 #ifdef DEBUG_UDP_LAYER
 		std::cerr << "receiveUdpPacket() from: " << fromaddr;
 		std::cerr << " Size: " << insize;
@@ -512,8 +474,7 @@ int UdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from)
 	return -1;
 }
 
-int UdpLayer::sendUdpPacket(const void *data, int size, const struct sockaddr_in &to)
-{
+int UdpLayer::sendUdpPacket(const void *data, int size, const struct sockaddr_in &to) {
 	/* send out */
 #ifdef DEBUG_UDP_LAYER
 	std::cerr << "UdpLayer::sendUdpPacket(): size: " << size;
@@ -539,19 +500,15 @@ int UdpLayer::sendUdpPacket(const void *data, int size, const struct sockaddr_in
 
 LossyUdpLayer::LossyUdpLayer(UdpReceiver *udpr, 
 			struct sockaddr_in &local, double frac)
-	:UdpLayer(udpr, local), lossFraction(frac)
-{
+	:UdpLayer(udpr, local), lossFraction(frac) {
 	return;
 }
 LossyUdpLayer::~LossyUdpLayer() { return; }
 
-int LossyUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from)
-{
-	if (0 < UdpLayer::receiveUdpPacket(data, size, from))
-	{
+int LossyUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from) {
+	if (0 < UdpLayer::receiveUdpPacket(data, size, from)) {
 		float prob = bdRandom::random_f32();
-		if (prob < lossFraction)
-		{
+		if (prob < lossFraction) {
 			/* discard */
 			//std::cerr << "LossyUdpLayer::receiveUdpPacket() Dropping packet!";
 			//std::cerr << std::endl;
@@ -569,12 +526,10 @@ int LossyUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &f
 	return -1; 
 }
 	
-int LossyUdpLayer::sendUdpPacket(const void *data, int size, const struct sockaddr_in &to)
-{
+int LossyUdpLayer::sendUdpPacket(const void *data, int size, const struct sockaddr_in &to) {
 	double prob = (1.0 * (rand() / (RAND_MAX + 1.0)));
 	
-	if (prob < lossFraction)
-	{
+	if (prob < lossFraction) {
 		/* discard */
 	
 		//std::cerr << "LossyUdpLayer::sendUdpPacket() Dropping packet!";
@@ -596,15 +551,12 @@ int LossyUdpLayer::sendUdpPacket(const void *data, int size, const struct sockad
 PortRange::PortRange() :lport(0), uport(0) { return; }
 PortRange::PortRange(uint16_t lp, uint16_t up) :lport(lp), uport(up) { return; }
 
-bool PortRange::inRange(uint16_t port)
-{
-	if (port < lport)
-	{
+bool PortRange::inRange(uint16_t port) {
+	if (port < lport) {
 		return false;
 	}
 	
-	if (port > uport)
-	{
+	if (port > uport) {
 		return false;
 	}
 	return true;
@@ -614,30 +566,24 @@ bool PortRange::inRange(uint16_t port)
 
 RestrictedUdpLayer::RestrictedUdpLayer(UdpReceiver *udpr, 
 			struct sockaddr_in &local)
-	:UdpLayer(udpr, local)
-{
+	:UdpLayer(udpr, local) {
 	return;
 }
 RestrictedUdpLayer::~RestrictedUdpLayer() { return; }
 
-void RestrictedUdpLayer::addRestrictedPortRange(int lp, int up)
-{
+void RestrictedUdpLayer::addRestrictedPortRange(int lp, int up) {
 	PortRange pr(lp, up);
 	mLostPorts.push_back(pr);
 }
 
-int RestrictedUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from)
-{
-	if (0 < UdpLayer::receiveUdpPacket(data, size, from))
-	{
+int RestrictedUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from) {
+	if (0 < UdpLayer::receiveUdpPacket(data, size, from)) {
 		/* check the port against list */
 		uint16_t inPort = ntohs(from.sin_port);
 
 		std::list<PortRange>::iterator it;
-		for(it = mLostPorts.begin(); it != mLostPorts.end(); it++)
-		{
-			if (it->inRange(inPort))
-			{
+		for (it = mLostPorts.begin(); it != mLostPorts.end(); it++) {
+			if (it->inRange(inPort)) {
 #ifdef DEBUG_UDP_LAYER 	
 				std::cerr << "RestrictedUdpLayer::receiveUdpPacket() Dropping packet";
 				std::cerr << ", Port(" << inPort << ") in restricted range!";
@@ -664,16 +610,13 @@ int RestrictedUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_
 	return -1;
 }
 	
-int RestrictedUdpLayer::sendUdpPacket(const void *data, int size, const struct sockaddr_in &to)
-{
+int RestrictedUdpLayer::sendUdpPacket(const void *data, int size, const struct sockaddr_in &to) {
 	/* check the port against list */
 	uint16_t outPort = ntohs(to.sin_port);
 
 	std::list<PortRange>::iterator it;
-	for(it = mLostPorts.begin(); it != mLostPorts.end(); it++)
-	{
-		if (it->inRange(outPort))
-		{
+	for (it = mLostPorts.begin(); it != mLostPorts.end(); it++) {
+		if (it->inRange(outPort)) {
 			/* drop */
 #ifdef DEBUG_UDP_LAYER 	
 			std::cerr << "RestrictedUdpLayer::sendUdpPacket() Dropping packet";
@@ -704,8 +647,7 @@ int RestrictedUdpLayer::sendUdpPacket(const void *data, int size, const struct s
 
 TimedUdpLayer::TimedUdpLayer(UdpReceiver *udpr, 
 			struct sockaddr_in &local)
-	:UdpLayer(udpr, local)
-{
+	:UdpLayer(udpr, local) {
         mStartTime = time(NULL) + STARTUP_PERIOD;
         mActive = false;
 	return;
@@ -713,14 +655,10 @@ TimedUdpLayer::TimedUdpLayer(UdpReceiver *udpr,
 
 TimedUdpLayer::~TimedUdpLayer() { return; }
 
-int TimedUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from)
-{
-	if (0 < UdpLayer::receiveUdpPacket(data, size, from))
-	{
-		if (!mActive)
-		{
-			if (time(NULL) < mStartTime)
-			{
+int TimedUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from) {
+	if (0 < UdpLayer::receiveUdpPacket(data, size, from)) {
+		if (!mActive) {
+			if (time(NULL) < mStartTime) {
 #ifdef DEBUG_UDP_LAYER 	
 #endif
 				std::cerr << "TimedUdpLayer::receiveUdpPacket() Dropping packet (Too Early)";
@@ -743,12 +681,9 @@ int TimedUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &f
 	return -1;
 }
 	
-int TimedUdpLayer::sendUdpPacket(const void *data, int size, const struct sockaddr_in &to)
-{
-	if (!mActive)
-	{
-		if (time(NULL) < mStartTime)
-		{
+int TimedUdpLayer::sendUdpPacket(const void *data, int size, const struct sockaddr_in &to) {
+	if (!mActive) {
+		if (time(NULL) < mStartTime) {
 			/* drop */
 #ifdef DEBUG_UDP_LAYER 	
 #endif

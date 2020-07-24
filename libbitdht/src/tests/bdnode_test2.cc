@@ -34,8 +34,7 @@
 #define N_PEERS_TO_PRINT 1
 #define N_QUERIES 2
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
 	/* create some ids */
 	bdNodeId ownId;
@@ -44,8 +43,7 @@ int main(int argc, char **argv)
 
 	bdNode node(&ownId, "bdTEST", "./dht.log", fns);
 
-	while(1)
-	{
+	while(1) {
 		node.iteration();
 		sleep(1);
 	}

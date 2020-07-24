@@ -18,17 +18,20 @@ public:
 
     virtual void run();
     void disable();
+    void enable();
+    void stop();
 
     void sortRsPeers(std::list<bdId>* result = nullptr);
     std::list<bdNodeId> getDiscoveredPeers();
-    bdMutex dhtMutex;
 
+    bdMutex dhtMutex;
 private:
     bool isAlive = true;
+    bool isActive = true;
     bool isSecondStage = false;
     static std::map<bdNodeId, bdFilteredPeer> discoveredPeers;
-    void iteration();
 
+    void iteration();
 };
 
 

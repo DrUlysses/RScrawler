@@ -25,8 +25,7 @@
 #include <iostream>
 
 bdHashEntry::bdHashEntry(std::string value, std::string secret, time_t lifetime, time_t store)
-	:mValue(value), mStoreTS(store), mSecret(secret), mLifetime(lifetime)
-{
+	:mValue(value), mStoreTS(store), mSecret(secret), mLifetime(lifetime) {
 	return;
 }
 
@@ -34,24 +33,20 @@ bdHashEntry::bdHashEntry(std::string value, std::string secret, time_t lifetime,
 /**************************** class bdHashSet ********************************/
 
 bdHashSet::bdHashSet(bdNodeId *id)
-	:mId(*id)
-{
+	:mId(*id) {
 	return;
 }
 
-int 	bdHashSet::search(std::string key, uint32_t maxAge, std::list<bdHashEntry> &entries)
-{
+int 	bdHashSet::search(std::string key, uint32_t maxAge, std::list<bdHashEntry> &entries) {
 	std::multimap<std::string, bdHashEntry>::iterator sit, eit, it;
         sit = mEntries.lower_bound(key);
         eit = mEntries.upper_bound(key);
 
 	time_t now = time(NULL);
 
-	for(it = sit; it != eit; it++)
-	{
+	for (it = sit; it != eit; it++) {
 		time_t age = now - it->second.mStoreTS;
-		if (age < (int32_t) maxAge)
-		{
+		if (age < (int32_t) maxAge) {
 			entries.push_back(it->second);
 		}
 	}
@@ -67,8 +62,7 @@ int 	bdHashSet::search(std::string key, uint32_t maxAge, std::list<bdHashEntry> 
  * -> create duplicate?
  */
 
-int 	bdHashSet::modify(std::string key, bdHashEntry *entry, uint32_t modFlags)
-{
+int 	bdHashSet::modify(std::string key, bdHashEntry *entry, uint32_t modFlags) {
 	std::multimap<std::string, bdHashEntry>::iterator sit, eit, it;
         sit = mEntries.lower_bound(key);
         eit = mEntries.upper_bound(key);
@@ -76,44 +70,35 @@ int 	bdHashSet::modify(std::string key, bdHashEntry *entry, uint32_t modFlags)
 	time_t now = time(NULL);
 
 	bool updated = false;
-	for(it = sit; it != eit; it++)
-	{
+	for (it = sit; it != eit; it++) {
 		/* check it all */
-		if (it->second.mValue == entry->mValue)
-		{
+		if (it->second.mValue == entry->mValue) {
 			bool noSecret = (it->second.mSecret == "");
 			bool sameSecret = (it->second.mSecret == entry->mSecret);
 			bool update = false;
 
-			if (noSecret && sameSecret)
-			{
+			if (noSecret && sameSecret) {
 				/* only allowed to increase lifetime */
-				if (modFlags == BITDHT_HASH_ENTRY_ADD)
-				{
+				if (modFlags == BITDHT_HASH_ENTRY_ADD) {
 					time_t existKillTime = it->second.mLifetime + it->second.mStoreTS;
 					time_t newKillTime = entry->mLifetime + now;
-					if (newKillTime > existKillTime)
-					{
+					if (newKillTime > existKillTime) {
 						update = true;
 					}
 				}
 			}
-			else if (sameSecret)
-			{
-				if (modFlags == BITDHT_HASH_ENTRY_ADD)
-				{
+			else if (sameSecret) {
+				if (modFlags == BITDHT_HASH_ENTRY_ADD) {
 					update = true;
 				}
-				else if (modFlags == BITDHT_HASH_ENTRY_DELETE)
-				{
+				else if (modFlags == BITDHT_HASH_ENTRY_DELETE) {
 					/* do it here */
 					mEntries.erase(it);
 					return 1;
 				}
 			}
 			
-			if (update)
-			{
+			if (update) {
 				it->second.mStoreTS = now;
 				it->second.mLifetime = entry->mLifetime;
 				updated = true;
@@ -121,8 +106,7 @@ int 	bdHashSet::modify(std::string key, bdHashEntry *entry, uint32_t modFlags)
 		}
 	}
 
-	if ((!updated) && (modFlags == BITDHT_HASH_ENTRY_ADD))
-	{
+	if ((!updated) && (modFlags == BITDHT_HASH_ENTRY_ADD)) {
 		/* create a new entry */
 		bdHashEntry newEntry(entry->mValue, entry->mSecret, entry->mLifetime, now);
 	        mEntries.insert(std::pair<std::string, bdHashEntry>(key, newEntry));
@@ -131,16 +115,14 @@ int 	bdHashSet::modify(std::string key, bdHashEntry *entry, uint32_t modFlags)
 	return updated;
 }
 
-int	bdHashSet::printHashSet(std::ostream &out)
-{
+int	bdHashSet::printHashSet(std::ostream &out) {
 	time_t now = time(NULL);
 	std::multimap<std::string, bdHashEntry>::iterator it;
 	out << "Hash: ";
 	bdStdPrintNodeId(out, &mId); // Allowing "Std" as we dont need dht functions everywhere.
 	out << std::endl;
 
-	for(it = mEntries.begin(); it != mEntries.end();it++)
-	{
+	for (it = mEntries.begin(); it != mEntries.end();it++) {
 		time_t age = now - it->second.mStoreTS;
 		out << "\tK:" << bdStdConvertToPrintable(it->first);
 		out << " V:" << bdStdConvertToPrintable(it->second.mValue);
@@ -154,8 +136,7 @@ int	bdHashSet::printHashSet(std::ostream &out)
 	
 	
 
-int	bdHashSet::cleanupHashSet(uint32_t maxAge)
-{
+int	bdHashSet::cleanupHashSet(uint32_t maxAge) {
 	time_t now = time(NULL);
 
 	/* this is nasty... but don't know how to effectively remove from multimaps
@@ -163,11 +144,9 @@ int	bdHashSet::cleanupHashSet(uint32_t maxAge)
 	 */
 
 	std::multimap<std::string, bdHashEntry>::iterator it;
-	for(it = mEntries.begin(); it != mEntries.end();)
-	{
+	for (it = mEntries.begin(); it != mEntries.end();) {
 		time_t age = now - it->second.mStoreTS;
-		if ((age > (int32_t) maxAge) || (age > it->second.mLifetime))
-		{
+		if ((age > (int32_t) maxAge) || (age > it->second.mLifetime)) {
 			mEntries.erase(it);
 			it = mEntries.begin();
 		}
@@ -186,14 +165,12 @@ int	bdHashSet::cleanupHashSet(uint32_t maxAge)
 
 /*******************************  class bdHashSpace ***************************/
 
-bdHashSpace::bdHashSpace()
-{
+bdHashSpace::bdHashSpace() {
 	return;
 }
 
 	/* accessors */
-int 	bdHashSpace::search(bdNodeId *id, std::string key, uint32_t maxAge, std::list<bdHashEntry> &entries)
-{
+int 	bdHashSpace::search(bdNodeId *id, std::string key, uint32_t maxAge, std::list<bdHashEntry> &entries) {
 	std::map<bdNodeId, bdHashSet>::iterator it;
 	it = mHashTable.find(*id);
 	if (it == mHashTable.end()) 
@@ -205,14 +182,12 @@ int 	bdHashSpace::search(bdNodeId *id, std::string key, uint32_t maxAge, std::li
 	return it->second.search(key, maxAge, entries);
 }
 
-int 	bdHashSpace::modify(bdNodeId *id, std::string key, bdHashEntry *entry, uint32_t modFlags)
-{
+int 	bdHashSpace::modify(bdNodeId *id, std::string key, bdHashEntry *entry, uint32_t modFlags) {
 	std::map<bdNodeId, bdHashSet>::iterator it;
 	it = mHashTable.find(*id);
 	if (it == mHashTable.end()) 
 	{
-		if (modFlags == BITDHT_HASH_ENTRY_DELETE)
-		{
+		if (modFlags == BITDHT_HASH_ENTRY_DELETE) {
 			/* done already */
 			return 1;
 		}
@@ -225,31 +200,26 @@ int 	bdHashSpace::modify(bdNodeId *id, std::string key, bdHashEntry *entry, uint
 	return it->second.modify(key, entry, modFlags);
 }
 
-int     bdHashSpace::printHashSpace(std::ostream &out)
-{
+int     bdHashSpace::printHashSpace(std::ostream &out) {
 	std::map<bdNodeId, bdHashSet>::iterator it;
 	out << "bdHashSpace::printHashSpace()" << std::endl;
 	out << "--------------------------------------------" << std::endl;
 	
-	for(it = mHashTable.begin(); it != mHashTable.end(); it++)
-	{
+	for (it = mHashTable.begin(); it != mHashTable.end(); it++) {
 		it->second.printHashSet(out);
 	}
 	out << "--------------------------------------------" << std::endl;
 	return 1;
 }
 
-int     bdHashSpace::cleanHashSpace(bdNodeId *min, bdNodeId *max, time_t maxAge)
-{
+int     bdHashSpace::cleanHashSpace(bdNodeId *min, bdNodeId *max, time_t maxAge) {
 	std::map<bdNodeId, bdHashSet>::iterator it;
 	std::list<bdNodeId> eraseList;
 	std::list<bdNodeId>::iterator eit;
 
-	for(it = mHashTable.begin(); it != mHashTable.end(); it++)
-	{
+	for (it = mHashTable.begin(); it != mHashTable.end(); it++) {
 		if ((it->first < *min) ||
-			(*max < it->first))
-		{
+			(*max < it->first)) {
 			/* schedule for erasure */
 			eraseList.push_back(it->first);
 		}
@@ -261,12 +231,10 @@ int     bdHashSpace::cleanHashSpace(bdNodeId *min, bdNodeId *max, time_t maxAge)
 	}
 
 	/* cleanup */
-	while(eraseList.size() > 0)
-	{
+	while(eraseList.size() > 0) {
 		bdNodeId &eId = eraseList.front();
 		it = mHashTable.find(eId);
-		if (it != mHashTable.end())
-		{
+		if (it != mHashTable.end()) {
 			mHashTable.erase(it);
 		}
 	}
@@ -274,8 +242,7 @@ int     bdHashSpace::cleanHashSpace(bdNodeId *min, bdNodeId *max, time_t maxAge)
 }
 
 
-int     bdHashSpace::clear()
-{
+int     bdHashSpace::clear() {
 	mHashTable.clear();
 	return 1;
 }

@@ -32,8 +32,7 @@
 #define N_PEERS_TO_PRINT 1000
 #define N_PEERS_TO_START 10
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
 	/* create some ids */
 	bdId ownId;
@@ -54,8 +53,7 @@ int main(int argc, char **argv)
 
 
 
-	while(1)
-	{
+	while(1) {
 		ubd.tick();
 		sleep(1);
 	}

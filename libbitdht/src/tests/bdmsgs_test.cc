@@ -37,8 +37,7 @@
 
 #define MAX_MESSAGE_LEN	10240
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	/***** create messages *****/
 	char msg[MAX_MESSAGE_LEN];
 	int avail = MAX_MESSAGE_LEN -1;
@@ -71,8 +70,7 @@ int main(int argc, char **argv)
 	token.len = 5;
 
 	/* setup lists */
-	for(int i = 0; i < 8; i++)
-	{
+	for (int i = 0; i < 8; i++) {
 		bdId rndId;
 		bdStdRandomId(&rndId);
 

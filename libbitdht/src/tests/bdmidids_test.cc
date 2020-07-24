@@ -28,15 +28,13 @@
 #include "bdstddht.h"
 #include <iostream>
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
 	/* Do this multiple times */
 	int i, j;
 
 	std::cerr << "Test Mid Peer Intersection....." << std::endl;
-	for(i = 0; i < 10; i++)
-	{
+	for (i = 0; i < 10; i++) {
 		bdNodeId targetId;
 		bdNodeId peerId;
 
@@ -45,8 +43,7 @@ int main(int argc, char **argv)
 	
 		std::cerr << "-------------------------------------------------" << std::endl;
 
-		for(j = 0; j < 10; j++)
-		{
+		for (j = 0; j < 10; j++) {
 
 			bdNodeId midId;
 

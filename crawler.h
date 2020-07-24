@@ -7,7 +7,7 @@
 class Crawler : public bdThread {
 public:
     Crawler();
-
+    void init();
     ~Crawler();
 
     virtual void run();
@@ -17,6 +17,7 @@ public:
 
     void setStage(bool stage);
     void setRegions(int start, int end);
+    void setPort(uint16_t newPort);
     void extractToCheckList(std::list<bdNodeId> peers);
     std::list<bdNodeId> getToCheckList();
 
@@ -28,10 +29,11 @@ private:
     std::list<bdNodeId> toCheckPeerList;
     bool readyToCheck = false;
     bool isAlive = true;
-    bdNodeId peerId;
+    bool isActive = true;
+    bdNodeId* peerId;
     bool currentStage;
     std::string bootstrapfile = "/home/ulysses/RS_NEW/RS/libbitdht/src/bitdht/bdboot.txt";
-    uint16_t port = 6775;
+    uint16_t port;
     std::string appId = "RS51";
     BitDhtHandler* dhtHandler;
     int regionStart = 0;

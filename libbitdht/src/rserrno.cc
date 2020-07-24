@@ -24,10 +24,8 @@
 
 #define RS_INTERNAL_ERRNO_CASE(e) case e: return #e
 
-const char* rsErrnoName(int err)
-{
-	switch (err)
-	{
+const char* rsErrnoName(int err) {
+	switch (err) {
 	RS_INTERNAL_ERRNO_CASE(EINVAL);
 	RS_INTERNAL_ERRNO_CASE(EBUSY);
 	RS_INTERNAL_ERRNO_CASE(EAGAIN);

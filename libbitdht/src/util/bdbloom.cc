@@ -33,8 +33,7 @@
 /* Bloom Filter implementation */
 
 
-bloomFilter::bloomFilter(int m, int k)
-{
+bloomFilter::bloomFilter(int m, int k) {
 	mBits.resize(m);
 	mHashFns.resize(k);
 
@@ -43,20 +42,17 @@ bloomFilter::bloomFilter(int m, int k)
 	mNoElements = 0;
 
 	int i;
-	for(i = 0; i < m; i++)
-	{
+	for (i = 0; i < m; i++) {
 		mBits[i] = 0;
 	}
 
-	for(i = 0; i < k; i++)
-	{
+	for (i = 0; i < k; i++) {
 		mHashFns[i] = NULL;
 	}
 
 }
 
-uint8_t convertCharToUint8(char ch1, char ch2)
-{
+uint8_t convertCharToUint8(char ch1, char ch2) {
 	uint8_t value1 = 0;
 	uint8_t value2 = 0;
 	
@@ -82,44 +78,37 @@ uint8_t convertCharToUint8(char ch1, char ch2)
 
 #define BITS_PER_BYTE (8)
 
-int bloomFilter::setFilterBits(const std::string &hex)
-{
+int bloomFilter::setFilterBits(const std::string &hex) {
 	uint32_t bytes = (mFilterBits / BITS_PER_BYTE);
-	if (mFilterBits % BITS_PER_BYTE)
-	{
+	if (mFilterBits % BITS_PER_BYTE) {
 		bytes++;
 	}
 
-	if (hex.size() < bytes * 2)
-	{
+	if (hex.size() < bytes * 2) {
 		return 0;
 	}
 
 	// convert to binary array.
 	uint8_t *tmparray = (uint8_t *) malloc(bytes);
     
-    	if(tmparray == NULL)
-        {
+    	if (tmparray == NULL) {
             std::cerr << "(EE) Error. Cannot allocate memory for " << bytes << " bytes in " << __PRETTY_FUNCTION__ << std::endl;
             return 0;
         }
         
 	uint32_t i = 0;
 
-	for(i = 0; i < bytes; i++)
-	{
+	for (i = 0; i < bytes; i++) {
 		tmparray[i] = convertCharToUint8(hex[2 * i], hex[2 * i + 1]);
 	}
 
 
-	for(i = 0; i < mFilterBits; i++)
-	{
+	for (i = 0; i < mFilterBits; i++) {
 		int byte = i / BITS_PER_BYTE;
 		int bit = i % BITS_PER_BYTE;
 		uint8_t value = (tmparray[byte] & (1 << bit));
 
-		if (value)
-		{
+		if (value) {
 			mBits[i] = 1;
 		}
 		else
@@ -132,47 +121,39 @@ int bloomFilter::setFilterBits(const std::string &hex)
 	return 1;
 }
 
-std::string bloomFilter::getFilter()
-{
+std::string bloomFilter::getFilter() {
 	/* extract filter as a hex string */
 	int bytes = (mFilterBits / BITS_PER_BYTE);
-	if (mFilterBits % BITS_PER_BYTE)
-	{
+	if (mFilterBits % BITS_PER_BYTE) {
 		bytes++;
 	}
 
-	if (bytes==0)
-	{
+	if (bytes==0) {
 		std::cerr << "(EE) Error. Cannot allocate memory for 0 byte in " << __PRETTY_FUNCTION__ << std::endl;
 		return std::string();
 	}
 	// convert to binary array.
 	uint8_t *tmparray = (uint8_t *) malloc(bytes);
     
-    	if(tmparray == NULL)
-        {
+    	if (tmparray == NULL) {
             std::cerr << "(EE) Error. Cannot allocate memory for " << bytes << " bytes in " << __PRETTY_FUNCTION__ << std::endl;
             return std::string();
         }
         
 	int i,j;
 	
-	for(i = 0; i < bytes; i++)
-	{
+	for (i = 0; i < bytes; i++) {
 		tmparray[i] = 0;
-		for(j = 0; j < BITS_PER_BYTE; j++)
-		{
+		for (j = 0; j < BITS_PER_BYTE; j++) {
 			int bit = i * BITS_PER_BYTE + j;
-			if (mBits[bit])
-			{
+			if (mBits[bit]) {
 				tmparray[i] |= (1 << j);
 			}
 		}
 	}
 
 	std::string out;
-	for(int i = 0; i < bytes; i++)
-	{
+	for (int i = 0; i < bytes; i++) {
 		bd_sprintf_append(out, "%02lx",  (uint32_t) (tmparray)[i]);
 	}
 
@@ -181,31 +162,25 @@ std::string bloomFilter::getFilter()
 	return out;
 }
 
-void bloomFilter::setBit(int bit)
-{
+void bloomFilter::setBit(int bit) {
 	mBits[bit] = 1;
 
 }
 
 
-bool bloomFilter::isBitSet(int bit)
-{
+bool bloomFilter::isBitSet(int bit) {
 	return (mBits[bit] == 1);
 }
 
-uint32_t bloomFilter::filterBits()
-{
+uint32_t bloomFilter::filterBits() {
 	return mFilterBits;
 }
 
-uint32_t bloomFilter::countBits()
-{
+uint32_t bloomFilter::countBits() {
 	int count = 0;
 	uint32_t i;
-	for(i = 0; i < mFilterBits; i++)
-	{
-		if (mBits[i])
-		{
+	for (i = 0; i < mFilterBits; i++) {
+		if (mBits[i]) {
 			count++;
 		}
 	}
@@ -213,8 +188,7 @@ uint32_t bloomFilter::countBits()
 }
 
 
-void bloomFilter::printFilter(std::ostream &out)
-{
+void bloomFilter::printFilter(std::ostream &out) {
 	out << "bloomFilter: m = " << mFilterBits;
 	out << " k = " << mNoHashs;
 	out << " n = " << mNoElements;
@@ -222,15 +196,12 @@ void bloomFilter::printFilter(std::ostream &out)
 
 	out << "BITS: ";
 	uint32_t i;
-	for(i = 0; i < mFilterBits; i++)
-	{
-		if ((i > 0) && (i % 32 == 0))
-		{
+	for (i = 0; i < mFilterBits; i++) {
+		if ((i > 0) && (i % 32 == 0)) {
 			out << std::endl;
 			out << "BITS: ";
 		}
-		if (mBits[i])
-		{
+		if (mBits[i]) {
 			out << "1";
 		}
 		else
@@ -243,17 +214,14 @@ void bloomFilter::printFilter(std::ostream &out)
 	out << std::endl;
 }
 
-void bloomFilter::setHashFunction(int idx,  uint32_t (*hashfn)(const std::string &))
-{
+void bloomFilter::setHashFunction(int idx,  uint32_t (*hashfn)(const std::string &)) {
 	mHashFns[idx] = hashfn;
 }
 
-void bloomFilter::add(const std::string &hex)
-{
+void bloomFilter::add(const std::string &hex) {
 	uint32_t (*hashfn)(const std::string &);
 	uint32_t i;
-	for(i = 0; i < mNoHashs; i++)
-	{
+	for (i = 0; i < mNoHashs; i++) {
 		hashfn = mHashFns[i];
 
 		int bit = hashfn(hex);
@@ -265,28 +233,23 @@ void bloomFilter::add(const std::string &hex)
 
 }
 
-bool bloomFilter::test(const std::string &hex)
-{
+bool bloomFilter::test(const std::string &hex) {
 	uint32_t (*hashfn)(const std::string &);
 	uint32_t i;
-	for(i = 0; i < mNoHashs; i++)
-	{
+	for (i = 0; i < mNoHashs; i++) {
 		hashfn = mHashFns[i];
 
 		int bit = hashfn(hex);
 
-		if (!isBitSet(bit))
-		{
+		if (!isBitSet(bit)) {
 			return false;
 		}
 	}
 	return true;
 }
 
-uint32_t getFirst10BitsAsNumber(const std::string &input)
-{
-	if (input.size() < 8)
-	{
+uint32_t getFirst10BitsAsNumber(const std::string &input) {
+	if (input.size() < 8) {
 		std::cerr << "getFirst10BitsAsNumber() ERROR Size too small!";
 		std::cerr << std::endl;
 		return 0;
@@ -316,10 +279,8 @@ uint32_t getFirst10BitsAsNumber(const std::string &input)
 	return val;
 }
 
-uint32_t getSecond10BitsAsNumber(const std::string &input)
-{
-	if (input.size() < 8)
-	{
+uint32_t getSecond10BitsAsNumber(const std::string &input) {
+	if (input.size() < 8) {
 		std::cerr << "getSecond10BitsAsNumber() ERROR Size too small!";
 		std::cerr << std::endl;
 		return 0;
@@ -350,10 +311,8 @@ uint32_t getSecond10BitsAsNumber(const std::string &input)
 }
 
 
-uint32_t getMid10BitsAsNumber(const std::string &input)
-{
-	if (input.size() < 8)
-	{
+uint32_t getMid10BitsAsNumber(const std::string &input) {
+	if (input.size() < 8) {
 		std::cerr << "getMid10BitsAsNumber() ERROR Size too small!";
 		std::cerr << std::endl;
 		return 0;
@@ -388,8 +347,7 @@ uint32_t getMid10BitsAsNumber(const std::string &input)
 #define BDFILTER_K 3
 
 bdBloom::bdBloom()
-	:bloomFilter(BDFILTER_M, BDFILTER_K)
-{
+	:bloomFilter(BDFILTER_M, BDFILTER_K) {
 	/* set the fns. */
 	setHashFunction(0, getFirst10BitsAsNumber);
 	setHashFunction(1, getSecond10BitsAsNumber);

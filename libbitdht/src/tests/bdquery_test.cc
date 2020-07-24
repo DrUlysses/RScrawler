@@ -32,8 +32,7 @@
 #define N_PEERS_TO_PRINT 1000
 #define N_PEERS_TO_START 10
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
 	/* create some ids */
 	bdNodeId ownId;
@@ -43,8 +42,7 @@ int main(int argc, char **argv)
 
 	bdSpace space(&ownId, fns);
 	int i = 0;
-	for (i = 0; i < N_PEERS_TO_ADD; i++)
-	{
+	for (i = 0; i < N_PEERS_TO_ADD; i++) {
 		bdId tmpId;
 		bdStdRandomId(&tmpId);
 
@@ -65,8 +63,7 @@ int main(int argc, char **argv)
 
 	space.find_nearest_nodes(&(queryId.id), N_PEERS_TO_START, nearest);
 
-	for(it = nearest.begin(); it != nearest.end(); it++)
-	{
+	for (it = nearest.begin(); it != nearest.end(); it++) {
 		startList.push_back(it->second);
 	}
 

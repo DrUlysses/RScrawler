@@ -44,8 +44,7 @@
 std::map<bdId, bdNodeManager *> nodes;
 std::map<struct sockaddr_in, bdId> addrIdx;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	time_t sim_time = 600;
 	time_t starttime = time(NULL);
 	int    n_nodes = 1000;
@@ -59,8 +58,7 @@ int main(int argc, char **argv)
 
 	std::cerr << "bdmgr_multitest() Setting up Nodes" << std::endl;
 	/* setup nodes */
-	for(i = 0; i < n_nodes; i++)
-	{
+	for (i = 0; i < n_nodes; i++) {
 		bdId id;
 
 		bdStdRandomId(&id);
@@ -82,18 +80,14 @@ int main(int argc, char **argv)
 
 	std::cerr << "bdmgr_multitest() Cross Seeding" << std::endl;
 	/* do a little cross seeding */
-	for(nit = nodes.begin(); nit != nodes.end(); nit++)
-	{
-		for(j = 0; j < 2; j++)
-		{
+	for (nit = nodes.begin(); nit != nodes.end(); nit++) {
+		for (j = 0; j < 2; j++) {
 			int peeridx = bdRandom::random_u32() % n_nodes;
-			for(i = 0, it = nodes.begin(); 
-				(i < peeridx) && (it != nodes.end()); i++, it++)
-			{
+			for (i = 0, it = nodes.begin();
+				(i < peeridx) && (it != nodes.end()); i++, it++) {
 				/* empty */
 			}
-			if (it != nodes.end())
-			{
+			if (it != nodes.end()) {
 				nit->second->addPotentialPeer((bdId *) &(it->first), NULL);
 			}
 		}
@@ -103,28 +97,24 @@ int main(int argc, char **argv)
 	
 	std::cerr << "bdmgr_multitest() Simulation Time....." << std::endl;
 	i = 0;
-	while(time(NULL) < starttime + sim_time)
-	{
+	while(time(NULL) < starttime + sim_time) {
 		i++;
 		std::cerr << "bdmgr_multitest() Iteration: " << i << std::endl;
 
-		for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
-		{
+		for (it = nodes.begin(), j = 0; it != nodes.end(); it++, j++) {
 			/* extract messages to go -> and deliver */
 #define MAX_MSG_SIZE	10240
 			struct sockaddr_in addr;
 			char data[MAX_MSG_SIZE];
 			int len = MAX_MSG_SIZE;
 
-			while(it->second->outgoingMsg(&addr, data, &len))
-			{
+			while(it->second->outgoingMsg(&addr, data, &len)) {
 				std::cerr << "bdmgr_multitest() Msg from Peer: " << j;
 
 				/* find the peer */
 				ait = addrIdx.find(addr);
 				nit = nodes.end();
-				if (ait != addrIdx.end())
-				{
+				if (ait != addrIdx.end()) {
 					nit = nodes.find(ait->second);
 					std::cerr << " For: ";
 					fns->bdPrintId(std::cerr, &(nit->first));
@@ -137,8 +127,7 @@ int main(int argc, char **argv)
 
 				}
 
-				if (nit != nodes.end())
-				{
+				if (nit != nodes.end()) {
 					/* set from address */
 					nit->second->incomingMsg( (sockaddr_in *) &(it->first.addr), data, len);
 				}
@@ -147,8 +136,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
-		{
+		for (it = nodes.begin(), j = 0; it != nodes.end(); it++, j++) {
 			/* tick */
 			std::cerr << "bdmgr_multitest() Ticking peer: " << j << std::endl;
 			it->second->iteration();
@@ -160,8 +148,7 @@ int main(int argc, char **argv)
 	}
 
 	std::cerr << "bdmgr_multitest() Displying States"<< std::endl;
-	for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
-	{
+	for (it = nodes.begin(), j = 0; it != nodes.end(); it++, j++) {
 		/* tick */
 		std::cerr << "bdmgr_multitest() Peer State: " << j << std::endl;
 		it->second->printState();

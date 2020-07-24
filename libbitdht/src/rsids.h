@@ -99,12 +99,10 @@ struct t_RsGenericIdType
 	 * @return empty id on failure, an id initialized from the bytes in the
 	 *	buffer
 	 */
-	static Id_t fromBufferUnsafe(const uint8_t* buff)
-	{
+	static Id_t fromBufferUnsafe(const uint8_t* buff) {
 		Id_t ret;
 
-		if(!buff)
-		{
+		if (!buff) {
 			RsErr() << __PRETTY_FUNCTION__ << " invalid paramethers buff: "
 			        << buff << std::endl;
 			print_stacktrace();
@@ -125,12 +123,10 @@ struct t_RsGenericIdType
 	template<bool UPPER_CASE2, RsGenericIdType UNIQUE_IDENTIFIER2>
 	explicit t_RsGenericIdType(
 	        const t_RsGenericIdType<ID_SIZE_IN_BYTES, UPPER_CASE2, UNIQUE_IDENTIFIER2>&
-	        id )
-	{ memmove(bytes, id.toByteArray(), ID_SIZE_IN_BYTES); }
+	        id ) { memmove(bytes, id.toByteArray(), ID_SIZE_IN_BYTES); }
 
 	/// Random initialization. Can be useful for testing and to generate new ids.
-	static Id_t random()
-	{
+	static Id_t random() {
 		Id_t id;
 		RsRandom::random_bytes(id.bytes, ID_SIZE_IN_BYTES);
 		return id;
@@ -155,7 +151,7 @@ struct t_RsGenericIdType
 	inline Id_t operator~ () const
 	{
 		Id_t ret;
-		for(uint32_t i=0; i < ID_SIZE_IN_BYTES; ++i)
+		for (uint32_t i=0; i < ID_SIZE_IN_BYTES; ++i)
 			ret.bytes[i] = ~bytes[i];
 		return ret;
 	}
@@ -163,29 +159,26 @@ struct t_RsGenericIdType
 	inline Id_t operator| (const Id_t& fp) const
 	{
 		Id_t ret;
-		for(uint32_t i=0; i < ID_SIZE_IN_BYTES; ++i)
+		for (uint32_t i=0; i < ID_SIZE_IN_BYTES; ++i)
 			ret.bytes[i] = bytes[i] | fp.bytes[i];
 		return ret;
 	}
 
 	inline bool isNull() const
 	{
-		for(uint32_t i=0; i < SIZE_IN_BYTES; ++i)
-		if(bytes[i] != 0) return false;
+		for (uint32_t i=0; i < SIZE_IN_BYTES; ++i)
+		if (bytes[i] != 0) return false;
 		return true;
 	}
 
-	friend std::ostream& operator<<(std::ostream& out, const Id_t& id)
-	{
-		switch (UNIQUE_IDENTIFIER)
-		{
+	friend std::ostream& operator<<(std::ostream& out, const Id_t& id) {
+		switch (UNIQUE_IDENTIFIER) {
 		case RsGenericIdType::PGP_FINGERPRINT:
 		{
 			uint8_t index = 0;
-			for(char c : id.toStdString())
-			{
+			for (char c : id.toStdString()) {
 				out << c;
-				if(++index % 4 == 0 && index < id.SIZE_IN_BYTES*2) out << ' ';
+				if (++index % 4 == 0 && index < id.SIZE_IN_BYTES*2) out << ' ';
 			}
 		}
 		break;
@@ -201,16 +194,15 @@ struct t_RsGenericIdType
 
 	bool serialise(void* data,uint32_t pktsize,uint32_t& offset) const
 	{
-		if(offset + SIZE_IN_BYTES > pktsize) return false;
+		if (offset + SIZE_IN_BYTES > pktsize) return false;
 		memmove( &(reinterpret_cast<uint8_t*>(data))[offset],
 		         bytes, SIZE_IN_BYTES );
 		offset += SIZE_IN_BYTES;
 		return true;
 	}
 
-	bool deserialise(const void* data, uint32_t pktsize, uint32_t& offset)
-	{
-		if(offset + SIZE_IN_BYTES > pktsize) return false;
+	bool deserialise(const void* data, uint32_t pktsize, uint32_t& offset) {
+		if (offset + SIZE_IN_BYTES > pktsize) return false;
 		memmove( bytes,
 		         &(reinterpret_cast<const uint8_t*>(data))[offset],
 		         SIZE_IN_BYTES );
@@ -223,7 +215,7 @@ struct t_RsGenericIdType
 	 * @deprecated This is too dangerous!
 	 * Nothing prevent a buffer of wrong size being passed at runtime!
 	 */
-	RS_DEPRECATED_FOR("fromBufferUnsafe(const uint8_t* buff)")
+	RS_DEPRECATED_for("fromBufferUnsafe(const uint8_t* buff)")
 	explicit t_RsGenericIdType(const uint8_t bytes[]);
 
 private:
@@ -240,9 +232,8 @@ std::string t_RsGenericIdType<ID_SIZE_IN_BYTES, UPPER_CASE, UNIQUE_IDENTIFIER>
 
 	std::string res(ID_SIZE_IN_BYTES*2,' ') ;
 
-	for(uint32_t j = 0; j < ID_SIZE_IN_BYTES; j++)
-		if(upper_case)
-		{
+	for (uint32_t j = 0; j < ID_SIZE_IN_BYTES; j++)
+		if (upper_case) {
 			res[2*j  ] = outh[ (bytes[j]>>4) ] ;
 			res[2*j+1] = outh[ bytes[j] & 0xf ] ;
 		}
@@ -257,13 +248,10 @@ std::string t_RsGenericIdType<ID_SIZE_IN_BYTES, UPPER_CASE, UNIQUE_IDENTIFIER>
 
 template<uint32_t ID_SIZE_IN_BYTES, bool UPPER_CASE, RsGenericIdType UNIQUE_IDENTIFIER>
 t_RsGenericIdType<ID_SIZE_IN_BYTES, UPPER_CASE, UNIQUE_IDENTIFIER>
-::t_RsGenericIdType(const std::string& s)
-{
+::t_RsGenericIdType(const std::string& s) {
 	std::string::size_type n = 0;
-	if(s.length() != ID_SIZE_IN_BYTES*2)
-	{
-		if(!s.empty())
-		{
+	if (s.length() != ID_SIZE_IN_BYTES*2) {
+		if (!s.empty()) {
 			RsErr() << __PRETTY_FUNCTION__ << " supplied string in constructor "
 			        << "has wrong size. Expected ID size=" << ID_SIZE_IN_BYTES*2
 			        << " String=\"" << s << "\" = " << s.length() << std::endl;
@@ -273,19 +261,17 @@ t_RsGenericIdType<ID_SIZE_IN_BYTES, UPPER_CASE, UNIQUE_IDENTIFIER>
 		return;
 	}
 
-	for(uint32_t i = 0; i < ID_SIZE_IN_BYTES; ++i)
-	{
+	for (uint32_t i = 0; i < ID_SIZE_IN_BYTES; ++i) {
 		bytes[i] = 0 ;
 
-		for(int k=0;k<2;++k)
-		{
+		for (int k=0;k<2;++k) {
 			char b = s[n++] ;
 
-			if(b >= 'A' && b <= 'F')
+			if (b >= 'A' && b <= 'F')
 				bytes[i] += (b-'A'+10) << 4*(1-k) ;
-			else if(b >= 'a' && b <= 'f')
+			else if (b >= 'a' && b <= 'f')
 				bytes[i] += (b-'a'+10) << 4*(1-k) ;
-			else if(b >= '0' && b <= '9')
+			else if (b >= '0' && b <= '9')
 				bytes[i] += (b-'0') << 4*(1-k) ;
 			else
 			{
@@ -299,11 +285,11 @@ t_RsGenericIdType<ID_SIZE_IN_BYTES, UPPER_CASE, UNIQUE_IDENTIFIER>
 }
 
 template<uint32_t ID_SIZE_IN_BYTES, bool UPPER_CASE, RsGenericIdType UNIQUE_IDENTIFIER>
-RS_DEPRECATED_FOR("t_RsGenericIdType::fromBuffer(...)")
+RS_DEPRECATED_for("t_RsGenericIdType::fromBuffer(...)")
 t_RsGenericIdType<ID_SIZE_IN_BYTES, UPPER_CASE, UNIQUE_IDENTIFIER>::
 t_RsGenericIdType(const uint8_t mem[]) /// @deprecated Too dangerous!
 {
-	if(mem == nullptr) memset(bytes, 0, ID_SIZE_IN_BYTES);
+	if (mem == nullptr) memset(bytes, 0, ID_SIZE_IN_BYTES);
 	else memcpy(bytes, mem, ID_SIZE_IN_BYTES);
 }
 
@@ -335,4 +321,4 @@ using DistantChatPeerId = t_RsGenericIdType<_RsIdSize::SSL_ID         , false, R
 using RsNodeGroupId     = t_RsGenericIdType<_RsIdSize::CERT_SIGN      , false, RsGenericIdType::NODE_GROUP     >;
 
 /// @deprecated Ugly name kept temporarly only because it is used in many places
-using PGPFingerprintType RS_DEPRECATED_FOR(RsPpgFingerprint) = RsPgpFingerprint;
+using PGPFingerprintType RS_DEPRECATED_for(RsPpgFingerprint) = RsPgpFingerprint;

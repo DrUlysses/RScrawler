@@ -3,8 +3,7 @@
 #include <iostream>
 #include <inttypes.h>
 
-void args(char *name)
-{
+void args(char *name) {
 	std::cerr << std::endl;
 	std::cerr << "Dht Single Shot Searcher";
 	std::cerr << std::endl;
@@ -19,8 +18,7 @@ void args(char *name)
 }
 
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
 	std::string bootstrapfile = "bdboot.txt";
 	std::string peerId;
@@ -30,10 +28,8 @@ int main(int argc, char **argv)
 	bool havePeerId = false;
 	
 
-	while((c = getopt(argc, argv,"p:")) != -1)
-	{
-		switch (c)
-		{
+	while((c = getopt(argc, argv,"p:")) != -1) {
+		switch (c) {
 			case 'p':
 				peerId = optarg;
 				havePeerId = true;
@@ -45,8 +41,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (!havePeerId)
-	{
+	if (!havePeerId) {
 		args(argv[0]);
 		return 1;
 	}

@@ -49,15 +49,12 @@ struct t_RsLogger
 	typedef t_RsLogger stream_type;
 
 	template<typename T>
-	inline stream_type& operator<<(const T& val)
-	{ ostr << val; return *this; }
+	inline stream_type& operator<<(const T& val) { ostr << val; return *this; }
 
 	/// needed for manipulators and things like std::endl
-	stream_type& operator<<(std::ostream& (*pf)(std::ostream&))
-	{
-		if(pf == static_cast<std::ostream& (*)(std::ostream&)>(
-		            &std::endl< char, std::char_traits<char> > ))
-		{
+	stream_type& operator<<(std::ostream& (*pf)(std::ostream&)) {
+		if (pf == static_cast<std::ostream& (*)(std::ostream&)>(
+		            &std::endl< char, std::char_traits<char> > )) {
 			__android_log_write(
 			            static_cast<int>(CATEGORY),
 			            "RetroShare", ostr.str().c_str() );
@@ -95,8 +92,7 @@ struct t_RsLogger
 	typedef decltype(std::cerr) stream_type;
 
 	template<typename T>
-	inline stream_type& operator<<(const T& val)
-	{
+	inline stream_type& operator<<(const T& val) {
 		using namespace std::chrono;
 		const auto now = system_clock::now();
 		const auto sec = time_point_cast<seconds>(now);
@@ -180,8 +176,7 @@ struct RsNoDbg
 	inline RsNoDbg& operator<<(const T&) { return *this; }
 
 	/// needed for manipulators and things like std::endl
-	inline RsNoDbg& operator<<(std::ostream& (*/*pf*/)(std::ostream&))
-	{ return *this; }
+	inline RsNoDbg& operator<<(std::ostream& (*/*pf*/)(std::ostream&)) { return *this; }
 };
 
 /**
@@ -239,7 +234,7 @@ struct RsNoDbg
 #include "rsdeprecate.h"
 
 namespace RsLog {
-    enum RS_DEPRECATED_FOR("RsErr, RsDbg, RsNoDbg") logLvl {
+    enum RS_DEPRECATED_for("RsErr, RsDbg, RsNoDbg") logLvl {
 		None	= -1,
 		Default	=  0,
 		Alert	=  1,
@@ -251,7 +246,7 @@ namespace RsLog {
 	};
 
 	// this struct must be provided by the caller (to rslog())
-	struct RS_DEPRECATED_FOR("RsErr, RsDbg, RsNoDbg") logInfo {
+	struct RS_DEPRECATED_for("RsErr, RsDbg, RsNoDbg") logInfo {
 		// module specific log lvl
 		logLvl lvl;
 		// module name (displayed in log)
@@ -259,16 +254,16 @@ namespace RsLog {
 	};
 }
 
-RS_DEPRECATED_FOR("RsErr, RsDbg, RsNoDbg")
+RS_DEPRECATED_for("RsErr, RsDbg, RsNoDbg")
 int setDebugCrashMode(const char *cfile);
 
-RS_DEPRECATED_FOR("RsErr, RsDbg, RsNoDbg")
+RS_DEPRECATED_for("RsErr, RsDbg, RsNoDbg")
 int setDebugFile(const char *fname);
 
-RS_DEPRECATED_FOR("RsErr, RsDbg, RsNoDbg")
+RS_DEPRECATED_for("RsErr, RsDbg, RsNoDbg")
 int setOutputLevel(RsLog::logLvl lvl);
 
-RS_DEPRECATED_FOR("RsErr, RsDbg, RsNoDbg")
+RS_DEPRECATED_for("RsErr, RsDbg, RsNoDbg")
 void rslog(const RsLog::logLvl lvl, RsLog::logInfo *info, const std::string &msg);
 
 

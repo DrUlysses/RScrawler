@@ -30,8 +30,7 @@
 
 #define N_TESTS 100
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
 	/* Do this multiple times */
 	int i;
@@ -42,16 +41,14 @@ int main(int argc, char **argv)
 	std::list<bdNodeId> testIds;
 	std::list<bdNodeId>::iterator it;
 
-	for(i = 0; i < N_TESTS; i++)
-	{
+	for (i = 0; i < N_TESTS; i++) {
 		bdNodeId targetId;
 		bdStdRandomNodeId(&targetId);
 		testIds.push_back(targetId);
 	}
 
 	std::cerr << "Test bdBloom Filter...." << std::endl;
-	for(it = testIds.begin(); it != testIds.end(); it++)
-	{
+	for (it = testIds.begin(); it != testIds.end(); it++) {
 		bdNodeId targetId = *it;
 	
 		std::cerr << "-------------------------------------------------" << std::endl;
@@ -74,8 +71,7 @@ int main(int argc, char **argv)
 	std::string fs2 = filter2.getFilter();
 	filter2.printFilter(std::cerr);
 
-	if (fs1 == fs2)
-	{
+	if (fs1 == fs2) {
 		std::cerr << "SUCCESS: Filter Correctly Transferred!";
 		std::cerr << std::endl;
 	}
@@ -86,8 +82,7 @@ int main(int argc, char **argv)
 	}
 
 
-	for(it = testIds.begin(); it != testIds.end(); it++)
-	{
+	for (it = testIds.begin(); it != testIds.end(); it++) {
 		bdNodeId targetId = *it;
 	
 		std::cerr << "-------------------------------------------------" << std::endl;
@@ -98,8 +93,7 @@ int main(int argc, char **argv)
 		bdStdPrintNodeId(str, &targetId);
 		std::cerr << str.str() << std::endl;
 
-		if (filter2.test(str.str()))
-		{
+		if (filter2.test(str.str())) {
 			std::cerr << "SUCCESS: Filter Found Entry";
 			std::cerr << std::endl;
 		}
@@ -125,10 +119,8 @@ int main(int argc, char **argv)
 #define FINAL_TESTS	(1000000)
 	int found = 0;
 	int didnt = 0;
-	for(i = 0; i < FINAL_TESTS; i++)
-	{
-		if ((i != 0) && (i % 100000 == 0))
-		{
+	for (i = 0; i < FINAL_TESTS; i++) {
+		if ((i != 0) && (i % 100000 == 0)) {
 			std::cerr << "Run " << i << " Checks" << std::endl;
 		}
 
@@ -137,8 +129,7 @@ int main(int argc, char **argv)
 		std::ostringstream str;
 		bdStdPrintNodeId(str, &targetId);
 
-		if (filter2.test(str.str()))
-		{
+		if (filter2.test(str.str())) {
 			found++;
 		}
 		else

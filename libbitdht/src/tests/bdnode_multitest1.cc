@@ -43,8 +43,7 @@
 std::map<bdId, bdNode *> nodes;
 std::map<uint16_t, bdId> portIdx;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	time_t sim_time = 60;
 	time_t starttime = time(NULL);
 	int    n_nodes = 10;
@@ -58,8 +57,7 @@ int main(int argc, char **argv)
 
 	std::cerr << "bdnode_multitest1() Setting up Nodes" << std::endl;
 	/* setup nodes */
-	for(i = 0; i < n_nodes; i++)
-	{
+	for (i = 0; i < n_nodes; i++) {
 		bdId id;
 
 		bdStdRandomId(&id);
@@ -81,13 +79,11 @@ int main(int argc, char **argv)
 
 	std::cerr << "bdnode_multitest1() Cross Seeding" << std::endl;
 	/* do a little cross seeding */
-	for(i = 0; i < n_nodes; i++)
-	{
+	for (i = 0; i < n_nodes; i++) {
 		bdId nid = portIdx[i];
 		bdNode *node = nodes[nid];
 
-		for(j = 0; j < 5; j++)
-		{		
+		for (j = 0; j < 5; j++) {
 			int peeridx = bdRandom::random_u32() % n_nodes;
 
 			bdId pid = portIdx[peeridx];
@@ -99,29 +95,25 @@ int main(int argc, char **argv)
 	
 	std::cerr << "bdnode_multitest1() Simulation Time....." << std::endl;
 	i = 0;
-	while(time(NULL) < starttime + sim_time)
-	{
+	while(time(NULL) < starttime + sim_time) {
 		i++;
 		std::cerr << "bdnode_multitest1() Iteration: " << i << std::endl;
 
-		for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
-		{
+		for (it = nodes.begin(), j = 0; it != nodes.end(); it++, j++) {
 			/* extract messages to go -> and deliver */
 #define MAX_MSG_SIZE	10240
 			struct sockaddr_in addr;
 			char data[MAX_MSG_SIZE];
 			int len = MAX_MSG_SIZE;
 
-			while(it->second->outgoingMsg(&addr, data, &len))
-			{
+			while(it->second->outgoingMsg(&addr, data, &len)) {
 				std::cerr << "bdnode_multitest1() Msg from Peer: " << j;
 
 				/* find the peer */
 				int peeridx = htons(addr.sin_port);
 				pit = portIdx.find(peeridx);
 				nit = nodes.end();
-				if (pit != portIdx.end())
-				{
+				if (pit != portIdx.end()) {
 					nit = nodes.find(pit->second);
 					std::cerr << " For: ";
 					fns->bdPrintId(std::cerr, &(nit->first));
@@ -134,8 +126,7 @@ int main(int argc, char **argv)
 
 				}
 
-				if (nit != nodes.end())
-				{
+				if (nit != nodes.end()) {
 					/* set from address */
 					nit->second->incomingMsg( (sockaddr_in *) &(it->first.addr), data, len);
 				}
@@ -144,18 +135,15 @@ int main(int argc, char **argv)
 			}
 		}
 
-		for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
-		{
+		for (it = nodes.begin(), j = 0; it != nodes.end(); it++, j++) {
 			/* tick */
 			std::cerr << "bdnode_multitest1() Ticking peer: " << j << std::endl;
 			it->second->iteration();
 		}
 
-		if (i % 5 == 0)
-		{
+		if (i % 5 == 0) {
 			std::cerr << "bdnode_multitest1() Displying States"<< std::endl;
-			for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
-			{
+			for (it = nodes.begin(), j = 0; it != nodes.end(); it++, j++) {
 				/* tick */
 				std::cerr << "bdnode_multitest1() Peer State: " << j << std::endl;
 				it->second->printState();

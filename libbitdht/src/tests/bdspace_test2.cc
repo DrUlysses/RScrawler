@@ -31,8 +31,7 @@
 #define N_PEERS_TO_TEST 100
 #define N_PEERS_TO_FIND 10
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
 	/* create some ids */
 	bdNodeId ownId;
@@ -41,8 +40,7 @@ int main(int argc, char **argv)
 
 	bdSpace space(&ownId, fns);
 	int i = 0;
-	for (i = 0; i < N_PEERS_TO_ADD; i++)
-	{
+	for (i = 0; i < N_PEERS_TO_ADD; i++) {
 		bdId tmpId;
 		bdStdRandomId(&tmpId);
 		space.add_peer(&tmpId, 0);
@@ -52,8 +50,7 @@ int main(int argc, char **argv)
 
 
 	/* now generate random id's and test closeness */
-	for(i = 0; i < N_PEERS_TO_TEST; i++)
-	{
+	for (i = 0; i < N_PEERS_TO_TEST; i++) {
 		bdId tmpId;
 		bdStdRandomId(&tmpId);
 		std::multimap<bdMetric, bdId> list2;

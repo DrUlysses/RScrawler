@@ -37,8 +37,7 @@ bool test_metric_random();
 
 INITTEST();
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
         std::cerr << "libbitdht: " << argv[0] << std::endl;
 
 	test_metric_explicit();
@@ -47,8 +46,7 @@ int main(int argc, char **argv)
         return TESTRESULT();
 }
 
-bool test_metric_explicit()
-{
+bool test_metric_explicit() {
         std::cerr << "test_metric_explicit:" << std::endl;
 
 #define NUM_IDS 6
@@ -61,30 +59,24 @@ bool test_metric_explicit()
 	 * check the metrics are what we expect.
 	 */
 
-	for(i = 0; i < NUM_IDS; i++)
-	{
+	for (i = 0; i < NUM_IDS; i++) {
 		bdZeroNodeId(&(id[i].id));
 	}
 
 	/* test the zero node works */
-	for(i = 0; i < NUM_IDS; i++)
-	{
-		for(j = 0; j < BITDHT_KEY_LEN; j++)
-		{
+	for (i = 0; i < NUM_IDS; i++) {
+		for (j = 0; j < BITDHT_KEY_LEN; j++) {
         		CHECK(id[i].id.data[j] == 0);
 		}
 	}
 
-	for(i = 0; i < NUM_IDS; i++)
-	{
-		for(j = i; j < NUM_IDS; j++)
-		{
+	for (i = 0; i < NUM_IDS; i++) {
+		for (j = i; j < NUM_IDS; j++) {
 			id[j].id.data[BITDHT_KEY_LEN - i - 1] = 1;
 		}
 	}
 		
-	for(i = 0; i < NUM_IDS; i++)
-	{
+	for (i = 0; i < NUM_IDS; i++) {
 		fprintf(stderr, "id[%d]:", i+1);
 		bdStdPrintId(std::cerr,&(id[i]));
 		fprintf(stderr, "\n");
@@ -95,10 +87,8 @@ bool test_metric_explicit()
 	bdMetric met2;
 	int bdist = 0;
 
-	for(i = 0; i < 6; i++)
-	{
-		for(j = i+1; j < 6; j++)
-		{
+	for (i = 0; i < 6; i++) {
+		for (j = i+1; j < 6; j++) {
 			bdStdDistance(&(id[i].id), &(id[j].id), &met);
 
 			fprintf(stderr, "%d^%d:", i, j);
@@ -126,8 +116,7 @@ bool test_metric_explicit()
 
 
 
-bool test_metric_random()
-{
+bool test_metric_random() {
         std::cerr << "test_metric_random:" << std::endl;
 
 	/* create some ids */

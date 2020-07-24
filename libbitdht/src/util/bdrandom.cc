@@ -59,13 +59,12 @@ bool bdRandom::seed(uint32_t s)
 
 void bdRandom::locked_next_state() 
 {
-	for(uint32_t i=0;i<N;++i)
-	{
+	for (uint32_t i=0;i<N;++i) {
 		uint32_t y = ((MT[i]) & UMASK) | ((MT[(i+1)%(int)N]) & LMASK) ;
 
 		MT[i] = MT[(i + M) % (int)N] ^ (y >> 1) ;
 
-		if((y & 1) == 1) 
+		if ((y & 1) == 1)
 			MT[i] = MT[i] ^ 0x9908b0df ;
 	}
 	index = 0 ;
@@ -80,7 +79,7 @@ uint32_t bdRandom::random_u32()
 
 		y = MT[index++] ;
 
-		if(index == N)
+		if (index == N)
 			locked_next_state();
 	}
 
@@ -108,11 +107,10 @@ double bdRandom::random_f64()
 	return random_u64() / (double)(~(uint64_t)0) ;
 }
 
-std::string bdRandom::random_alphaNumericString(uint32_t len)
-{
+std::string bdRandom::random_alphaNumericString(uint32_t len) {
 	std::string s = "" ;
 
-	for(uint32_t i=0;i<len;++i)
+	for (uint32_t i=0;i<len;++i)
 		s += (char)( (random_u32()%94) + 33) ;
 
 	return s ;

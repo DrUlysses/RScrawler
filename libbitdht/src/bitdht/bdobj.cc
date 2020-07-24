@@ -23,25 +23,21 @@
 #include "bdobj.h"
 
 
-void bdPrintTransId(std::ostream &out, bdToken *transId)
-{
+void bdPrintTransId(std::ostream &out, bdToken *transId) {
 	//out << transId->data;
 	bdPrintToken(out, transId);
 	return;
 }
 
 
-void bdPrintToken(std::ostream &out, bdToken *token)
-{
-	for(unsigned int i = 0; i < token->len; i++)
-	{
+void bdPrintToken(std::ostream &out, bdToken *token) {
+	for (unsigned int i = 0; i < token->len; i++) {
 		out << std::hex << (uint32_t) token->data[i];
 	}
 	out << std::dec;
 }
 
-void bdPrintCompactPeerId(std::ostream &out, std::string /*cpi*/ )
-{
+void bdPrintCompactPeerId(std::ostream &out, std::string /*cpi*/ ) {
 	out << "DummyCompactPeerId";
 }
 

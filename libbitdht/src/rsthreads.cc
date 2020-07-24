@@ -66,10 +66,9 @@ int RS_pthread_setname_np(pthread_t __target_thread, const char *__buf) {
 	#include <iostream>
 #endif
 
-/*static*/ void* RsThread::rsthread_init(void* p)
-{
+/*static*/ void* RsThread::rsthread_init(void* p) {
 	RsThread* thread = reinterpret_cast<RsThread *>(p);
-	if(!thread) return nullptr;
+	if (!thread) return nullptr;
 
 	/* Using pthread_detach(...) the thread resources will be automatically
 	 * freed when this function return, so there is no need for pthread_join()
@@ -85,8 +84,7 @@ int RS_pthread_setname_np(pthread_t __target_thread, const char *__buf) {
 	return nullptr;
 }
 
-void RsThread::resetTid()
-{
+void RsThread::resetTid() {
 #ifdef WINDOWS_SYS
 	memset (&mTid, 0, sizeof(mTid));
 #else
@@ -104,22 +102,19 @@ bool RsThread::isRunning() { return !mHasStopped; }
 
 bool RsThread::shouldStop() { return mShouldStop; }
 
-void RsThread::askForStop()
-{
+void RsThread::askForStop() {
 	/* Call onStopRequested() only once even if askForStop() is called multiple
 	 * times */
-	if(!mShouldStop.exchange(true)) onStopRequested();
+	if (!mShouldStop.exchange(true)) onStopRequested();
 }
 
-void RsThread::wrapRun()
-{
+void RsThread::wrapRun() {
 	run();
 	resetTid();
 	mHasStopped = true;
 }
 
-void RsThread::fullstop()
-{
+void RsThread::fullstop() {
 #ifdef RS_THREAD_FORCE_STOP
 	const rstime_t stopRequTS = time(nullptr);
 #endif
@@ -127,8 +122,7 @@ void RsThread::fullstop()
 	askForStop();
 
 	const pthread_t callerTid = pthread_self();
-	if(pthread_equal(mTid, callerTid))
-	{
+	if (pthread_equal(mTid, callerTid)) {
 		RsErr() << __PRETTY_FUNCTION__ << " called by same thread. This should "
 		        << "never happen! this: " << static_cast<void*>(this)
 		        << std::hex << ", callerTid: " << callerTid
@@ -140,18 +134,16 @@ void RsThread::fullstop()
 
 	// Wait for the thread being stopped
 	auto i = 1;
-	while(!mHasStopped)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	while(!mHasStopped) {
+		std::this_thread::sleep_for (std::chrono::milliseconds(200));
 		++i;
-		if(!(i%5))
+		if (!(i%5))
 			RsDbg() << __PRETTY_FUNCTION__ << " " << i*0.2 << " seconds passed"
 			        << " waiting for thread: " << std::hex << mLastTid
 			        << std::dec << " " << mFullName << " to stop" << std::endl;
 
 #ifdef RS_THREAD_FORCE_STOP
-		if(mStopTimeout && time(nullptr) > stopRequTS + mStopTimeout)
-		{
+		if (mStopTimeout && time(nullptr) > stopRequTS + mStopTimeout) {
 			RsErr() << __PRETTY_FUNCTION__ << " thread mLastTid: " << std::hex
 			         << mLastTid << " mTid: " << mTid << std::dec << " "
 			         << mFullName
@@ -162,7 +154,7 @@ void RsThread::fullstop()
 			         << std::endl;
 
 			const auto terr = pthread_cancel(mTid);
-			if(terr == 0) mHasStopped = true;
+			if (terr == 0) mHasStopped = true;
 			else
 			{
 				RsErr() << __PRETTY_FUNCTION__ << " pthread_cancel("
@@ -177,16 +169,13 @@ void RsThread::fullstop()
 	}
 }
 
-bool RsThread::start(const std::string& threadName)
-{
+bool RsThread::start(const std::string& threadName) {
 	// Atomically check if the thread was already started and set it as running
-	if(mHasStopped.exchange(false))
-	{
+	if (mHasStopped.exchange(false)) {
 		mShouldStop = false;
 		int pError = pthread_create(
 		            &mTid, nullptr, &rsthread_init, static_cast<void*>(this) );
-		if(pError)
-		{
+		if (pError) {
 			RsErr() << __PRETTY_FUNCTION__ << " pthread_create could not create"
 			        << " new thread: " << threadName << " pError: " << pError
 			        << std::endl;
@@ -194,8 +183,7 @@ bool RsThread::start(const std::string& threadName)
 			print_stacktrace();
 			return false;
 		}
-		if(!mTid)
-		{
+		if (!mTid) {
 			RsErr() << __PRETTY_FUNCTION__ << " pthread_create could not create"
 			        << " new thread: " << threadName << " mTid: " << mTid
 			        << std::endl;
@@ -212,7 +200,7 @@ bool RsThread::start(const std::string& threadName)
 
 		/* Set PThread thread name which is restricted to 16 characters
 		 * including the terminating null byte */
-		if(pthread_setname_np && !threadName.empty())
+		if (pthread_setname_np && !threadName.empty())
 			RS_pthread_setname_np(mTid, threadName.substr(0, 15).c_str());
 
 		return true;
@@ -225,22 +213,18 @@ bool RsThread::start(const std::string& threadName)
 }
 
 RsQueueThread::RsQueueThread(uint32_t min, uint32_t max, double relaxFactor )
-    :mMinSleep(min), mMaxSleep(max), mRelaxFactor(relaxFactor)
-{
+    :mMinSleep(min), mMaxSleep(max), mRelaxFactor(relaxFactor) {
     mLastSleep = (uint32_t)mMinSleep ;
     mLastWork = time(NULL) ;
 }
 
-void RsQueueThread::threadTick()
-{
+void RsQueueThread::threadTick() {
     bool doneWork = false;
-    while(workQueued() && doWork())
-    {
+    while(workQueued() && doWork()) {
         doneWork = true;
     }
     time_t now = time(NULL);
-    if (doneWork)
-    {
+    if (doneWork) {
         mLastWork = now;
         mLastSleep = (uint32_t) (mMinSleep + (mLastSleep - mMinSleep) / 2.0);
 #ifdef DEBUG_TICKING
@@ -255,8 +239,7 @@ void RsQueueThread::threadTick()
 
         mLastSleep += (uint32_t)
                         ((mMaxSleep-mMinSleep) * (frac + 0.05));
-        if (mLastSleep > mMaxSleep)
-        {
+        if (mLastSleep > mMaxSleep) {
             mLastSleep = mMaxSleep;
         }
 #ifdef DEBUG_TICKING
@@ -264,20 +247,17 @@ void RsQueueThread::threadTick()
 #endif
     }
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(mLastSleep));
+	std::this_thread::sleep_for (std::chrono::milliseconds(mLastSleep));
 }
 
-void RsMutex::unlock()
-{
+void RsMutex::unlock() {
 	_thread_id = 0;
 	pthread_mutex_unlock(&realMutex);
 }
 
-void RsMutex::lock()
-{
+void RsMutex::lock() {
 	int err = pthread_mutex_lock(&realMutex);
-	if( err != 0)
-	{
+	if ( err != 0) {
 		RsErr() << __PRETTY_FUNCTION__ << "pthread_mutex_lock returned: "
 		        << rsErrnoName(err)
 #ifdef RSMUTEX_DEBUG
@@ -296,8 +276,7 @@ void RsMutex::lock()
 }
 
 #ifdef RSMUTEX_DEBUG
-double RsStackMutex::getCurrentTS()
-{
+double RsStackMutex::getCurrentTS() {
 
 #ifndef WINDOWS_SYS
         struct timeval cts_tmp;
@@ -313,10 +292,8 @@ double RsStackMutex::getCurrentTS()
 #endif
 
 
-RsThread::~RsThread()
-{
-	if(!mHasStopped)
-	{
+RsThread::~RsThread() {
+	if (!mHasStopped) {
 		RsErr() << __PRETTY_FUNCTION__ << " deleting thread: " << mLastTid
 		        << " " << mFullName << " that is still "
 		        << "running! Something seems very wrong here and RetroShare is "

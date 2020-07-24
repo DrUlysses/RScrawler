@@ -27,8 +27,7 @@
 #include "bencode.h"
 #include <stdio.h>
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
 	char msg[100];
 
@@ -57,8 +56,7 @@ int main(int argc, char **argv)
 
 	be_node *n = be_decoden(msg, 16);
 
-	if (n)
-	{
+	if (n) {
 		be_dump(n);
 		be_free(n);
 	}
@@ -92,8 +90,7 @@ int main(int argc, char **argv)
 
 	n = be_decoden(msg, 14);
 
-	if (n)
-	{
+	if (n) {
 		be_dump(n);
 		be_free(n);
 	}
@@ -166,8 +163,7 @@ int main(int argc, char **argv)
 
 	n = be_decoden(msg, 58);
 
-	if (n)
-	{
+	if (n) {
 		be_dump(n);
 		be_free(n);
 	}
