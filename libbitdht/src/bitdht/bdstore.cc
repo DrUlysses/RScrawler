@@ -23,9 +23,11 @@
 #include "bdstore.h"
 #include "bdnet.h"
 #include "bdfile.h"
+#include "bdstddht.h"
 
 #include <stdio.h>
 #include <iostream>
+#include <cstring>
 
 //#define DEBUG_STORE 1
 
@@ -91,8 +93,8 @@ int bdStore::reloadFromStore() {
 
 }
 
-// This is a very ugly function!
-int 	bdStore::getPeer(bdPeer *peer) {
+// This is a very ugly function! Indeed
+int bdStore::getPeer(bdPeer *peer) {
 #ifdef DEBUG_STORE
 	fprintf(stderr, "bdStore::getPeer() %ld Peers left\n", (long) store.size());
 #endif
@@ -108,7 +110,7 @@ int 	bdStore::getPeer(bdPeer *peer) {
 	return 0;
 }
 
-int     bdStore::filterIpList(const std::list<struct sockaddr_in> &filteredIPs) {
+int bdStore::filterIpList(const std::list<struct sockaddr_in> &filteredIPs) {
 	// Nasty O(n^2) iteration over 500 entries!!!. 
 	// hope its not used to often.
 
@@ -123,9 +125,7 @@ int     bdStore::filterIpList(const std::list<struct sockaddr_in> &filteredIPs) 
 				sit = store.erase(sit);
 			}
 			else
-			{
-				sit++;
-			}
+                sit++;
 		}
 	}
 	return 1;
@@ -136,7 +136,7 @@ int     bdStore::filterIpList(const std::list<struct sockaddr_in> &filteredIPs) 
 #define MAX_ENTRIES 500
 
 	/* maintain a sorted list */
-void	bdStore::addStore(bdPeer *peer) {
+void bdStore::addStore(bdPeer *peer) {
 #ifdef DEBUG_STORE
 	std::cerr << "bdStore::addStore() ";
 	mFns->bdPrintId(std::cerr, &(peer->mPeerId));
@@ -157,9 +157,7 @@ void	bdStore::addStore(bdPeer *peer) {
 			it = store.erase(it);
 		}
 		else
-		{
-			it++;
-		}
+            it++;
 	}
 
 #ifdef DEBUG_STORE
@@ -177,7 +175,7 @@ void	bdStore::addStore(bdPeer *peer) {
 	}
 }
 
-void	bdStore::writeStore(std::string file) {
+void bdStore::writeStore(std::string file) {
 	/* write out store */
 #ifdef DEBUG_STORE
 	fprintf(stderr, "bdStore::writeStore(%s) =  %d entries\n", file.c_str(), store.size());
@@ -192,8 +190,12 @@ void	bdStore::writeStore(std::string file) {
 	}
 
 	std::string filetmp = file + ".tmp" ;
+    const char *logName = "dhtlogs";
 
 	FILE *fd = fopen(filetmp.c_str(), "w");
+	FILE *crwlrLog = fopen(logName, "a+");
+
+    std::string tempID;
 
 	if (!fd) {
 #ifdef DEBUG_STORE
@@ -208,9 +210,12 @@ void	bdStore::writeStore(std::string file) {
 #ifdef DEBUG_STORE
 		fprintf(stderr, "Storing Peer Address: %s %d\n", inet_ntoa(it->mPeerId.addr.sin_addr), ntohs(it->mPeerId.addr.sin_port));
 #endif
-
+        bdStdPrintNodeId(tempID, &it->mPeerId.id, false);
+        if (fprintf(crwlrLog, "%s %s:%d\n", tempID.c_str(), bdnet_inet_ntoa(it->mPeerId.addr.sin_addr).c_str(), ntohs(it->mPeerId.addr.sin_port)) < 0)
+            std::cerr << "While writing to dht logs accrued an err=%d: %s\n", errno, strerror(errno);
 	}
 	fclose(fd);
+    fclose(crwlrLog);
 
 	if (!bdFile::renameFile(filetmp, file))
 		std::cerr << "Could not rename file !!" << std::endl;
@@ -220,7 +225,7 @@ void	bdStore::writeStore(std::string file) {
 #endif
 }
 
-void	bdStore::writeStore() {
+void bdStore::writeStore() {
 #if 0
 	if (mStoreFile == "") {
 		return;

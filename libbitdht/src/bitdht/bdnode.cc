@@ -72,8 +72,12 @@ bdNode::bdNode(bdNodeId *ownId, std::string dhtVersion, const std::string& bootf
           mFilterPeers(filterfile,ownId, BITDHT_FILTER_REASON_OWNID, fns, manager),
           mQueryMgr(NULL),
           mConnMgr(NULL),
-          mOwnId(*ownId), mDhtVersion(dhtVersion), mStore(bootfile, fns), mFns(fns),
-          mFriendList(ownId), mHistory(HISTORY_PERIOD) {
+          mOwnId(*ownId),
+          mDhtVersion(dhtVersion),
+          mStore(bootfile, fns),
+          mFns(fns),
+          mFriendList(ownId),
+          mHistory(HISTORY_PERIOD) {
 	init(); /* (uses this pointers) stuff it - do it here! */
 }
 
@@ -201,9 +205,8 @@ void bdNode::restartNode() {
 
 	/* setup */
 	bdPeer peer;
-	while(mStore.getPeer(&peer)) {
+	while(mStore.getPeer(&peer))
 		addPotentialPeer(&(peer.mPeerId), NULL);
-	}
 }
 
 
@@ -482,9 +485,9 @@ void bdNode::checkPotentialPeer(bdId *id, bdId *src) {
 				std::cerr << std::endl;
 
 				// Stores in queue for later callback and desemination around the network.
-	        		mBadPeerQueue.queuePeer(id, 0);
+				mBadPeerQueue.queuePeer(id, 0);
 
-                    mFilterPeers.addPeerToFilter(id->addr, 0);
+				mFilterPeers.addPeerToFilter(id->addr, 0);
 
 				std::list<struct sockaddr_in> filteredIPs;
                 mFilterPeers.filteredIPs(filteredIPs);
@@ -2230,11 +2233,7 @@ uint32_t bdNode::registerIncomingMsg(bdId *id, bdToken *transId, uint32_t msgTyp
 	return 0;
 }
 
-void bdNode::cleanupTransIdRegister() {
-	return;
-}
-
-
+void bdNode::cleanupTransIdRegister() {}
 
 /*************** Internal Msg Storage *****************/
 

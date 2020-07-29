@@ -32,14 +32,14 @@ public:
 
     bdStore(std::string file, bdDhtFunctions *fns);
 
-    int 	reloadFromStore(); /* for restarts */
+    int reloadFromStore(); /* for restarts */
     int	filterIpList(const std::list<struct sockaddr_in> &filteredIPs);
-    int 	clear();
+    int clear();
 
-    int 	getPeer(bdPeer *peer);
-    void	addStore(bdPeer *peer);
-    void	writeStore(std::string file);
-    void	writeStore();
+    int getPeer(bdPeer *peer);
+    void addStore(bdPeer *peer);
+    void writeStore(std::string file);
+    void writeStore();
 
 protected:
     std::string mStoreFile;

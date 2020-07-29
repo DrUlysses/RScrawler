@@ -73,8 +73,8 @@ bdNodeManager::bdNodeManager(bdNodeId *id, std::string dhtVersion, std::string b
 	mSearchingDone = false;
 	mSearchTS = 0;
 
-        mNetworkSize = 0;
-        mBdNetworkSize = 0;
+	mNetworkSize = 0;
+	mBdNetworkSize = 0;
 
 	std::string bfilter = "edff727f3a49f55c0504ad99d4282f7a26b3f69b59ebc6ca496879c6805a0aa567dffb755f17fdfd44dd24180bf2b61ebfbe68e9a53e79d7893f002140882daf7efbfed66f36eb170064208286040001fbefbbbbef1fa7fdf4a21128d050a208cd3a529a7efdc672c8255130e022b134bc6c77dfbf455d054349c575774d427b";
 
@@ -148,14 +148,11 @@ uint32_t bdNodeManager::setDhtMode(uint32_t dhtFlags) {
 
 
 bool bdNodeManager::setAttachMode(bool on) {
-	if (on) {
-        	setNodeOptions(BITDHT_OPTIONS_MAINTAIN_UNSTABLE_PORT);
-	}
+	if (on)
+        setNodeOptions(BITDHT_OPTIONS_MAINTAIN_UNSTABLE_PORT);
 	else
-	{
-        	setNodeOptions(0);
-	}
-        return on;
+        setNodeOptions(0);
+    return on;
 }
 
         /* Friend Tracking */
@@ -254,7 +251,6 @@ void bdNodeManager::removeFindNode(bdNodeId *id) {
 }
 
 void bdNodeManager::iteration() {
-
 	time_t now = time(NULL);
 	time_t modeAge = now - mModeTS;
 	switch(mMode) {

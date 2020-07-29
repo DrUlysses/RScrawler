@@ -76,6 +76,7 @@ void Logger::iteration() {
     while (std::getline(logsFile, line)) {
         // I HATE C++ STRINGS
         std::string accum;
+        size_t pos;
         short counter = 0;
         for (short i = 0; i < line.length(); i++) {
             if (line[i] != ' ' and i != line.length() - 1)
@@ -83,12 +84,18 @@ void Logger::iteration() {
             else {
                 switch (counter) {
                     case 0:
+                        if (accum.length() != 40) {
+                            accum = "";
+                            break;
+                        }
                         memcpy(id.data, accum.c_str(), sizeof(id.data));
                         counter++;
                         accum = "";
                         break;
                     case 1:
-                        accum.erase(accum.find(':'), 8);
+                        pos = accum.find(':');
+                        if (pos != std::string::npos)
+                            accum.erase(pos, 6);
                         addr_str = accum;
                         counter++;
                         accum = "";
@@ -104,6 +111,9 @@ void Logger::iteration() {
                         counter++;
                         accum = "";
                         break;
+                    default:
+                        accum = "";
+                        break;
                 }
             }
         }
@@ -111,7 +121,7 @@ void Logger::iteration() {
         char addr_c_str[addr_str.length()];
         memcpy(addr_c_str, addr_str.c_str(), sizeof(addr_str));
         if (bdnet_inet_aton(addr_c_str, &(addr.sin_addr)) && this != NULL) {
-            bdFilteredPeer tempPeer;
+            bdFilteredPeer tempPeer{};
             tempPeer.mAddr = addr;
             tempPeer.mFilterFlags = status;
             tempPeer.mLastSeen = timeStamp;
@@ -145,11 +155,15 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
                 switch (counter) {
                     case 0:
                         bdStdLoadNodeId(&id.id, accum);
+                        if (accum.length() != 40) {
+                            accum = "";
+                            break;
+                        }
                         counter++;
                         accum = "";
                         break;
                     case 1:
-                        accum.erase(accum.find(':'), 8);
+                        accum.erase(accum.find(':'), 6);
                         addr_str = accum;
                         counter++;
                         accum = "";
@@ -157,6 +171,9 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
                     case 2:
                         memcpy(version.data, accum.c_str(), sizeof(version.data));
                         counter++;
+                        accum = "";
+                        break;
+                    default:
                         accum = "";
                         break;
                 }
@@ -177,7 +194,7 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
         return;
     }
     std::list<std::string> myIDsList;
-    while (std::getline(logsFile, line))
+    while (std::getline(myIDs, line))
         myIDsList.push_back(line);
     myIDs.close();
 

@@ -8,9 +8,7 @@
 #define SEARCH_ROUNDS_COUNT 3
 #define USED_IDS_FILENAME "my_ids"
 
-Crawler::Crawler() : crwlrMutex(true) {
-
-}
+Crawler::Crawler() : crwlrMutex(true) {}
 
 void Crawler::init() {
     bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
@@ -32,7 +30,6 @@ Crawler::~Crawler() noexcept {
     std::cerr << "Crawler object destroyed, id: ";
     bdStdPrintNodeId(std::cerr, peerId);
     std::cerr << std::endl;
-    return;
 }
 
 void Crawler::stop() {
@@ -78,7 +75,7 @@ void Crawler::iterationFirstStage() {
 }
 
 void Crawler::iterationSecondStage() {
-    if (toCheckPeerList.size() > 0) {
+    if (!toCheckPeerList.empty()) {
         time_t tempTime = time(NULL);
         std::map<bdNodeId, std::pair<std::string, time_t>> statuses = bdFindPeers(*dhtHandler, toCheckPeerList);
         std::map<bdNodeId, std::pair<std::string, time_t>>::iterator it;
