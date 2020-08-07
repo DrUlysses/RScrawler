@@ -69,15 +69,15 @@
 
 bdNode::bdNode(bdNodeId *ownId, std::string dhtVersion, const std::string& bootfile, const std::string& filterfile, bdDhtFunctions *fns, bdNodeManager *manager)
     :mNodeSpace(ownId, fns),
-          mFilterPeers(filterfile,ownId, BITDHT_FILTER_REASON_OWNID, fns, manager),
-          mQueryMgr(NULL),
-          mConnMgr(NULL),
-          mOwnId(*ownId),
-          mDhtVersion(dhtVersion),
-          mStore(bootfile, fns),
-          mFns(fns),
-          mFriendList(ownId),
-          mHistory(HISTORY_PERIOD) {
+      mFilterPeers(filterfile,ownId, BITDHT_FILTER_REASON_OWNID, fns, manager),
+      mQueryMgr(NULL),
+      mConnMgr(NULL),
+      mOwnId(*ownId),
+      mDhtVersion(dhtVersion),
+      mStore(bootfile, fns),
+      mFns(fns),
+      mFriendList(ownId),
+      mHistory(HISTORY_PERIOD) {
 	init(); /* (uses this pointers) stuff it - do it here! */
 }
 
@@ -114,7 +114,7 @@ void bdNode::setNodeOptions(uint32_t optFlags) {
 		mNodeSpace.setAttachedFlag(BITDHT_PEER_STATUS_DHT_ENGINE | BITDHT_PEER_STATUS_DHT_ENGINE_VERSION, 0);
 }
 
-#define BDNODE_HIGH_MSG_RATE	50
+#define BDNODE_HIGH_MSG_RATE 50
 #define BDNODE_MED_MSG_RATE	10
 #define BDNODE_LOW_MSG_RATE	5
 #define BDNODE_TRICKLE_MSG_RATE	3
@@ -130,7 +130,6 @@ uint32_t bdNode::setNodeDhtMode(uint32_t dhtFlags) {
 	std::cerr << std::endl;
 
 	uint32_t origFlags = mNodeDhtMode;
-
 
 	uint32_t traffic = dhtFlags &  BITDHT_MODE_TRAFFIC_MASK;
 	if (traffic) {

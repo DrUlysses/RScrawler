@@ -108,8 +108,8 @@ BitDhtHandler::BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, 
 
 	mStack = new UdpStack(local);
 
-	std::string temp; // TODO: filter file is missing, after bootstrapfile
-	mUdpBitDht = new UdpBitDht(mStack, ownId, appId, bootstrapfile, temp, stdfns);
+	std::string filerFileName = "blacklist";
+	mUdpBitDht = new UdpBitDht(mStack, ownId, appId, bootstrapfile, filerFileName, stdfns);
 	mStack->addReceiver(mUdpBitDht);
 
 	/* setup callback to here */
@@ -278,10 +278,12 @@ int BitDhtHandler::PeerCallback(const bdId *id, uint32_t status) {
 
             const char *logName = "dhtlogs";
             FILE *tempFile = fopen(logName, "a+");
+            if (!tempFile)
+                std::cerr << "Can't open dhtlogs file! err=%d: %s\n", errno, strerror(errno);
             std::string tempID;
             bdStdPrintId(tempID, id, false);
             tempID.erase(tempID.find("ip:"), 3);
-            if (fprintf(tempFile, "%s\n", tempID.c_str()) < 0)
+            if (fprintf(tempFile, "%s %lu\n", tempID.c_str(), time(NULL)) < 0)
                 std::cerr << "While writing to dht logs accrued an err=%d: %s\n", errno, strerror(errno);
             fclose(tempFile);
 
@@ -296,10 +298,12 @@ int BitDhtHandler::PeerCallback(const bdId *id, uint32_t status) {
 
             const char *logName = "dhtlogs";
             FILE *tempFile = fopen(logName, "a+");
+            if (!tempFile)
+                std::cerr << "Can't open dhtlogs file! err=%d: %s\n", errno, strerror(errno);
             std::string tempID;
             bdStdPrintId(tempID, id, false);
             tempID.erase(tempID.find("ip:"), 3);
-            if (fprintf(tempFile, "%s\n", tempID.c_str()) < 0)
+            if (fprintf(tempFile, "%s %lu\n", tempID.c_str(), time(NULL)) < 0)
                 std::cerr << "While writing to dht logs accrued an err=%d: %s\n", errno, strerror(errno);
             fclose(tempFile);
 

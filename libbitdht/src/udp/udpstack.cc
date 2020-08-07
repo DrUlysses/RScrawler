@@ -37,28 +37,28 @@
 
 
 UdpStack::UdpStack(struct sockaddr_in &local)
-	:udpLayer(NULL), laddr(local) {
+	:udpLayer(NULL),
+	 laddr(local) {
+
 	openSocket();
 	return;
 }
 
 UdpStack::UdpStack(int testmode, struct sockaddr_in &local)
-	:udpLayer(NULL), laddr(local) {
+	:udpLayer(NULL),
+	 laddr(local) {
+
 	std::cerr << "UdpStack::UdpStack() Evoked in TestMode" << std::endl;
 	if (testmode == UDP_TEST_LOSSY_LAYER) {
 		std::cerr << "UdpStack::UdpStack() Installing LossyUdpLayer" << std::endl;
 		udpLayer = new LossyUdpLayer(this, laddr, UDP_TEST_LOSSY_FRAC);
-	}
-	else if (testmode == UDP_TEST_RESTRICTED_LAYER) {
+	} else if (testmode == UDP_TEST_RESTRICTED_LAYER) {
 		std::cerr << "UdpStack::UdpStack() Installing RestrictedUdpLayer" << std::endl;
 		udpLayer = new RestrictedUdpLayer(this, laddr);
-	}
-	else if (testmode == UDP_TEST_TIMED_LAYER) {
+	} else if (testmode == UDP_TEST_TIMED_LAYER) {
 		std::cerr << "UdpStack::UdpStack() Installing TimedUdpLayer" << std::endl;
 		udpLayer = new TimedUdpLayer(this, laddr);
-	}
-	else
-	{
+	} else {
 		std::cerr << "UdpStack::UdpStack() Installing Standard UdpLayer" << std::endl;
 		// standard layer 
 		openSocket();
@@ -124,9 +124,9 @@ int  UdpStack::sendPkt(const void *data, int size, const struct sockaddr_in &to,
 	return udpLayer->sendPkt(data, size, to, ttl);
 }
 
-int     UdpStack::status(std::ostream &out) {
+int UdpStack::status(std::ostream &out) {
 	{
-	        bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
+	    bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
 	
 		out << "UdpStack::status()" << std::endl;
 		out << "localaddr: " << laddr << std::endl;
@@ -147,8 +147,7 @@ int     UdpStack::status(std::ostream &out) {
 }
 
 /* setup connections */
-int UdpStack::openSocket()	
-{
+int UdpStack::openSocket() {
 	udpLayer = new UdpLayer(this, laddr);
 	return 1;
 }
@@ -212,8 +211,7 @@ int UdpStack::removeReceiver(UdpReceiver *recv) {
 /*****************************************************************************************/
 
 UdpSubReceiver::UdpSubReceiver(UdpPublisher *pub)
-	:mPublisher(pub) 
-{ 
+	:mPublisher(pub) {
 	return; 
 }
 

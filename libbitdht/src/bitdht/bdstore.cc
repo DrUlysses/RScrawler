@@ -133,7 +133,7 @@ int bdStore::filterIpList(const std::list<struct sockaddr_in> &filteredIPs) {
 			
 		
 
-#define MAX_ENTRIES 500
+#define MAX_ENTRIES 10
 
 	/* maintain a sorted list */
 void bdStore::addStore(bdPeer *peer) {
@@ -211,7 +211,7 @@ void bdStore::writeStore(std::string file) {
 		fprintf(stderr, "Storing Peer Address: %s %d\n", inet_ntoa(it->mPeerId.addr.sin_addr), ntohs(it->mPeerId.addr.sin_port));
 #endif
         bdStdPrintNodeId(tempID, &it->mPeerId.id, false);
-        if (fprintf(crwlrLog, "%s %s:%d\n", tempID.c_str(), bdnet_inet_ntoa(it->mPeerId.addr.sin_addr).c_str(), ntohs(it->mPeerId.addr.sin_port)) < 0)
+        if (fprintf(crwlrLog, "%s %s:%d %lu\n", tempID.c_str(), bdnet_inet_ntoa(it->mPeerId.addr.sin_addr).c_str(), ntohs(it->mPeerId.addr.sin_port), time(NULL)) < 0)
             std::cerr << "While writing to dht logs accrued an err=%d: %s\n", errno, strerror(errno);
 	}
 	fclose(fd);

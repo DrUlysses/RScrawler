@@ -51,8 +51,8 @@ void Logger::run() {
             std::string tempID;
             for (std::map<bdNodeId, bdFilteredPeer>::iterator it = Logger::discoveredPeers.begin(); it != Logger::discoveredPeers.end(); it++) {
                 bdStdPrintNodeId(tempID, &it->first, false);
-                fprintf(logsFile, "%s %s %u %lu\n", tempID.c_str(), bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str(),
-                        it->second.mFilterFlags, it->second.mLastSeen);
+                fprintf(logsFile, "%s %s %lu\n", tempID.c_str(), bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str(),
+                        it->second.mLastSeen);
             }
             fclose(logsFile);
         }
@@ -86,6 +86,7 @@ void Logger::iteration() {
                     case 0:
                         if (accum.length() != 40) {
                             accum = "";
+                            counter = -10;
                             break;
                         }
                         memcpy(id.data, accum.c_str(), sizeof(id.data));
@@ -101,13 +102,20 @@ void Logger::iteration() {
                         accum = "";
                         break;
                     case 2:
-                        status = (uint32_t) std::stoul(accum);
-                        counter++;
-                        accum = "";
+                        // Won't work after some time (kinda current time dependent)
+                        if (accum[0] == '1' && accum[1] == '5' && accum[2] == '9' && accum[3] == '6') {
+                            timeStamp = (time_t) std::stoul(accum);
+                            counter++;
+                            accum = "";
+                        } else {
+                            accum = "";
+                            counter = -10;
+                            break;
+                        }
                         break;
                     case 3:
                         accum += line[i];
-                        timeStamp = (time_t) std::stoul(accum);
+                        status = (uint32_t) std::stoul(accum);
                         counter++;
                         accum = "";
                         break;
@@ -117,27 +125,40 @@ void Logger::iteration() {
                 }
             }
         }
+        // Check if read data was uncorrupted
+        if (counter > 0) {
+            char addr_c_str[addr_str.length()];
+            memcpy(addr_c_str, addr_str.c_str(), sizeof(addr_str));
+            if (bdnet_inet_aton(addr_c_str, &(addr.sin_addr)) && this != NULL) {
+                bdFilteredPeer tempPeer{};
+                tempPeer.mAddr = addr;
+                tempPeer.mFilterFlags = status;
+                tempPeer.mLastSeen = timeStamp;
 
-        char addr_c_str[addr_str.length()];
-        memcpy(addr_c_str, addr_str.c_str(), sizeof(addr_str));
-        if (bdnet_inet_aton(addr_c_str, &(addr.sin_addr)) && this != NULL) {
-            bdFilteredPeer tempPeer{};
-            tempPeer.mAddr = addr;
-            tempPeer.mFilterFlags = status;
-            tempPeer.mLastSeen = timeStamp;
-
-            Logger::discoveredPeers[id] = tempPeer;
+                Logger::discoveredPeers[id] = tempPeer;
+            }
         }
     }
     logsFile.close();
 }
 
 void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
+    // TODO: what is the purpose of this function? Clarify that
     std::string line;
     std::string addr_str;
     bdId id;
     bdToken version;
     std::map<bdId, bdToken> RSPeers;
+
+    std::ifstream myIDs(USED_IDS_FILENAME);
+    if (!myIDs) {
+        std::cerr << "Failed to open my IDs file" << std::endl;
+        return;
+    }
+    std::list<std::string> myIDsList;
+    while (std::getline(myIDs, line))
+        myIDsList.push_back(line);
+    myIDs.close();
 
     std::ifstream logsFile(RS_PEERS_FILENAME);
     if (!logsFile) {
@@ -157,6 +178,7 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
                         bdStdLoadNodeId(&id.id, accum);
                         if (accum.length() != 40) {
                             accum = "";
+                            counter = -10;
                             break;
                         }
                         counter++;
@@ -187,17 +209,6 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
     logsFile.close();
 
     //result = new std::list<bdId>[RSPeers.size()]();
-
-    std::ifstream myIDs(USED_IDS_FILENAME);
-    if (!myIDs) {
-        std::cerr << "Failed to open my IDs file" << std::endl;
-        return;
-    }
-    std::list<std::string> myIDsList;
-    while (std::getline(myIDs, line))
-        myIDsList.push_back(line);
-    myIDs.close();
-
     FILE *filtered = fopen(FILTERED_FILENAME, "a+");
     std::map<bdId, bdToken>::iterator it;
     for (it = RSPeers.begin(); it != RSPeers.end(); it++) {
@@ -205,15 +216,12 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
             result->push_back(it->first);*/
         bdStdPrintNodeId(line, &it->first.id, false);
         if (std::find(myIDsList.begin(), myIDsList.end(), line) == myIDsList.end()) {
-            fprintf(filtered, "%s %s %s\n", line.c_str(), bdnet_inet_ntoa(it->first.addr.sin_addr).c_str(),
-                    it->second.data);
-            bdFilteredPeer tempPeer;
-            tempPeer.mAddr = it->first.addr;
-            Logger::discoveredPeers[it->first.id] = tempPeer;
+            fprintf(filtered, "%s %s %lu %s\n", line.c_str(), bdnet_inet_ntoa(it->first.addr.sin_addr).c_str(),
+                    Logger::discoveredPeers[it->first.id].mLastSeen, it->second.data);
+            Logger::discoveredPeers[it->first.id].mAddr = it->first.addr;
         }
     }
     fclose(filtered);
-    return;
 }
 
 std::list<bdNodeId> Logger::getDiscoveredPeers() {

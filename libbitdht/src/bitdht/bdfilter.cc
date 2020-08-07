@@ -57,7 +57,7 @@ void bdFilter::writeBannedIpFile() {
         return;
     }
 
-    for ( std::map<uint32_t,bdFilteredPeer>::iterator it=mFiltered.begin();it!=mFiltered.end();++it) {
+    for (std::map<uint32_t,bdFilteredPeer>::iterator it=mFiltered.begin();it!=mFiltered.end();++it) {
         fprintf(fd, "%s %u %lu %lu\n", bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str(), it->second.mFilterFlags, it->second.mFilterTS, it->second.mLastSeen) ;
 #ifdef DEBUG_FILTER
         fprintf(stderr, "Storing Peer Address: %s \n", bdnet_inet_ntoa(it->second.mAddr.sin_addr).c_str()) ;
@@ -75,12 +75,12 @@ void bdFilter::writeBannedIpFile() {
 }
 
 void bdFilter::loadBannedIpFile() {
-        char line[10240];
-        char addr_str[10240];
+    char line[10240];
+    char addr_str[10240];
 
-        struct sockaddr_in addr;
-        memset(&addr, 0, sizeof(struct sockaddr_in));
-        addr.sin_family = PF_INET;
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(struct sockaddr_in));
+    addr.sin_family = PF_INET;
 
     FILE *fd = fopen(mFilename.c_str(),"r") ;
 
@@ -142,9 +142,8 @@ int bdFilter::checkPeer(const bdId *id, uint32_t mode) {
 	if (add) {
         bool isNew = addPeerToFilter(id->addr, flags);
 
-		if (isNew) {
+		if (isNew)
 			return 1;
-		}
 	}
 
 	return 0;

@@ -70,6 +70,7 @@ void firstStage(std::vector<Crawler>& crawlers, Logger& logger) {
     tempIDStorage.merge(logger.getDiscoveredPeers());
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
         crawlers[i].extractToCheckList(tempIDStorage);
+    // TODO: run second time
     // Pause crawling
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
         bdStackMutex stackMutex(crawlers[i].mMutex);
