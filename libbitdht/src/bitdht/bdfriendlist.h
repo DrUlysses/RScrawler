@@ -51,33 +51,31 @@
 
 //#define BD_FRIEND_ENTRY_MASK_KNOWN	BITDHT_PEER_STATUS_MASK_KNOWN
 
-class bdFriendEntry
-{
-	public:
+class bdFriendEntry {
+public:
 	bdFriendEntry();
 
-bool	addrKnown(struct sockaddr_in *addr);
-uint32_t getPeerFlags();
+    bool addrKnown(struct sockaddr_in *addr);
+    uint32_t getPeerFlags();
 
 	bdId mPeerId;
 	uint32_t mFlags; 
 	time_t mLastSeen;
 };
 
-class bdFriendList
-{
+class bdFriendList {
 
-	public:
-	bdFriendList(const bdNodeId *ownid);
+public:
+    bdFriendList(const bdNodeId *ownid);
 
-bool	updatePeer(const bdId *id, uint32_t flags);
-bool	removePeer(const bdNodeId *id);
+    bool updatePeer(const bdId *id, uint32_t flags);
+    bool removePeer(const bdNodeId *id);
 
-bool	findPeerEntry(const bdNodeId *id, bdFriendEntry &entry);
-bool    findPeersWithFlags(uint32_t flags, std::list<bdNodeId> &peerList);
+    bool findPeerEntry(const bdNodeId *id, bdFriendEntry &entry);
+    bool findPeersWithFlags(uint32_t flags, std::list<bdNodeId> &peerList);
 
-bool    print(std::ostream &out);
-	private:
+    bool print(std::ostream &out);
+private:
 
 	std::map<bdNodeId, bdFriendEntry> mPeers;
 };
