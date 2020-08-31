@@ -118,14 +118,6 @@ void bdSingleShotFindPeer(BitDhtHandler &dht, bdNodeId searchID, std::map<bdNode
         (status == BITDHT_QUERY_SUCCESS)) {
 
         std::string peer_ip = bdnet_inet_ntoa(resultId.addr.sin_addr);
-        //uint16_t peer_port = ntohs(resultId.addr.sin_port);
-
-        /*std::cerr << "Answer: ";
-        std::cerr << std::endl;
-        std::cerr << "\tPeer IpAddress: " << peer_ip;
-        std::cerr << std::endl;
-        std::cerr << "\tPeer Port: " << peer_port;
-        std::cerr << std::endl;*/
 
         bdQueryStatus qStatus;
         qStatus.mStatus = status;
@@ -148,12 +140,6 @@ void updateQueries(std::map<bdNodeId, bdQueryStatus> &query, BitDhtHandler &dht,
         bdStdPrintNodeId(std::cout, &(*it).first);
         status = dhtStatusToString((*it).second.mStatus);
         dht.mUdpBitDht->getDhtPeerAddress(&(*it).first, *tempAddr);
-        /*std::cout << " : " << status << std::endl;
-        std::cout << "\tfrom IP: " << *tempAddr << std::endl;
-        std::cout << "\tquery time: " << querySummary.mQueryTS << std::endl;
-        std::cout << "\tsearch time: " << querySummary.mSearchTime << std::endl;
-        std::cout << "\tretry period: " << querySummary.mQueryIdlePeerRetryPeriod << std::endl;
-        std::cout << std::endl;*/
         for (itIdsMap = querySummary.mPotentialPeers.begin(); itIdsMap != querySummary.mPotentialPeers.end(); itIdsMap++)
             toCheckList.push_back(itIdsMap->second.mPeerId.id);
         for (itIdsMap = querySummary.mClosest.begin(); itIdsMap != querySummary.mClosest.end(); itIdsMap++)

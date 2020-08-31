@@ -687,36 +687,31 @@ int beMsgGetListBdIds(be_node *n, std::list<bdId> &nodes) {
 	/* extract the string pointer, and size */
 	/* split into parts */
 
-        if (n->type != BE_STR) {
-                return 0;
-        }
+        if (n->type != BE_STR)
+            return 0;
 
 	int len = be_str_len(n);
 	int count = len / BITDHT_COMPACTNODEID_LEN;
 	for (int i = 0; i < count; i++) {
 		bdId id;
-		if (decodeCompactNodeId(&id, &(n->val.s[i*BITDHT_COMPACTNODEID_LEN]), BITDHT_COMPACTNODEID_LEN)) {
+		if (decodeCompactNodeId(&id, &(n->val.s[i*BITDHT_COMPACTNODEID_LEN]), BITDHT_COMPACTNODEID_LEN))
 			nodes.push_back(id);
-		}
 	}
-        return 1;
+    return 1;
 }
 
 int beMsgGetBdId(be_node *n, bdId &id) {
 	/* extract the string pointer, and size */
 	/* split into parts */
 
-        if (n->type != BE_STR) {
-                return 0;
-        }
+    if (n->type != BE_STR)
+        return 0;
 
 	int len = be_str_len(n);
-	if (len < BITDHT_COMPACTNODEID_LEN) {
+	if (len < BITDHT_COMPACTNODEID_LEN)
 		return 0;
-	}
-	if (decodeCompactNodeId(&id, n->val.s, BITDHT_COMPACTNODEID_LEN)) {
-        	return 1;
-	}
+	if (decodeCompactNodeId(&id, n->val.s, BITDHT_COMPACTNODEID_LEN))
+        return 1;
 	return 0;
 }
 

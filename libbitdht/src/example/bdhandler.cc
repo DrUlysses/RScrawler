@@ -158,16 +158,13 @@ bool BitDhtHandler::getActive() {
     return (mUdpBitDht->stateDht() >= BITDHT_MGR_STATE_ACTIVE);
 }
 
-
-
-
 	/* pqiNetAssistConnect - external interface functions */
 	/* add / remove peers */
 bool BitDhtHandler::FindNode(bdNodeId *peerId) {
 	BssResult res;
-        res.id.id = *peerId;
-        res.mode = BSS_SINGLE_SHOT;
-        res.status = 0;
+    res.id.id = *peerId;
+    res.mode = BSS_SINGLE_SHOT;
+    res.status = 0;
 
 	{
         bdStackMutex stack(resultsMtx); /********** MUTEX LOCKED *************/

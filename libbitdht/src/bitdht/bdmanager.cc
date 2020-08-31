@@ -237,9 +237,8 @@ void bdNodeManager::removeFindNode(bdNodeId *id) {
 #endif
 	std::map<bdNodeId, bdQueryPeer>::iterator it;	
 	it = mActivePeers.find(*id);
-	if (it == mActivePeers.end()) {
+	if (it == mActivePeers.end())
 		return;
-	}
 
 	/* cleanup any actions */
 	mQueryMgr->clearQuery(&(it->first));
@@ -307,14 +306,12 @@ void bdNodeManager::iteration() {
 					mModeTS = now;
 				}
 
-				if (modeAge > MAX_FINDSELF_TIME) 
-				{
+				if (modeAge > MAX_FINDSELF_TIME) {
 					if (nodeSpaceSize >= MIN_OP_SPACE_SIZE) {
 						mMode = BITDHT_MGR_STATE_REFRESH;
 						mModeTS = now;
 					}
-					else
-					{
+					else {
 						mMode = BITDHT_MGR_STATE_FAILED;
 						mModeTS = now;
 					}

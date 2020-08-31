@@ -10,6 +10,7 @@
 
 #define CRAWLERS_COUNT 32
 #define CRAWL_DURATION 30 // in seconds
+#define CRAWLS_COUNT 5
 #define CHECKS_COUNT 3
 #define DURATION_BETWEEN_CHECKS 30 // in seconds
 
@@ -61,16 +62,17 @@ void firstStage(std::vector<Crawler>& crawlers, Logger& logger) {
         regionStart = regionEnd + 1;
         regionEnd = i == CRAWLERS_COUNT - 2 ? 32 : regionEnd + regionLength;
     }
-    // Waiting for crawlers duty
-    sleep(CRAWL_DURATION);
-    // Sorting out of region IDs
-    std::list<bdNodeId> tempIDStorage;
-    for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
-        tempIDStorage.merge(crawlers[i].getToCheckList());
-    tempIDStorage.merge(logger.getDiscoveredPeers());
-    for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
-        crawlers[i].extractToCheckList(tempIDStorage);
-    // TODO: run second time
+    for (unsigned int i = 0; i < CRAWLS_COUNT; i++) {
+        // Waiting for crawlers duty
+        sleep(CRAWL_DURATION);
+        // Sorting out of region IDs
+        std::list<bdNodeId> tempIDStorage;
+        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
+            tempIDStorage.merge(crawlers[j].getToCheckList());
+        tempIDStorage.merge(logger.getDiscoveredPeers());
+        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
+            crawlers[j].extractToCheckList(tempIDStorage);
+    }
     // Pause crawling
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
         bdStackMutex stackMutex(crawlers[i].mMutex);

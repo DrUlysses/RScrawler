@@ -3,7 +3,7 @@
 #include <bootstrap_fn.h>
 #include "crawler.h"
 
-#define TICK_PAUSE 480 // in seconds
+#define TICK_PAUSE 5 // in seconds
 #define SEARCH_SHOTS_COUNT 5
 #define SEARCH_ROUNDS_COUNT 3
 #define USED_IDS_FILENAME "my_ids"
@@ -59,7 +59,6 @@ void Crawler::run() {
             else
                 Crawler::iterationSecondStage();
         }
-
         sleep(TICK_PAUSE);
     }
 }
