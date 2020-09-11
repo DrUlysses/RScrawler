@@ -12,6 +12,7 @@ public:
 
     virtual void run();
     virtual void stop();
+    void restart();
     void disable();
     void enable();
 
@@ -32,7 +33,7 @@ private:
     bool isActive = true;
     bdNodeId* peerId;
     bool currentStage;
-    std::string bootstrapfile = "/home/ulysses/RS_Gitlab/rs-crawler/libbitdht/src/bitdht/bdboot.txt";
+    std::string bootstrapfile = "/home/ulysses/RS/rs-crawler/libbitdht/src/bitdht/bdboot.txt";
     uint16_t port;
     std::string appId = "RS51";
     BitDhtHandler* dhtHandler;

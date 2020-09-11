@@ -93,15 +93,13 @@ int bdStore::reloadFromStore() {
 
 }
 
-// This is a very ugly function! Indeed
 int bdStore::getPeer(bdPeer *peer) {
 #ifdef DEBUG_STORE
 	fprintf(stderr, "bdStore::getPeer() %ld Peers left\n", (long) store.size());
 #endif
 
-	std::list<bdPeer>::iterator it;
-	int i = 0;
-	for (it = store.begin(); (it != store.end()) && (i < mIndex); it++, i++) ; /* empty loop */
+    std::list<bdPeer>::iterator it = store.begin();
+    std::advance(it, mIndex);
 	if (it != store.end()) {
 		*peer = *it;
 		mIndex++;
@@ -131,11 +129,9 @@ int bdStore::filterIpList(const std::list<struct sockaddr_in> &filteredIPs) {
 	return 1;
 }
 			
-		
-
 #define MAX_ENTRIES 10
 
-	/* maintain a sorted list */
+/* maintain a sorted list */
 void bdStore::addStore(bdPeer *peer) {
 #ifdef DEBUG_STORE
 	std::cerr << "bdStore::addStore() ";

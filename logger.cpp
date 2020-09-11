@@ -103,7 +103,7 @@ void Logger::iteration() {
                         break;
                     case 2:
                         // Won't work after some time (kinda current time dependent)
-                        if (accum[0] == '1' && accum[1] == '5' && accum[2] == '9' && accum[3] == '6') {
+                        if (accum[0] == '1' && accum[1] == '5' && accum[2] == '9') {
                             timeStamp = (time_t) std::stoul(accum);
                             counter++;
                             accum = "";

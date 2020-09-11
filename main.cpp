@@ -27,7 +27,6 @@ void secondStage(std::vector<Crawler>& crawlers, Logger& logger);
 int main(int argc, char **argv) {
     // Creates cr_count + 1 then destroys one. Why? I don't know (probably it needs to have some copy constructor)
     std::vector<Crawler> crawlers(CRAWLERS_COUNT);
-    std::fill(crawlers.begin(), crawlers.end(), Crawler());
 
     Logger* logger = new Logger();
 
@@ -66,10 +65,13 @@ void firstStage(std::vector<Crawler>& crawlers, Logger& logger) {
         // Waiting for crawlers duty
         sleep(CRAWL_DURATION);
         // Sorting out of region IDs
-        std::list<bdNodeId> tempIDStorage;
+        std::list<bdNodeId> tempIDStorage = logger.getDiscoveredPeers();
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
             tempIDStorage.merge(crawlers[j].getToCheckList());
         tempIDStorage.merge(logger.getDiscoveredPeers());
+
+        crawlers[i].restart();
+
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
             crawlers[j].extractToCheckList(tempIDStorage);
     }

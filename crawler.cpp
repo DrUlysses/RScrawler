@@ -38,6 +38,11 @@ void Crawler::stop() {
     dhtHandler->shutdown();
 }
 
+void Crawler::restart() {
+    bdStackMutex stackMutex(crwlrMutex);
+    dhtHandler->restart();
+}
+
 void Crawler::disable() {
     isActive = false;
 }

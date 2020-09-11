@@ -450,7 +450,6 @@ void bdNode::send_connect_msg(bdId *id, int msgtype, bdId *srcAddr, bdId *destAd
 
 void bdNode::checkPotentialPeer(bdId *id, bdId *src) {
     /* Save the peer */
-
     const char *logName = "dhtlogs";
     FILE *tempFile = fopen(logName, "a+");
     if (!tempFile)
