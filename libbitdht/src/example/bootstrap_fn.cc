@@ -37,7 +37,7 @@ void bdCheckPeersFromList(BitDhtHandler &dht, std::list<bdNodeId> &toCheckList) 
     std::map<bdNodeId, bdQueryStatus> query;
     std::list<bdNodeId>::iterator toCheckListIterator;
     for (toCheckListIterator = toCheckList.begin(); toCheckListIterator != toCheckList.end(); toCheckListIterator++) {
-        bdSingleShotFindPeer(dht, (*toCheckListIterator), query);
+        bdSingleShotFindPeer(dht, *toCheckListIterator, query);
         updateQueries(query, dht, toCheckList);
         std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
     }

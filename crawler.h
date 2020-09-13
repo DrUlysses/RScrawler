@@ -13,8 +13,7 @@ public:
     virtual void run();
     virtual void stop();
     void restart();
-    void disable();
-    void enable();
+    void enable(bool state);
 
     void setStage(bool stage);
     void setRegions(int start, int end);

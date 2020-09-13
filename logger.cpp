@@ -31,7 +31,6 @@ void Logger::stop() {
 
 void Logger::disable() {
     isActive = false;
-    bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
     sortRsPeers();
 }
 
@@ -150,78 +149,81 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
     bdToken version;
     std::map<bdId, bdToken> RSPeers;
 
-    std::ifstream myIDs(USED_IDS_FILENAME);
-    if (!myIDs) {
-        std::cerr << "Failed to open my IDs file" << std::endl;
-        return;
-    }
-    std::list<std::string> myIDsList;
-    while (std::getline(myIDs, line))
-        myIDsList.push_back(line);
-    myIDs.close();
+    {
+        bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
+        std::ifstream myIDs(USED_IDS_FILENAME);
+        if (!myIDs) {
+            std::cerr << "Failed to open my IDs file" << std::endl;
+            return;
+        }
+        std::list<std::string> myIDsList;
+        while (std::getline(myIDs, line))
+            myIDsList.push_back(line);
+        myIDs.close();
 
-    std::ifstream logsFile(RS_PEERS_FILENAME);
-    if (!logsFile) {
-        std::cerr << "Failed to open RS peers list file" << std::endl;
-        return;
-    }
-    while (std::getline(logsFile, line)) {
-        // I HATE C++ STRINGS
-        std::string accum;
-        short counter = 0;
-        for (short i = 0; i < line.length(); i++) {
-            if (line[i] != ' ' and i != line.length() - 1)
-                accum += line[i];
-            else {
-                switch (counter) {
-                    case 0:
-                        bdStdLoadNodeId(&id.id, accum);
-                        if (accum.length() != 40) {
+        std::ifstream logsFile(RS_PEERS_FILENAME);
+        if (!logsFile) {
+            std::cerr << "Failed to open RS peers list file" << std::endl;
+            return;
+        }
+        while (std::getline(logsFile, line)) {
+            // I HATE C++ STRINGS
+            std::string accum;
+            short counter = 0;
+            for (short i = 0; i < line.length(); i++) {
+                if (line[i] != ' ' and i != line.length() - 1)
+                    accum += line[i];
+                else {
+                    switch (counter) {
+                        case 0:
+                            bdStdLoadNodeId(&id.id, accum);
+                            if (accum.length() != 40) {
+                                accum = "";
+                                counter = -10;
+                                break;
+                            }
+                            counter++;
                             accum = "";
-                            counter = -10;
                             break;
-                        }
-                        counter++;
-                        accum = "";
-                        break;
-                    case 1:
-                        accum.erase(accum.find(':'), 6);
-                        addr_str = accum;
-                        counter++;
-                        accum = "";
-                        break;
-                    case 2:
-                        memcpy(version.data, accum.c_str(), sizeof(version.data));
-                        counter++;
-                        accum = "";
-                        break;
-                    default:
-                        accum = "";
-                        break;
+                        case 1:
+                            accum.erase(accum.find(':'), 6);
+                            addr_str = accum;
+                            counter++;
+                            accum = "";
+                            break;
+                        case 2:
+                            memcpy(version.data, accum.c_str(), sizeof(version.data));
+                            counter++;
+                            accum = "";
+                            break;
+                        default:
+                            accum = "";
+                            break;
+                    }
                 }
             }
+            char addr_c_str[addr_str.length()];
+            memcpy(addr_c_str, addr_str.c_str(), sizeof(addr_str));
+            if (bdnet_inet_aton(addr_c_str, &(id.addr.sin_addr)))
+                RSPeers[id] = version;
         }
-        char addr_c_str[addr_str.length()];
-        memcpy(addr_c_str, addr_str.c_str(), sizeof(addr_str));
-        if (bdnet_inet_aton(addr_c_str, &(id.addr.sin_addr)))
-            RSPeers[id] = version;
-    }
-    logsFile.close();
+        logsFile.close();
 
-    //result = new std::list<bdId>[RSPeers.size()]();
-    FILE *filtered = fopen(FILTERED_FILENAME, "a+");
-    std::map<bdId, bdToken>::iterator it;
-    for (it = RSPeers.begin(); it != RSPeers.end(); it++) {
-        /*if (result != nullptr)
-            result->push_back(it->first);*/
-        bdStdPrintNodeId(line, &it->first.id, false);
-        if (std::find(myIDsList.begin(), myIDsList.end(), line) == myIDsList.end()) {
-            fprintf(filtered, "%s %s %lu %s\n", line.c_str(), bdnet_inet_ntoa(it->first.addr.sin_addr).c_str(),
-                    Logger::discoveredPeers[it->first.id].mLastSeen, it->second.data);
-            Logger::discoveredPeers[it->first.id].mAddr = it->first.addr;
+        //result = new std::list<bdId>[RSPeers.size()]();
+        FILE *filtered = fopen(FILTERED_FILENAME, "a+");
+        std::map<bdId, bdToken>::iterator it;
+        for (it = RSPeers.begin(); it != RSPeers.end(); it++) {
+            /*if (result != nullptr)
+                result->push_back(it->first);*/
+            bdStdPrintNodeId(line, &it->first.id, false);
+            if (std::find(myIDsList.begin(), myIDsList.end(), line) == myIDsList.end()) {
+                fprintf(filtered, "%s %s %lu %s\n", line.c_str(), bdnet_inet_ntoa(it->first.addr.sin_addr).c_str(),
+                        Logger::discoveredPeers[it->first.id].mLastSeen, it->second.data);
+                Logger::discoveredPeers[it->first.id].mAddr = it->first.addr;
+            }
         }
+        fclose(filtered);
     }
-    fclose(filtered);
 }
 
 std::list<bdNodeId> Logger::getDiscoveredPeers() {

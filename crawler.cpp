@@ -34,21 +34,25 @@ Crawler::~Crawler() noexcept {
 
 void Crawler::stop() {
     isAlive = false;
-    bdStackMutex stackMutex(crwlrMutex);
-    dhtHandler->shutdown();
+    {
+        bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+        dhtHandler->shutdown();
+    }
 }
 
 void Crawler::restart() {
-    bdStackMutex stackMutex(crwlrMutex);
-    dhtHandler->restart();
+    {
+        bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+        dhtHandler->restart();
+    }
 }
 
-void Crawler::disable() {
-    isActive = false;
-}
-
-void Crawler::enable() {
-    isActive = true;
+void Crawler::enable(bool state) {
+    isActive = state;
+    {
+        bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+        dhtHandler->enable(state);
+    }
 }
 
 void Crawler::run() {

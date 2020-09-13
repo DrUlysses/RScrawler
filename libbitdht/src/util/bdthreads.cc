@@ -81,8 +81,6 @@ pthread_t  createThread(bdThread &thread) {
 
     thread.mMutex.unlock();
 
-
-
     return tid;
 
 }
@@ -146,7 +144,6 @@ void bdThread::join() /* waits for the the mTid thread to stop */
 
     }
     mMutex.unlock();
-
 }
 
 void bdThread::stop() 

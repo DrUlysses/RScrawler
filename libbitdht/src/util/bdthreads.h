@@ -48,7 +48,7 @@ class bdMutex
 			}
 			else
 #endif
-				if ( pthread_mutex_init(&realMutex, NULL))
+				if (pthread_mutex_init(&realMutex, NULL))
 					std::cerr << "ERROR: Could not initialize mutex !" << std::endl ;
 		}
 
@@ -61,12 +61,11 @@ class bdMutex
 		pthread_mutex_t  realMutex;
 };
 
-class bdStackMutex
-{
+class bdStackMutex {
 	public:
 
 	bdStackMutex(bdMutex &mtx): mMtx(mtx) { mMtx.lock(); }
-        ~bdStackMutex() { mMtx.unlock(); }
+	~bdStackMutex() { mMtx.unlock(); }
 
 	private:
 	bdMutex &mMtx;

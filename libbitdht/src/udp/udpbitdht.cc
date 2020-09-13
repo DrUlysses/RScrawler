@@ -166,13 +166,13 @@ int UdpBitDht::getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from) {
 	return mBitDhtManager->getDhtPeerAddress(id, from);
 }
 
-int 	UdpBitDht::getDhtValue(const bdNodeId *id, std::string key, std::string &value) {
+int UdpBitDht::getDhtValue(const bdNodeId *id, std::string key, std::string &value) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->getDhtValue(id, key, value);
 }
 
-int 	UdpBitDht::getDhtBucket(const int idx, bdBucket &bucket) {
+int UdpBitDht::getDhtBucket(const int idx, bdBucket &bucket) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->getDhtBucket(idx, bucket);
@@ -180,13 +180,13 @@ int 	UdpBitDht::getDhtBucket(const int idx, bdBucket &bucket) {
 
 
 
-int 	UdpBitDht::getDhtQueries(std::map<bdNodeId, bdQueryStatus> &queries) {
+int UdpBitDht::getDhtQueries(std::map<bdNodeId, bdQueryStatus> &queries) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->getDhtQueries(queries);
 }
 
-int 	UdpBitDht::getDhtQueryStatus(const bdNodeId *id, bdQuerySummary &query) {
+int UdpBitDht::getDhtQueryStatus(const bdNodeId *id, bdQuerySummary &query) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
     return mBitDhtManager->getDhtQueryStatus(id, query);
@@ -200,16 +200,14 @@ bool UdpBitDht::getListOfBannedIps(std::list<bdFilteredPeer>& ipl) {
     return mBitDhtManager->getFilteredPeers(ipl) ;
 }
 
-
-
-        /* stats and Dht state */
-int UdpBitDht:: startDht() {
+/* stats and Dht state */
+int UdpBitDht::startDht() {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->startDht();
 }
 
-int UdpBitDht:: stopDht() {
+int UdpBitDht::stopDht() {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->stopDht();
@@ -293,10 +291,8 @@ void UdpBitDht::getDataTransferred(uint32_t &read, uint32_t &write) {
 
 void UdpBitDht::run() {
 	while(1) {
-		while(tick()) {
+		while(tick())
 			usleep(TICK_PAUSE_USEC);
-		}
-
 		{
 			bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 			mBitDhtManager->iteration();

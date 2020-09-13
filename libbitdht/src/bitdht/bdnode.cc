@@ -449,17 +449,17 @@ void bdNode::send_connect_msg(bdId *id, int msgtype, bdId *srcAddr, bdId *destAd
 
 
 void bdNode::checkPotentialPeer(bdId *id, bdId *src) {
-    /* Save the peer */
+    /* Save the peer
     const char *logName = "dhtlogs";
     FILE *tempFile = fopen(logName, "a+");
-    if (!tempFile)
-        std::cerr << "Can't open dhtlogs file! err=%d: %s\n", errno, strerror(errno);
     std::string tempID;
     bdStdPrintId(tempID, id, false);
     tempID.erase(tempID.find("ip:"), 3);
-    if (fprintf(tempFile, "%s %lu\n", tempID.c_str(), time(NULL)) < 0)
-        std::cerr << "While writing to dht logs accrued an err=%d: %s\n", errno, strerror(errno);
+    std::cout << "Found peer: " << tempID << " ver " << versionId.data << std::endl;
+    if (fprintf(tempFile, "%s %s %lu %s\n", tempID.c_str(), versionId.data, time(NULL), messageType.c_str()) < 0)
+        std::cerr << "While whiting to dhtlogs accrued an err=%d: %s\n", errno, strerror (errno);
     fclose(tempFile);
+    */
 
 	/* Check BadPeer Filters for Potential Peers too */
 
@@ -1532,23 +1532,15 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
 	/* Handle version + id */
 	//unsigned char tempStr[8];
     //strncpy((char*)tempStr, "BD02RS51", 8);
-	if (be_version &&
-            versionId.data[0] == 'B' &&
-            versionId.data[1] == 'D' &&
-            versionId.data[2] == '0' &&
-            versionId.data[3] == '2' &&
-            versionId.data[4] == 'R' &&
-            versionId.data[5] == 'S' &&
-            versionId.data[6] == '5' &&
-            versionId.data[7] == '1') {
-        const char *logName = "rspeers";
+	if (be_version) {
+        const char *logName = "dhtlogs";
         FILE *tempFile = fopen(logName, "a+");
         std::string tempID;
         bdStdPrintId(tempID, &srcId, false);
         tempID.erase(tempID.find("ip:"), 3);
-        std::cout << "Found RS peer: " << tempID << " ver " << versionId.data << std::endl;
+        std::cout << "Found peer: " << tempID << " ver " << versionId.data << std::endl;
         if (fprintf(tempFile, "%s %s %lu %s\n", tempID.c_str(), versionId.data, time(NULL), messageType.c_str()) < 0)
-            std::cerr << "While whiting to rs peers logs accrued an err=%d: %s\n", errno, strerror (errno);
+            std::cerr << "While whiting to dhtlogs accrued an err=%d: %s\n", errno, strerror (errno);
         fclose(tempFile);
 	}
 	    //add_RS_peer(srcId, versionId);

@@ -9,8 +9,8 @@
 #include "crawler.h"
 
 #define CRAWLERS_COUNT 32
-#define CRAWL_DURATION 30 // in seconds
-#define CRAWLS_COUNT 5
+#define CRAWL_DURATION 10 // in seconds
+#define CRAWLS_COUNT 2
 #define CHECKS_COUNT 3
 #define DURATION_BETWEEN_CHECKS 30 // in seconds
 
@@ -77,8 +77,8 @@ void firstStage(std::vector<Crawler>& crawlers, Logger& logger) {
     }
     // Pause crawling
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
-        bdStackMutex stackMutex(crawlers[i].mMutex);
-        crawlers[i].disable();
+        crawlers[i].enable(false);
+        crawlers[i].stop();
     }
     logger.disable();
 }
@@ -88,7 +88,7 @@ void secondStage(std::vector<Crawler>& crawlers, Logger& logger) {
 
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
         crawlers[i].setStage(1);
-        crawlers[i].enable();
+        crawlers[i].enable(true);
     }
     // Sorting out of region IDs
     for (unsigned int i = 0; i < CHECKS_COUNT; i++) {
