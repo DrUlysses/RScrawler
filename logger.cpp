@@ -11,9 +11,6 @@
 #include <algorithm>
 #include <bdstddht.h>
 
-#define TICK_PAUSE	5
-#define USED_IDS_FILENAME "my_ids"
-
 std::map<bdNodeId, bdFilteredPeer> Logger::discoveredPeers = {};
 
 Logger::Logger() : dhtMutex(true) {

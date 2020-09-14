@@ -10,6 +10,8 @@
 #define DHT_FILENAME "foundDHTs"
 #define RS_PEERS_FILENAME "rspeers"
 #define FILTERED_FILENAME "filtered"
+#define TICK_PAUSE	5
+#define USED_IDS_FILENAME "my_ids"
 
 class Logger : public bdThread {
 public:

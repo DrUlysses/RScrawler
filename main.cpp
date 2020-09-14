@@ -57,6 +57,7 @@ void firstStage(std::vector<Crawler>& crawlers, Logger& logger) {
         crawlers[i].setStage(0);
         crawlers[i].setRegions(regionStart, regionEnd);
         crawlers[i].setPort(port++);
+        crawlers[i].setCrawlsCount(CRAWLS_COUNT);
         crawlers[i].start();
         regionStart = regionEnd + 1;
         regionEnd = i == CRAWLERS_COUNT - 2 ? 32 : regionEnd + regionLength;
@@ -66,8 +67,10 @@ void firstStage(std::vector<Crawler>& crawlers, Logger& logger) {
         sleep(CRAWL_DURATION);
         // Sorting out of region IDs
         std::list<bdNodeId> tempIDStorage = logger.getDiscoveredPeers();
-        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
+        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
+            crawlers[i].setActive(false);
             tempIDStorage.merge(crawlers[j].getToCheckList());
+        }
         tempIDStorage.merge(logger.getDiscoveredPeers());
 
         crawlers[i].restart();

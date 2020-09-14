@@ -1,8 +1,12 @@
-
 #include <string>
 #include <inttypes.h>
 #include "bdhandler.h"
+#include <algorithm>
+#include <fstream>
 
+#define TICK_LENGTH 1
+#define PEER_RECONNECT_TICKS 2
+#define USED_IDS_FILENAME "my_ids"
 
 /* NOTE. At the moment only the bootstrapfile is actually used.
  * peerId is ignored (a random peerId is searched for). ip & port are not filled in either.

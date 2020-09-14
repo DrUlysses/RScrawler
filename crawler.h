@@ -4,6 +4,11 @@
 #include <util/bdthreads.h>
 #include <bdiface.h>
 
+#define TICK_PAUSE 5 // in seconds
+#define SEARCH_SHOTS_COUNT 5
+#define SEARCH_ROUNDS_COUNT 3
+#define USED_IDS_FILENAME "my_ids"
+
 class Crawler : public bdThread {
 public:
     Crawler();
@@ -14,10 +19,12 @@ public:
     virtual void stop();
     void restart();
     void enable(bool state);
+    void setActive(bool state);
 
     void setStage(bool stage);
     void setRegions(int start, int end);
     void setPort(uint16_t newPort);
+    void setCrawlsCount(unsigned int count);
     void extractToCheckList(std::list<bdNodeId> peers);
     std::list<bdNodeId> getToCheckList();
 
@@ -27,8 +34,8 @@ private:
     void iterationSecondStage();
 
     std::list<bdNodeId> toCheckPeerList;
+    unsigned int crawlsCount = 1;
     bool readyToCheck = false;
-    bool isAlive = true;
     bool isActive = true;
     bdNodeId* peerId;
     bool currentStage;

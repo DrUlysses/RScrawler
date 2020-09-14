@@ -3,10 +3,7 @@
 #include <bootstrap_fn.h>
 #include "crawler.h"
 
-#define TICK_PAUSE 5 // in seconds
-#define SEARCH_SHOTS_COUNT 5
-#define SEARCH_ROUNDS_COUNT 3
-#define USED_IDS_FILENAME "my_ids"
+
 
 Crawler::Crawler() : crwlrMutex(true) {}
 
@@ -33,7 +30,6 @@ Crawler::~Crawler() noexcept {
 }
 
 void Crawler::stop() {
-    isAlive = false;
     {
         bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
         dhtHandler->shutdown();
@@ -55,18 +51,28 @@ void Crawler::enable(bool state) {
     }
 }
 
+void Crawler::setActive(bool state) {
+    isActive = state;
+}
+
+void Crawler::setCrawlsCount(unsigned int count) {
+    crawlsCount = count;
+}
+
 void Crawler::run() {
     {
         bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
         dhtHandler = new BitDhtHandler(peerId, port, appId, bootstrapfile);
     }
-    while(isAlive) {
+    for (unsigned int i = 0; i < crawlsCount; i++) {
         if (isActive) {
-            bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
-            if (currentStage == 0)
+            if (currentStage == 0) {
+                bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
                 Crawler::iterationFirstStage();
-            else
+            } else {
+                bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
                 Crawler::iterationSecondStage();
+            }
         }
         sleep(TICK_PAUSE);
     }
