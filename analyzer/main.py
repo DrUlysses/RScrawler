@@ -17,7 +17,7 @@ def get_data(path, version=""):
             break
         data = line.split(' ')
         if data[0].count('0') == 40:
-            break
+            continue
         if len(data[0]) == 40 and data[1].count('.') == 3:
             if len(data) >= 3:
                 if len(data[2]) >= 10:
