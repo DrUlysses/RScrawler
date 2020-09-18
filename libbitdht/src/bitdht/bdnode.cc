@@ -1530,11 +1530,16 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
     //strncpy((char*)tempStr, "BD02RS51", 8);
 	if (be_version) {
         std::string tempID;
+        std::string tempVersion;
         bdStdPrintId(tempID, &srcId, false);
         tempID.erase(tempID.find("ip:"), 3);
-        std::cout << "Found peer: " << tempID << " ver " << versionId.data << " msg "  << messageType << std::endl;
-        tempID += " " + std::string(reinterpret_cast<const char *>(versionId.data)) + " " +
-                  std::to_string(time(NULL)) + " " + messageType;
+        if ((versionId.data[0] == 'l' && versionId.data[1] == 't') ||
+                (versionId.data[0] == 'L' && versionId.data[1] == 'T'))
+            tempVersion = "lt";
+        else
+            tempVersion = std::string(versionId.data, versionId.data + sizeof versionId.data / sizeof versionId.data[0]);
+        std::cout << "Found peer: " << tempID << " ver " << tempVersion << " msg "  << messageType << std::endl;
+        tempID += " " + tempVersion + " " + std::to_string(time(NULL)) + " " + messageType;
         mFoundPeers.insert(mFoundPeers.end(), tempID);
 	} else {
         std::string tempID;

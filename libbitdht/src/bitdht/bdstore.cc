@@ -213,8 +213,9 @@ void bdStore::writeStore(std::string file) {
 	fclose(fd);
     fclose(crwlrLog);
 
-	if (!bdFile::renameFile(filetmp, file))
-		std::cerr << "Could not rename file !!" << std::endl;
+    bdFile::renameFile(filetmp, file);
+	//if (!)
+		//std::cerr << "Could not rename file !!" << std::endl;
 #ifdef DEBUG_STORE
 	else
 		std::cerr << "Successfully renamed file " << filetmp << " to " << file << std::endl;

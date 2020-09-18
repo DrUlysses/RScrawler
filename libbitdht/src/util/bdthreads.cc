@@ -52,7 +52,7 @@ extern "C" void* bdthread_init(void* p) {
 }
 
 
-pthread_t  createThread(bdThread &thread) {
+pthread_t createThread(bdThread &thread) {
     pthread_t tid;
     void  *data = (void *) (&thread);
 
@@ -99,8 +99,7 @@ bdThread::bdThread() {
 #endif
 }
 
-void bdThread::join() /* waits for the the mTid thread to stop */
-{
+void bdThread::join() /* waits for the the mTid thread to stop */ {
 #ifdef DEBUG_THREADS
     	std::cerr << "bdThread::join() Called! Waiting for Thread.mTid: ";
 
@@ -146,8 +145,7 @@ void bdThread::join() /* waits for the the mTid thread to stop */
     mMutex.unlock();
 }
 
-void bdThread::stop() 
-{
+void bdThread::stop() {
 #ifdef DEBUG_THREADS
     	std::cerr << "bdThread::stop() Called!";
     	std::cerr << std::endl;

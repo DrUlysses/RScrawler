@@ -28,12 +28,10 @@
 
 /* Thread Wrappers */
 
-class bdMutex
-{
+class bdMutex {
 	public:
 
-		bdMutex(bool recursive = false) 
-		{
+		bdMutex(bool recursive = false) {
 			/* remove unused parameter warnings */
 			(void) recursive;
 
@@ -48,14 +46,14 @@ class bdMutex
 			}
 			else
 #endif
-				if (pthread_mutex_init(&realMutex, NULL))
-					std::cerr << "ERROR: Could not initialize mutex !" << std::endl ;
+            if (pthread_mutex_init(&realMutex, NULL))
+                std::cerr << "ERROR: Could not initialize mutex !" << std::endl ;
 		}
 
 		~bdMutex() { pthread_mutex_destroy(&realMutex); }
-		void	lock() { pthread_mutex_lock(&realMutex); }
-		void	unlock() { pthread_mutex_unlock(&realMutex); }
-		bool	trylock() { return (0 == pthread_mutex_trylock(&realMutex)); }
+		void lock() { pthread_mutex_lock(&realMutex); }
+		void unlock() { pthread_mutex_unlock(&realMutex); }
+		bool trylock() { return (0 == pthread_mutex_trylock(&realMutex)); }
 
 	private:
 		pthread_mutex_t  realMutex;
@@ -74,11 +72,10 @@ class bdStackMutex {
 class bdThread;
 
 /* to create a thread! */
-pthread_t  createThread(bdThread &thread);
+pthread_t createThread(bdThread &thread);
 
-class bdThread
-{
-	public:
+class bdThread {
+public:
 	bdThread();
 	virtual ~bdThread() { return; }
 

@@ -66,8 +66,9 @@ void bdFilter::writeBannedIpFile() {
     }
     fclose(fd);
 
-    if (!bdFile::renameFile(filetmp, mFilename))
-        std::cerr << "Could not rename file !!" << std::endl;
+    bdFile::renameFile(filetmp, mFilename);
+    //if (!)
+        //std::cerr << "Could not rename file !!" << std::endl;
 #ifdef DEBUG_FILTER
     else
         std::cerr << "Successfully renamed file " << filetmp << " to " << mFilename << std::endl;

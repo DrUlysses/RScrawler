@@ -132,8 +132,7 @@ BitDhtHandler::BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, 
 
 /* pqiNetAssist - external interface functions */
 void BitDhtHandler::enable(bool on) {
-    std::cerr << "p3BitDht::enable(" << on << ")";
-    std::cerr << std::endl;
+    std::cerr << "p3BitDht::enable(" << on << ")" << std::endl;
     if (on)
         mUdpBitDht->startDht();
     else

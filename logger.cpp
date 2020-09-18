@@ -60,6 +60,11 @@ void Logger::iteration() {
         return;
     }
     while (std::getline(logsFile, line)) {
+        version = "";
+        addr_str = "";
+        addr = {};
+        id = {};
+        timeStamp = 0;
         if (line.empty())
             continue;
         // I HATE C++ STRINGS
@@ -97,7 +102,7 @@ void Logger::iteration() {
                         break;
                     case 3:
                         // Won't work after some time (kinda current time dependent)
-                        if (accum[0] == '1' && accum[1] == '6') {
+                        if (accum.length() == 10) {
                             timeStamp = (time_t) std::stoul(accum);
                             counter++;
                             accum = "";
@@ -194,7 +199,7 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
                             break;
                         case 3:
                             // Won't work after some time (kinda current time dependent)
-                            if (accum[0] == '1' && accum[1] == '6') {
+                            if (accum.length() == 10) {
                                 timeStamp = (time_t) std::stoul(accum);
                                 counter++;
                                 accum = "";

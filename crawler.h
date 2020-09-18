@@ -21,6 +21,7 @@ public:
     void start();
     void enable(bool state);
     void setActive(bool state);
+    bool getActive();
 
     void setStage(bool stage);
     void setRegions(int start, int end);

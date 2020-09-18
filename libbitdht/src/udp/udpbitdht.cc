@@ -76,8 +76,7 @@ UdpBitDht::UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string appVersion, st
 }
 
 
-UdpBitDht::~UdpBitDht() 
-{ 
+UdpBitDht::~UdpBitDht() {
 	return; 
 }
 
@@ -329,9 +328,8 @@ int UdpBitDht::tick() {
 		size = BITDHT_MAX_PKTSIZE; // reset msg size!
 	}
 
-	if (i == MAX_MSG_PER_TICK) {
+	if (i == MAX_MSG_PER_TICK)
 		return 1; /* keep on ticking */
-	}
 	return 0;
 }
 

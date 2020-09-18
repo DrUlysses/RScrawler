@@ -27,25 +27,22 @@
 #include <iostream>
 #include <inttypes.h>
 
-class bdToken
-{
-	public:
+class bdToken {
+public:
 	bdToken() :len(0) { return; }
 	uint32_t len;
 	unsigned char data[BITDHT_TOKEN_MAX_LEN];
 };
 
-class bdCompactIds
-{
-	public:
+class bdCompactIds {
+public:
 	bdCompactIds() :len(0) { return; }
 	uint32_t len;
 	unsigned char data[BITDHT_TOKEN_MAX_LEN];
 };
 
-class bdVersion
-{
-	public:
+class bdVersion {
+public:
 	bdVersion() :len(0) { return; }
 	uint32_t len;
 	unsigned char data[BITDHT_TOKEN_MAX_LEN];

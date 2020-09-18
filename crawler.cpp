@@ -29,17 +29,21 @@ Crawler::~Crawler() noexcept {
 }
 
 void Crawler::stop() {
+    isActive = false;
     {
         bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+        dhtHandler->enable(false);
         dhtHandler->shutdown();
     }
 }
 
 void Crawler::start() {
-    bdThread::start();
+    isActive = true;
     {
         bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
         dhtHandler->start();
+        if (dhtHandler != nullptr)
+            dhtHandler->enable(true);
     }
 }
 
@@ -62,6 +66,10 @@ void Crawler::setActive(bool state) {
     isActive = state;
 }
 
+bool Crawler::getActive() {
+    return isActive && dhtHandler->getEnabled();
+}
+
 void Crawler::setCrawlsCount(unsigned int count) {
     crawlsCount = count;
 }
@@ -73,15 +81,12 @@ void Crawler::run() {
     }
     for (unsigned int i = 0; i < crawlsCount; i++) {
         if (isActive) {
-            if (currentStage == 0) {
-                bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+            bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+            if (currentStage == 0)
                 Crawler::iterationFirstStage();
-                writeLogs();
-            } else {
-                bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+            else
                 Crawler::iterationSecondStage();
-                writeLogs();
-            }
+            writeLogs();
         }
         sleep(TICK_PAUSE);
     }

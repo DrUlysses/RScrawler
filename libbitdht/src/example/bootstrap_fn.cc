@@ -4,6 +4,11 @@
 #include "bootstrap_fn.h"
 
 void bdSingleSourceFindPeers(BitDhtHandler &dht, short shotsCount, short searchRounds, int regionStart, int regionEnd, std::list<bdNodeId>& toCheckList) {
+    if (!dht.getEnabled()) {
+        std::cerr << "DhtHandler is disabled, exiting bdSingleSourceFindPeers" << std::endl;
+        return;
+    }
+
     std::map<bdNodeId, bdQueryStatus> query;
 
     bdNodeId searchId;
@@ -26,11 +31,18 @@ void bdSingleSourceFindPeers(BitDhtHandler &dht, short shotsCount, short searchR
 }
 
 void bdCheckPeersFromList(BitDhtHandler &dht, std::list<bdNodeId> &toCheckList) {
+    if (!dht.getEnabled()) {
+        std::cerr << "DhtHandler is disabled, exiting bdCheckPeersFromList" << std::endl;
+        return;
+    }
+
     std::map<bdNodeId, bdQueryStatus> query;
     std::list<bdNodeId>::iterator toCheckListIterator;
     for (toCheckListIterator = toCheckList.begin(); toCheckListIterator != toCheckList.end(); toCheckListIterator++) {
-        if (!dht.getActive() || !dht.getEnabled())
+        if (!dht.getActive() || !dht.getEnabled()) {
+            std::cerr << "DhtHandler is disabled, exiting bdCheckPeersFromList" << std::endl;
             return;
+        }
         bdSingleShotFindPeer(dht, *toCheckListIterator, query);
         std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
     }
@@ -38,14 +50,26 @@ void bdCheckPeersFromList(BitDhtHandler &dht, std::list<bdNodeId> &toCheckList) 
 
 std::map<bdNodeId, std::pair<std::string, time_t>> bdFindPeers(BitDhtHandler &dht, std::list<bdNodeId> peers) {
     std::map<bdNodeId, std::pair<std::string, time_t>> result;
+
     std::list<bdNodeId>::iterator peersIt;
-    for (peersIt = peers.begin(); peersIt != peers.end(); peersIt++)
+    for (peersIt = peers.begin(); peersIt != peers.end(); peersIt++) {
+        if (!dht.getEnabled()) {
+            std::cerr << "DhtHandler is disabled, exiting bdFindPeers" << std::endl;
+            return result;
+        }
         result[*peersIt] = bdSingleShotFindStatus(dht, *peersIt);
+    }
     return result;
 }
 
 std::pair<std::string, time_t> bdSingleShotFindStatus(BitDhtHandler &dht, bdNodeId searchID) {
     std::pair<std::string, time_t> result;
+
+    if (!dht.getEnabled()) {
+        std::cerr << "DhtHandler is disabled, exiting bdSingleShotFindStatus" << std::endl;
+        return result;
+    }
+
     std::cerr << "bssdht: searching for Id: ";
     bdStdPrintNodeId(std::cerr, &searchID);
     std::cerr << std::endl;
@@ -77,6 +101,11 @@ std::pair<std::string, time_t> bdSingleShotFindStatus(BitDhtHandler &dht, bdNode
 }
 
 void bdSingleShotFindPeer(BitDhtHandler &dht, bdNodeId searchID, std::map<bdNodeId, bdQueryStatus> &query) {
+    if (!dht.getEnabled()) {
+        std::cerr << "DhtHandler is disabled, exiting bdSingleShotFindPeer" << std::endl;
+        return;
+    }
+
     std::cerr << "bssdht: searching for Id: ";
     bdStdPrintNodeId(std::cerr, &searchID);
     std::cerr << std::endl;
