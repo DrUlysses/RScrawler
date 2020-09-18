@@ -38,8 +38,7 @@
 class BitDhtIntCallback;
 
 
-class BssResult
-{
+class BssResult {
     public:
 	bdId id;
     uint32_t mode;		    // single shot
@@ -58,6 +57,7 @@ public:
     void enable(bool on);
     void shutdown(); /* blocking call */
     void restart();
+    void start();
 
     bool getEnabled();
     bool getActive();
@@ -70,6 +70,8 @@ public:
     virtual int ValueCallback(const bdNodeId *id, std::string key, uint32_t status);
 
     bool SearchResult(bdId *id, uint32_t &status);
+
+    std::vector<std::string> getFoundPeers();
 
     UdpBitDht *mUdpBitDht;
 

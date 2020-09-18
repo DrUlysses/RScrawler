@@ -85,8 +85,6 @@ int bitdht_create_ping_msg(bdToken *tid, bdNodeId *id, bdToken *vid, char *msg, 
 	be_free(dict);
 
 	return blen;
-	
-
 }
 
 
@@ -398,7 +396,6 @@ int bitdht_announce_peers_msg(bdToken *tid, bdNodeId *id, bdNodeId *info_hash, u
 	be_free(dict);
 
 	return blen;
-
 }
 
 

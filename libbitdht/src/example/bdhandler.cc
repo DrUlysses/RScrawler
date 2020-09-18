@@ -130,7 +130,7 @@ BitDhtHandler::BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, 
 	mUdpBitDht->startDht();
 }
 
-	/* pqiNetAssist - external interface functions */
+/* pqiNetAssist - external interface functions */
 void BitDhtHandler::enable(bool on) {
     std::cerr << "p3BitDht::enable(" << on << ")";
     std::cerr << std::endl;
@@ -142,6 +142,11 @@ void BitDhtHandler::enable(bool on) {
 	
 void BitDhtHandler::shutdown() /* blocking call */ {
     mUdpBitDht->stopDht();
+}
+
+void BitDhtHandler::start() /* blocking call */ {
+	if (this != nullptr)
+		mUdpBitDht->startDht();
 }
 
 
@@ -156,6 +161,10 @@ bool BitDhtHandler::getEnabled() {
 
 bool BitDhtHandler::getActive() {
     return (mUdpBitDht->stateDht() >= BITDHT_MGR_STATE_ACTIVE);
+}
+
+std::vector<std::string> BitDhtHandler::getFoundPeers() {
+    return mUdpBitDht->getFoundPeers();
 }
 
 	/* pqiNetAssistConnect - external interface functions */

@@ -2,3 +2,6 @@
 /libretroshare/
 
 .idea/
+/analyzer/.idea
+
+analyzer/__pycache__/

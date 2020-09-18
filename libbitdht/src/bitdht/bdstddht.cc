@@ -67,6 +67,14 @@ void bdStdZeroNodeId(bdNodeId *id) {
 	return;
 }
 
+bool bdStdIsZeroNodeId(bdNodeId *id) {
+    uint32_t *a_data = (uint32_t *) id->data;
+    for (int i = 0; i < BITDHT_KEY_INTLEN; i++)
+        if (a_data[i] != 0)
+            return false;
+    return true;
+}
+
 // Ignore differences in port....
 // must be careful which one we accept after this.
 // can could end-up with the wrong port.

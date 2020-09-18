@@ -415,7 +415,6 @@ void bdNode::send_ping(bdId *id) {
 	msgout_ping(id, &transId);
 }
 
-
 void bdNode::send_query(bdId *id, bdNodeId *targetNodeId, bool localnet) {
 	/* push out query */
 	bdToken transId;
@@ -432,7 +431,6 @@ void bdNode::send_query(bdId *id, bdNodeId *targetNodeId, bool localnet) {
 #endif
 }
 
-
 void bdNode::send_connect_msg(bdId *id, int msgtype, bdId *srcAddr, bdId *destAddr, int mode, int param, int status) {
 	/* push out query */
 	bdToken transId;
@@ -447,19 +445,15 @@ void bdNode::send_connect_msg(bdId *id, int msgtype, bdId *srcAddr, bdId *destAd
 #endif
 }
 
-
 void bdNode::checkPotentialPeer(bdId *id, bdId *src) {
-    /* Save the peer
-    const char *logName = "dhtlogs";
-    FILE *tempFile = fopen(logName, "a+");
+    /* Save the peer */
     std::string tempID;
     bdStdPrintId(tempID, id, false);
     tempID.erase(tempID.find("ip:"), 3);
-    std::cout << "Found peer: " << tempID << " ver " << versionId.data << std::endl;
-    if (fprintf(tempFile, "%s %s %lu %s\n", tempID.c_str(), versionId.data, time(NULL), messageType.c_str()) < 0)
-        std::cerr << "While whiting to dhtlogs accrued an err=%d: %s\n", errno, strerror (errno);
-    fclose(tempFile);
-    */
+    std::cout << "Found peer: " << tempID << std::endl;
+    tempID += " " + std::to_string(time(NULL));
+    mFoundPeers.insert(mFoundPeers.end(), tempID);
+
 
 	/* Check BadPeer Filters for Potential Peers too */
 
@@ -508,7 +502,6 @@ void bdNode::checkPotentialPeer(bdId *id, bdId *src) {
 	if (src) // src can be NULL!
 		mConnMgr->addPotentialConnectionProxy(src, id); // CAUTION: Order switched!
 }
-
 
 void bdNode::addPotentialPeer(bdId *id, bdId * /*src*/) {
 	mPotentialPeers.push_back(*id);
@@ -601,6 +594,13 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags) {
 		std::cerr << std::endl;
 	}
 #endif
+}
+
+std::vector<std::string> bdNode::getFoundPeers() {
+    std::vector<std::string> res;
+    res.insert(res.end(), mFoundPeers.begin(), mFoundPeers.end());
+    mFoundPeers.clear();
+    return res;
 }
 
 /************************************ Process Remote Query *************************/
@@ -721,7 +721,7 @@ void bdNode::processRemoteQuery() {
 
 /************************************ Message Buffering ****************************/
 
-        /* interaction with outside world */
+/* interaction with outside world */
 int bdNode::outgoingMsg(struct sockaddr_in *addr, char *msg, int *len) {
 	if (mOutgoingMsgs.size() > 0) {
 		bdNodeNetMsg *bdmsg = mOutgoingMsgs.front();
@@ -734,8 +734,7 @@ int bdNode::outgoingMsg(struct sockaddr_in *addr, char *msg, int *len) {
 			//std::cerr << "bdNode::outgoingMsg space(" << *len << ") msgsize(" << bdmsg->mSize << ")";
 			//std::cerr << std::endl;
 			*len = bdmsg->mSize;
-		}
-		else {
+		} else {
 			//std::cerr << "bdNode::outgoingMsg space(" << *len << ") small - trunc from: "
  			//<< bdmsg->mSize;
 			//std::cerr << std::endl;
@@ -1029,11 +1028,8 @@ void bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr) {
 		//bdmsg->print(std::cerr);
 		mOutgoingMsgs.push_back(bdmsg);
 		//bdmsg->print(std::cerr);
-	}
-	else
+	} else
 		std::cerr << "bdNode::sendPkt() Outgoing Packet Filtered" << std::endl;
-
-	return;
 }
 
 
@@ -1287,12 +1283,12 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
 	uint32_t connStatus;
 	uint32_t connType;
 
-	be_node  *be_ConnSrcAddr = NULL;
-	be_node  *be_ConnDestAddr = NULL;
-	be_node  *be_ConnMode = NULL;
-	be_node  *be_ConnParam = NULL;
-	be_node  *be_ConnStatus = NULL;
-	be_node  *be_ConnType = NULL;
+	be_node *be_ConnSrcAddr = NULL;
+	be_node *be_ConnDestAddr = NULL;
+	be_node *be_ConnMode = NULL;
+	be_node *be_ConnParam = NULL;
+	be_node *be_ConnStatus = NULL;
+	be_node *be_ConnType = NULL;
 	if (beType == BITDHT_MSG_TYPE_CONNECT) {
         messageType = "CONNECT";
 		/* SrcAddr */
@@ -1529,25 +1525,27 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
 		}
 	}
 
-	/* Handle version + id */
+	/* Handle version + id runs from locked thread, so should be secure to write to the file */
 	//unsigned char tempStr[8];
     //strncpy((char*)tempStr, "BD02RS51", 8);
 	if (be_version) {
-        const char *logName = "dhtlogs";
-        FILE *tempFile = fopen(logName, "a+");
         std::string tempID;
         bdStdPrintId(tempID, &srcId, false);
         tempID.erase(tempID.find("ip:"), 3);
-        std::cout << "Found peer: " << tempID << " ver " << versionId.data << std::endl;
-        if (fprintf(tempFile, "%s %s %lu %s\n", tempID.c_str(), versionId.data, time(NULL), messageType.c_str()) < 0)
-            std::cerr << "While whiting to dhtlogs accrued an err=%d: %s\n", errno, strerror (errno);
-        fclose(tempFile);
+        std::cout << "Found peer: " << tempID << " ver " << versionId.data << " msg "  << messageType << std::endl;
+        tempID += " " + std::string(reinterpret_cast<const char *>(versionId.data)) + " " +
+                  std::to_string(time(NULL)) + " " + messageType;
+        mFoundPeers.insert(mFoundPeers.end(), tempID);
+	} else {
+        std::string tempID;
+        bdStdPrintId(tempID, &srcId, false);
+        tempID.erase(tempID.find("ip:"), 3);
+        std::cout << "Found peer: " << tempID << " msg "  << messageType << std::endl;
+        tempID += " " + std::to_string(time(NULL)) + " " + messageType;
+        mFoundPeers.insert(mFoundPeers.end(), tempID);
 	}
-	    //add_RS_peer(srcId, versionId);
-	    //std::cout << "Got message from IP: " << srcId.addr.sin_addr.s_addr << "\nID: " << id.data << "\nVersion: " << versionId.data << std::endl;
 
 	be_free(node);
-	return;
 }
 
 /* Input: id, token.

@@ -7,11 +7,16 @@
 #include <vector>
 
 #define LOG_FILENAME "dhtlogs"
-#define DHT_FILENAME "foundDHTs"
 #define RS_PEERS_FILENAME "rspeers"
-#define FILTERED_FILENAME "filtered"
 #define TICK_PAUSE	5
 #define USED_IDS_FILENAME "my_ids"
+
+class bdFoundPeer {
+public:
+    struct sockaddr_in mAddr;
+    std::string mVersion;
+    time_t mLastSeen;
+};
 
 class Logger : public bdThread {
 public:
@@ -31,7 +36,7 @@ private:
     bool isAlive = true;
     bool isActive = true;
     bool isSecondStage = false;
-    static std::map<bdNodeId, bdFilteredPeer> discoveredPeers;
+    static std::map<bdNodeId, bdFoundPeer> discoveredPeers;
 
     void iteration();
 };

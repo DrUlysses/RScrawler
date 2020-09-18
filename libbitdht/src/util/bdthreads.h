@@ -80,15 +80,15 @@ class bdThread
 {
 	public:
 	bdThread();
-virtual ~bdThread() { return; }
+	virtual ~bdThread() { return; }
 
-virtual void start() { createThread(*this); }
-virtual void run() = 0; /* called once the thread is started */
-virtual	void join(); /* waits for the mTid thread to stop */
-virtual	void stop(); /* calls pthread_exit() */
+	virtual void start() { createThread(*this); }
+	virtual void run() = 0; /* called once the thread is started */
+	virtual	void join(); /* waits for the mTid thread to stop */
+	virtual	void stop(); /* calls pthread_exit() */
 
 	pthread_t mTid;
-        bdMutex   mMutex;
+	bdMutex mMutex;
 };
 
 

@@ -9,10 +9,12 @@
 #include "crawler.h"
 
 #define CRAWLERS_COUNT 32
-#define CRAWL_DURATION 10 // in seconds
+#define CRAWL_DURATION 20 // in seconds
 #define CRAWLS_COUNT 2
 #define CHECKS_COUNT 3
 #define DURATION_BETWEEN_CHECKS 30 // in seconds
+#define DURATION_BETWEEN_CRAWLS 21600 // 6 hours (in seconds)
+#define LOG_FILENAME "dhtlogs"
 
 void args(char *name) {
     std::cerr << std::endl << "Dht Single Shot Searcher" << std::endl;
@@ -25,22 +27,40 @@ void firstStage(std::vector<Crawler>& crawlers, Logger& logger);
 void secondStage(std::vector<Crawler>& crawlers, Logger& logger);
 
 int main(int argc, char **argv) {
-    // Creates cr_count + 1 then destroys one. Why? I don't know (probably it needs to have some copy constructor)
+
+    // Generate up-to-date bdboot.txt
+//    system("cat libbitdht/src/bitdht/bdboot.txt | ./libbitdht/src/bitdht/bdboot_generate.sh | tee /libbitdht/src/bitdht/tmp/bdboot_generated.txt\n"
+//           "cat libbitdht/src/bitdht//tmp/bdboot_generated.txt | sort -u > libbitdht/src/bitdht/bdboot.txt");
+
     std::vector<Crawler> crawlers(CRAWLERS_COUNT);
 
     Logger* logger = new Logger();
 
-    // Find node search
-    firstStage(crawlers, *logger);
+    // One week
+    for (short i = 0; i < 7; i++) {
+        // Whole day loop
+        for (short  j = 0; j < (24 * 60 * 60) / DURATION_BETWEEN_CRAWLS; j++)
+        // Find node search
+        firstStage(crawlers, *logger);
 
-    std::cerr << "Crawls are finished";
-    std::cerr << std::endl;
+        std::cerr << "Crawls are finished" << std::endl;
 
-    // Ping-pong status and version check
-    secondStage(crawlers, *logger);
+        // Ping-pong status and version check
+        secondStage(crawlers, *logger);
 
-    std::cerr << "Watchers are finished";
-    std::cerr << std::endl;
+        std::cerr << "Watchers are finished" << std::endl;
+
+        std::cerr << "Waiting for the next crawl" << std::endl;
+
+        // Run analyzer
+        system("../analyzer/run.sh");
+
+        // Wait for the next crawl
+        sleep(DURATION_BETWEEN_CRAWLS);
+
+        // Delete old log file
+        remove(LOG_FILENAME);
+    }
 
     return 0;
 }
@@ -62,11 +82,12 @@ void firstStage(std::vector<Crawler>& crawlers, Logger& logger) {
         regionStart = regionEnd + 1;
         regionEnd = i == CRAWLERS_COUNT - 2 ? 32 : regionEnd + regionLength;
     }
+    std::list<bdNodeId> tempIDStorage;
     for (unsigned int i = 0; i < CRAWLS_COUNT; i++) {
         // Waiting for crawlers duty
         sleep(CRAWL_DURATION);
         // Sorting out of region IDs
-        std::list<bdNodeId> tempIDStorage = logger.getDiscoveredPeers();
+        tempIDStorage.merge(logger.getDiscoveredPeers());
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
             crawlers[i].setActive(false);
             tempIDStorage.merge(crawlers[j].getToCheckList());
@@ -91,18 +112,20 @@ void secondStage(std::vector<Crawler>& crawlers, Logger& logger) {
 
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
         crawlers[i].setStage(1);
+        crawlers[i].start();
         crawlers[i].enable(true);
     }
     // Sorting out of region IDs
+    std::list<bdNodeId> tempIDStorage;
     for (unsigned int i = 0; i < CHECKS_COUNT; i++) {
         logger.sortRsPeers();
         sleep(DURATION_BETWEEN_CHECKS);
-        std::list<bdNodeId> tempIDStorage;
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
             tempIDStorage.merge(crawlers[j].getToCheckList());
         tempIDStorage.merge(logger.getDiscoveredPeers());
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
             crawlers[j].extractToCheckList(tempIDStorage);
+        crawlers[i].restart();
     }
 
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {

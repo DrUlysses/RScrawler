@@ -232,9 +232,8 @@ public:
  * so we can expose the bucket entries for the gui.
  */
 
-class bdPeer
-{
-	public:
+class bdPeer {
+public:
 	bdPeer():mPeerFlags(0), mLastSendTime(0), mLastRecvTime(0), mFoundTime(0), mExtraFlags(0) { return; }
 
 	bdId   mPeerId;
@@ -246,41 +245,36 @@ class bdPeer
 	uint32_t mExtraFlags;
 };
 	
-class bdBucket
-{
-	public:
-	
+class bdBucket {
+public:
 	bdBucket();
 	/* list so we can queue properly */
 	std::list<bdPeer> entries;
 };
 
-class bdQueryStatus
-{
-        public:
-        uint32_t mStatus;
-        uint32_t mQFlags;
-        std::list<bdId> mResults;
+class bdQueryStatus {
+public:
+    uint32_t mStatus;
+    uint32_t mQFlags;
+    std::list<bdId> mResults;
 };
 
-class bdQuerySummary
-{
-        public:
+class bdQuerySummary {
+public:
+    bdNodeId mId;
+    bdMetric mLimit;
+    uint32_t mState;
+    time_t mQueryTS;
+    uint32_t mQueryFlags;
+    int32_t mSearchTime;
 
-        bdNodeId mId;
-        bdMetric mLimit;
-        uint32_t mState;
-        time_t mQueryTS;
-        uint32_t mQueryFlags;
-        int32_t mSearchTime;
+    int32_t mQueryIdlePeerRetryPeriod; // seconds between retries.
 
-        int32_t mQueryIdlePeerRetryPeriod; // seconds between retries.
-
-        // closest peers
-        std::multimap<bdMetric, bdPeer>  mClosest;
-        std::multimap<bdMetric, bdPeer>  mPotentialPeers;
-        std::list<bdPeer>  mProxiesUnknown;
-        std::list<bdPeer>  mProxiesFlagged;
+    // closest peers
+    std::multimap<bdMetric, bdPeer>  mClosest;
+    std::multimap<bdMetric, bdPeer>  mPotentialPeers;
+    std::list<bdPeer>  mProxiesUnknown;
+    std::list<bdPeer>  mProxiesFlagged;
 };
 
 

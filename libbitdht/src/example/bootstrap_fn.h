@@ -24,5 +24,4 @@ std::map<bdNodeId, std::pair<std::string, time_t>> bdFindPeers(BitDhtHandler &dh
 std::pair<std::string, time_t> bdSingleShotFindStatus(BitDhtHandler &dht, bdNodeId searchID);
 void bdCheckPeersFromList(BitDhtHandler &dht, std::list<bdNodeId>& toCheckList);
 
-void updateQueries(std::map<bdNodeId, bdQueryStatus> &query, BitDhtHandler &dht, std::list<bdNodeId> &toCheckList);
 std::string dhtStatusToString(uint32_t code);

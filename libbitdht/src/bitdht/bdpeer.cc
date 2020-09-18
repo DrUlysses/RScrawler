@@ -926,10 +926,9 @@ int     bdSpace::printDHT() {
 }
 
 
-int     bdSpace::getDhtBucket(const int idx, bdBucket &bucket) {
-	if ((idx < 0) || (idx > (int) buckets.size() - 1 )) {
+int bdSpace::getDhtBucket(const int idx, bdBucket &bucket) {
+	if ((idx < 0) || (idx > (int) buckets.size() - 1 ))
 		return 0;
-	}
 	bucket = buckets[idx];
 	return 1;
 }

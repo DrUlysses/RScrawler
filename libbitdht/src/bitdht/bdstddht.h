@@ -40,6 +40,7 @@
 void bdStdRandomNodeId(bdNodeId *id);
 void bdStdRandomIdFromRegion(bdNodeId *id, int start, int end);
 void bdStdZeroNodeId(bdNodeId *id);
+bool bdStdIsZeroNodeId(bdNodeId *id);
 
 void bdStdRandomId(bdId *id);
 int bdStdDistance(const bdNodeId *a, const bdNodeId *b, bdMetric *r);

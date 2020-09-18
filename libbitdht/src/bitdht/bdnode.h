@@ -54,38 +54,25 @@ class bdFilter;
 The node handles the i/o traffic from peers.
 It 
 
-
-
 ping, return
 peers, return
 hash store, return
 hash get, return
 
-
-
 respond queue.
 
 query queue.
 
-
-
-
-
 input -> call into recvFunction()
 output -> call back to Udp().
-
-
-
 
  *********/
 
 class bdFilteredPeer ;
 class bdNodeManager;
 
-class bdNodeNetMsg
-{
-
-	public:
+class bdNodeNetMsg {
+public:
 	bdNodeNetMsg(char *data, int size, struct sockaddr_in *addr);
 	~bdNodeNetMsg();
 
@@ -97,26 +84,23 @@ class bdNodeNetMsg
 
 };
 
-class bdNodePublisher
-{
-	public:
+class bdNodePublisher {
+public:
 	/* simplified outgoing msg functions (for the managers) */
 	virtual void send_ping(bdId *id) = 0; /* message out */
 	virtual void send_query(bdId *id, bdNodeId *targetNodeId, bool localnet) = 0; /* message out */
 	virtual void send_connect_msg(bdId *id, int msgtype, 
 				bdId *srcAddr, bdId *destAddr, int mode, int param, int status) = 0;
 
-        // internal Callback -> normally continues to callbackConnect().
-        virtual void callbackConnect(bdId *srcId, bdId *proxyId, bdId *destId,
+    // internal Callback -> normally continues to callbackConnect().
+    virtual void callbackConnect(bdId *srcId, bdId *proxyId, bdId *destId,
                                 int mode, int point, int param, int cbtype, int errcode) = 0;
 
 };
 
 
-class bdNode: public bdNodePublisher
-{
+class bdNode: public bdNodePublisher {
 public:
-
     bdNode(bdNodeId *id, std::string dhtVersion, const std::string& bootfile, const std::string& filterfile,
 		bdDhtFunctions *fns, bdNodeManager* manager);
 
@@ -135,6 +119,8 @@ public:
 	// virtual so manager can do callback.
 	// peer flags defined in bdiface.h
 	virtual void addPeer(const bdId *id, uint32_t peerflags);
+	// return log data and clear variable
+	virtual std::vector<std::string> getFoundPeers();
 
 	void printState();
 	void checkPotentialPeer(bdId *id, bdId *src);
@@ -170,7 +156,6 @@ public:
 // Below is internal Management of incoming / outgoing messages.
 
 private:
-
 	/* internal interaction with network */
     void sendPkt(char *msg, int len, struct sockaddr_in addr);
     void recvPkt(char *msg, int len, struct sockaddr_in addr);
@@ -230,7 +215,6 @@ private:
 
 	void cleanupTransIdRegister();
 
-
 	void doStats();
 
 	/********** Variables **********/
@@ -278,8 +262,7 @@ private:
 	std::list<bdNodeNetMsg *> mOutgoingMsgs;
 	std::list<bdNodeNetMsg *> mIncomingMsgs;
 
+	std::list<std::string> mFoundPeers;
 };
-
-
 
 #endif // BITDHT_NODE_H

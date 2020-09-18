@@ -16,17 +16,12 @@ void bdSingleSourceFindPeers(BitDhtHandler &dht, short shotsCount, short searchR
     }
 
     for (short i = 0; i < searchRounds; i++) {
-        dht.mUdpBitDht->getDhtQueries(query);
-        updateQueries(query, dht, toCheckList);
         std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
         if (toCheckList.size() == 0) {
             std::cout << "Retrying to find any initial peers\n";
             bdStdRandomIdFromRegion(&searchId, regionStart, regionEnd);
             bdSingleShotFindPeer(dht, searchId, query);
-            updateQueries(query, dht, toCheckList);
-            std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
         }
-
     }
 }
 
@@ -37,7 +32,6 @@ void bdCheckPeersFromList(BitDhtHandler &dht, std::list<bdNodeId> &toCheckList) 
         if (!dht.getActive() || !dht.getEnabled())
             return;
         bdSingleShotFindPeer(dht, *toCheckListIterator, query);
-        updateQueries(query, dht, toCheckList);
         std::cout << "NUMBER OF IDs TO CHECK: " << toCheckList.size() << std::endl;
     }
 }
@@ -125,41 +119,6 @@ void bdSingleShotFindPeer(BitDhtHandler &dht, bdNodeId searchID, std::map<bdNode
     } else {
         std::cerr << "Sorry, Cant be found!";
         std::cerr << std::endl;
-    }
-}
-
-void updateQueries(std::map<bdNodeId, bdQueryStatus> &query, BitDhtHandler &dht, std::list<bdNodeId> &toCheckList) {
-    std::ifstream myIDs(USED_IDS_FILENAME);
-    if (!myIDs) {
-        std::cerr << "Failed to open my IDs file" << std::endl;
-        return;
-    }
-    std::list<std::string> myIDsList;
-    std::string line;
-    while (std::getline(myIDs, line))
-        myIDsList.push_back(line);
-    myIDs.close();
-
-    std::string status;
-    auto *tempAddr = new sockaddr_in;
-    std::multimap<bdMetric, bdPeer>::iterator itIdsMap;
-    std::map<bdNodeId, bdQueryStatus>::iterator it;
-    bdQuerySummary querySummary;
-    for (it = query.begin(); it != query.end(); it++) {
-        dht.mUdpBitDht->getDhtQueryStatus(&(*it).first, querySummary);
-        status = dhtStatusToString((*it).second.mStatus);
-        dht.mUdpBitDht->getDhtPeerAddress(&(*it).first, *tempAddr);
-        for (itIdsMap = querySummary.mPotentialPeers.begin();
-             itIdsMap != querySummary.mPotentialPeers.end(); itIdsMap++) {
-            bdStdPrintNodeId(line, &itIdsMap->second.mPeerId.id, false);
-            if (std::find(myIDsList.begin(), myIDsList.end(), line) == myIDsList.end())
-                toCheckList.push_back(itIdsMap->second.mPeerId.id);
-        }
-        for (itIdsMap = querySummary.mClosest.begin(); itIdsMap != querySummary.mClosest.end(); itIdsMap++) {
-            bdStdPrintNodeId(line, &itIdsMap->second.mPeerId.id, false);
-            if (std::find(myIDsList.begin(), myIDsList.end(), line) == myIDsList.end())
-                toCheckList.push_back(itIdsMap->second.mPeerId.id);
-        }
     }
 }
 

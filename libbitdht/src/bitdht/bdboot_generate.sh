@@ -28,7 +28,7 @@ using this.
 
 Example usage:
 --------------------------------
-cat bdboot.txt | bdboot_generate.sh | tee /tmp/bdboot_generated.txt
+cat bdboot.txt | ./bdboot_generate.sh | tee /tmp/bdboot_generated.txt
 cat /tmp/bdboot_generated.txt | sort -u > bdboot.txt
 --------------------------------
 README

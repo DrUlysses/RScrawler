@@ -200,6 +200,10 @@ bool UdpBitDht::getListOfBannedIps(std::list<bdFilteredPeer>& ipl) {
     return mBitDhtManager->getFilteredPeers(ipl) ;
 }
 
+std::vector<std::string> UdpBitDht::getFoundPeers() {
+    return mBitDhtManager->getFoundPeers();
+}
+
 /* stats and Dht state */
 int UdpBitDht::startDht() {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/

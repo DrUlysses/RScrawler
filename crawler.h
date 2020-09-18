@@ -12,12 +12,13 @@
 class Crawler : public bdThread {
 public:
     Crawler();
-    void init();
     ~Crawler();
+    void init();
 
     virtual void run();
     virtual void stop();
     void restart();
+    void start();
     void enable(bool state);
     void setActive(bool state);
 
@@ -26,6 +27,7 @@ public:
     void setPort(uint16_t newPort);
     void setCrawlsCount(unsigned int count);
     void extractToCheckList(std::list<bdNodeId> peers);
+    void writeLogs();
     std::list<bdNodeId> getToCheckList();
 
 private:
