@@ -44,46 +44,43 @@ std::string printPktOffset(unsigned int offset, void *d, unsigned int size);
  * just sends and receives Udp packets.
  */
 
-class UdpReceiver
-{
-	public:
-virtual ~UdpReceiver() {}
-virtual int recvPkt(void *data, int size, struct sockaddr_in &from) = 0;
-virtual int status(std::ostream &out) = 0;
+class UdpReceiver {
+public:
+    virtual ~UdpReceiver() {}
+    virtual int recvPkt(void *data, int size, struct sockaddr_in &from) = 0;
+    virtual int status(std::ostream &out) = 0;
 };
 
-class UdpPublisher
-{
-	public:
-virtual ~UdpPublisher() {}
-virtual	int sendPkt(const void *data, int size, const struct sockaddr_in &to, int ttl) = 0;
+class UdpPublisher {
+public:
+    virtual ~UdpPublisher() {}
+    virtual	int sendPkt(const void *data, int size, const struct sockaddr_in &to, int ttl) = 0;
 };
 
 
-class UdpLayer: public bdThread
-{
-	public:
+class UdpLayer: public bdThread {
+public:
 
 	UdpLayer(UdpReceiver *recv, struct sockaddr_in &local);
-virtual ~UdpLayer() { return; }
+    virtual ~UdpLayer() { return; }
 
-int 	reset(struct sockaddr_in &local); /* calls join, close, openSocket */
-void	getDataTransferred(uint32_t &read, uint32_t &write);
+    int reset(struct sockaddr_in &local); /* calls join, close, openSocket */
+    void getDataTransferred(uint32_t &read, uint32_t &write);
 
-int     status(std::ostream &out);
+    int status(std::ostream &out);
 
 	/* setup connections */
 	int closeSocket();
 	int openSocket();
 
 	/* RsThread functions */
-virtual void run(); /* called once the thread is started */
+    virtual void run(); /* called once the thread is started */
 
-void	recv_loop(); /* uses callback to UdpReceiver */
+    void recv_loop(); /* uses callback to UdpReceiver */
 
 	/* Higher Level Interface */
 	//int  readPkt(void *data, int *size, struct sockaddr_in &from);
-	int  sendPkt(const void *data, int size, const struct sockaddr_in &to, int ttl);
+	int sendPkt(const void *data, int size, const struct sockaddr_in &to, int ttl);
 
 	/* monitoring / updates */
 	int okay();
@@ -92,18 +89,18 @@ void	recv_loop(); /* uses callback to UdpReceiver */
 
 	/* data */
 	/* internals */
-	protected:
+protected:
 
-virtual	int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
-virtual	int sendUdpPacket(const void *data, int size, const struct sockaddr_in &to);
+    virtual	int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
+    virtual	int sendUdpPacket(const void *data, int size, const struct sockaddr_in &to);
  
 	int setTTL(int t);
 	int getTTL();
 
 	/* low level */
-	private:
+private:
 
-void    clearDataTransferred();
+    void clearDataTransferred();
 
 	UdpReceiver *recv;
 
@@ -122,23 +119,21 @@ void    clearDataTransferred();
 
 
 /* For Testing - drops packets */
-class LossyUdpLayer: public UdpLayer
-{
-	public:
-  LossyUdpLayer(UdpReceiver *udpr, struct sockaddr_in &local, double frac);
-virtual ~LossyUdpLayer();
+class LossyUdpLayer: public UdpLayer {
+public:
+    LossyUdpLayer(UdpReceiver *udpr, struct sockaddr_in &local, double frac);
+    virtual ~LossyUdpLayer();
 
-        protected:
+protected:
 
-virtual int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
-virtual	int sendUdpPacket(const void *data, int size, const struct sockaddr_in &to);
+    virtual int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
+    virtual	int sendUdpPacket(const void *data, int size, const struct sockaddr_in &to);
 
 	double lossFraction;
 };
 
-class PortRange
-{
-	public:
+class PortRange {
+public:
 	PortRange();
 	PortRange(uint16_t lp, uint16_t up);
 
@@ -150,34 +145,32 @@ class PortRange
 
 
 /* For Testing - drops packets */
-class RestrictedUdpLayer: public UdpLayer
-{
-	public:
-  RestrictedUdpLayer(UdpReceiver *udpr, struct sockaddr_in &local);
-virtual ~RestrictedUdpLayer();
+class RestrictedUdpLayer: public UdpLayer {
+public:
+    RestrictedUdpLayer(UdpReceiver *udpr, struct sockaddr_in &local);
+    virtual ~RestrictedUdpLayer();
 
-void	addRestrictedPortRange(int lp, int up);
+    void addRestrictedPortRange(int lp, int up);
 
-        protected:
+protected:
 
-virtual int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
-virtual	int sendUdpPacket(const void *data, int size, const struct sockaddr_in &to);
+    virtual int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
+    virtual	int sendUdpPacket(const void *data, int size, const struct sockaddr_in &to);
 
 	std::list<PortRange> mLostPorts;
 };
 
 
 /* For Testing - drops packets all packets for initial minute (simulates TTL) */
-class TimedUdpLayer: public UdpLayer
-{
-	public:
-  TimedUdpLayer(UdpReceiver *udpr, struct sockaddr_in &local);
-virtual ~TimedUdpLayer();
+class TimedUdpLayer: public UdpLayer {
+public:
+    TimedUdpLayer(UdpReceiver *udpr, struct sockaddr_in &local);
+    virtual ~TimedUdpLayer();
 
-        protected:
+protected:
 
-virtual int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
-virtual	int sendUdpPacket(const void *data, int size, const struct sockaddr_in &to);
+    virtual int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
+    virtual	int sendUdpPacket(const void *data, int size, const struct sockaddr_in &to);
 
 	time_t mStartTime;
 	bool mActive;

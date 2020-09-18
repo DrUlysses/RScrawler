@@ -72,6 +72,8 @@ void Logger::iteration() {
         size_t pos;
         short counter = 0;
         for (short i = 0; i < line.length() - 1; i++) {
+            if (counter == -10)
+                break;
             if (line[i] != ' ')
                 accum += line[i];
             else {
@@ -102,7 +104,7 @@ void Logger::iteration() {
                         break;
                     case 3:
                         // Won't work after some time (kinda current time dependent)
-                        if (accum.length() == 10) {
+                        if (accum.length() >= 10) {
                             timeStamp = (time_t) std::stoul(accum);
                             counter++;
                             accum = "";
@@ -140,8 +142,8 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
     std::string addr_str;
     bdId id;
     bdToken version;
-    std::map<bdId, time_t> RSPeers;
-    time_t timeStamp;
+    std::map<bdId, std::string> RSPeers;
+    std::string timeStamp;
 
     {
         bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
@@ -158,10 +160,16 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
         std::ifstream logsFile;
         logsFile.open(LOG_FILENAME, std::fstream::out | std::fstream::in);
         while (std::getline(logsFile, line)) {
+            version = {};
+            addr_str = "";
+            id = {};
+            timeStamp = std::to_string(time(NULL));
             // I HATE C++ STRINGS
             std::string accum;
             short counter = 0;
             for (short i = 0; i < line.length() - 1; i++) {
+                if (counter == -10)
+                    break;
                 if (line[i] != ' ')
                     accum += line[i];
                 else {
@@ -199,15 +207,12 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
                             break;
                         case 3:
                             // Won't work after some time (kinda current time dependent)
-                            if (accum.length() == 10) {
-                                timeStamp = (time_t) std::stoul(accum);
-                                counter++;
-                                accum = "";
-                            } else {
-                                accum = "";
-                                counter = -10;
-                                break;
-                            }
+                            if (accum.length() >= 10)
+                                timeStamp = accum;
+                            else
+                                timeStamp = std::to_string(time(NULL));
+                            counter++;
+                            accum = "";
                             break;
                         default:
                             accum = "";
@@ -229,8 +234,8 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
                 result->push_back(it->first);*/
             bdStdPrintNodeId(line, &RSPeer.first.id, false);
             if (std::find(myIDsList.begin(), myIDsList.end(), line) == myIDsList.end()) {
-                fprintf(filtered, "%s %s %lu\n", line.c_str(),
-                        bdnet_inet_ntoa(RSPeer.first.addr.sin_addr).c_str(), RSPeer.second);
+                fprintf(filtered, "%s %s %s\n", line.c_str(),
+                        bdnet_inet_ntoa(RSPeer.first.addr.sin_addr).c_str(), RSPeer.second.c_str());
             }
         }
         fclose(filtered);

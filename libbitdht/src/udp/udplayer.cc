@@ -154,7 +154,7 @@ UdpLayer::UdpLayer(UdpReceiver *udpr, struct sockaddr_in &local)
 	return;
 }
 
-int     UdpLayer::status(std::ostream &out) {
+int UdpLayer::status(std::ostream &out) {
 	out << "UdpLayer::status()" << std::endl;
 	out << "localaddr: " << laddr << std::endl;
 	out << "sockfd: " << sockfd << std::endl;

@@ -28,6 +28,13 @@ Crawler::~Crawler() noexcept {
     std::cerr << std::endl;
 }
 
+void Crawler::initDhtHandler() {
+    {
+        bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+        dhtHandler = new BitDhtHandler(peerId, port, appId, bootstrapfile);
+    }
+}
+
 void Crawler::stop() {
     isActive = false;
     {
@@ -75,17 +82,16 @@ void Crawler::setCrawlsCount(unsigned int count) {
 }
 
 void Crawler::run() {
-    {
-        bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
-        dhtHandler = new BitDhtHandler(peerId, port, appId, bootstrapfile);
-    }
     for (unsigned int i = 0; i < crawlsCount; i++) {
         if (isActive) {
-            bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
-            if (currentStage == 0)
+            if (currentStage == 0) {
+                bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
                 Crawler::iterationFirstStage();
-            else
+            }
+            else {
+                bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
                 Crawler::iterationSecondStage();
+            }
             writeLogs();
         }
         sleep(TICK_PAUSE);
@@ -151,12 +157,13 @@ std::list<bdNodeId> Crawler::getToCheckList() {
 }
 
 void Crawler::writeLogs() {
+    bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
     const char *logName = "dhtlogs";
     if (!dhtHandler) {
         std::cerr << "Problem with dhtHandler, can't write to logs" << std::endl;
         return;
     }
-    if (!dhtHandler->getEnabled() || !dhtHandler->getActive()) {
+    if (!dhtHandler->getEnabled()) {
         std::cerr << "dhtHandler is disabled, can't write to logs" << std::endl;
         return;
     }
@@ -182,4 +189,5 @@ void Crawler::writeLogs() {
                 std::cerr << "While whiting to dhtlogs accrued an err=%d: %s\n", errno, strerror(errno);
     }
     fclose(tempFile);
+    std::cout << "Successfully written to logs" << std::endl;
 }

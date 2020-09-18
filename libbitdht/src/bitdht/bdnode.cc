@@ -448,10 +448,11 @@ void bdNode::send_connect_msg(bdId *id, int msgtype, bdId *srcAddr, bdId *destAd
 void bdNode::checkPotentialPeer(bdId *id, bdId *src) {
     /* Save the peer */
     std::string tempID;
+    std::string tempTime = std::to_string(time(NULL));
     bdStdPrintId(tempID, id, false);
     tempID.erase(tempID.find("ip:"), 3);
-    std::cout << "Found peer: " << tempID << std::endl;
-    tempID += " " + std::to_string(time(NULL));
+    std::cout << "Found peer: " << tempID << " time " << tempTime << std::endl;
+    tempID += " " + tempTime;
     mFoundPeers.insert(mFoundPeers.end(), tempID);
 
 
@@ -1528,25 +1529,32 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
 	/* Handle version + id runs from locked thread, so should be secure to write to the file */
 	//unsigned char tempStr[8];
     //strncpy((char*)tempStr, "BD02RS51", 8);
+    std::string tempTime = std::to_string(time(NULL));
 	if (be_version) {
         std::string tempID;
         std::string tempVersion;
         bdStdPrintId(tempID, &srcId, false);
         tempID.erase(tempID.find("ip:"), 3);
-        if ((versionId.data[0] == 'l' && versionId.data[1] == 't') ||
-                (versionId.data[0] == 'L' && versionId.data[1] == 'T'))
-            tempVersion = "lt";
+        if (versionId.data[0] == 'B' &&
+            versionId.data[1] == 'D' &&
+            versionId.data[2] == '0' &&
+            versionId.data[3] == '2' &&
+            versionId.data[4] == 'R' &&
+            versionId.data[5] == 'S' &&
+            versionId.data[6] == '5' &&
+            versionId.data[7] == '1')
+            tempVersion = "BD02RS51";
         else
-            tempVersion = std::string(versionId.data, versionId.data + sizeof versionId.data / sizeof versionId.data[0]);
-        std::cout << "Found peer: " << tempID << " ver " << tempVersion << " msg "  << messageType << std::endl;
-        tempID += " " + tempVersion + " " + std::to_string(time(NULL)) + " " + messageType;
+            tempVersion = "other";
+        std::cout << "Found peer: " << tempID << " ver " << tempVersion << " msg " << messageType << " time " << tempTime << std::endl;
+        tempID += " " + tempVersion + " " + tempTime + " " + messageType;
         mFoundPeers.insert(mFoundPeers.end(), tempID);
 	} else {
         std::string tempID;
         bdStdPrintId(tempID, &srcId, false);
         tempID.erase(tempID.find("ip:"), 3);
-        std::cout << "Found peer: " << tempID << " msg "  << messageType << std::endl;
-        tempID += " " + std::to_string(time(NULL)) + " " + messageType;
+        std::cout << "Found peer: " << tempID << " msg "  << messageType << " time " << tempTime << std::endl;
+        tempID += " " + tempTime + " " + messageType;
         mFoundPeers.insert(mFoundPeers.end(), tempID);
 	}
 

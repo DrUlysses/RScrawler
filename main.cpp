@@ -9,7 +9,7 @@
 #include "crawler.h"
 
 #define CRAWLERS_COUNT 32
-#define CRAWL_DURATION 20 // in seconds
+#define CRAWL_DURATION 30 // in seconds
 #define CRAWLS_COUNT 2
 #define DURATION_BETWEEN_CHECKS 30 // in seconds
 #define CHECKS_COUNT 3
@@ -17,31 +17,30 @@
 #define LOG_FILENAME "dhtlogs"
 #define RS_PEERS_FILENAME "rspeers"
 
-void args(char *name) {
+/*void args(char *name) {
     std::cerr << std::endl << "Dht Single Shot Searcher" << std::endl;
     std::cerr << "Usage:" << std::endl;
     std::cerr << "\t" << name << " -p <peerId> " << std::endl << std::endl;
     std::cerr << "NB: The PeerId is Required to Run" << std::endl << std::endl;
-}
+}*/
 
 void firstStage(std::vector<Crawler>& crawlers, Logger& logger);
 void secondStage(std::vector<Crawler>& crawlers, Logger& logger);
 
-std::string exec(const char* cmd) {
-    char buffer[128];
+void exec(const char* cmd) {
+    char buffer[16];
     std::string result;
     FILE* pipe = popen(cmd, "r");
     if (!pipe)
-        throw std::runtime_error("popen() failed!");
+        std::cerr << "popen() failed!" << std::endl;
     try {
         while (fgets(buffer, sizeof buffer, pipe) != nullptr)
-            result += buffer;
+            std::cerr << buffer;
     } catch (...) {
         pclose(pipe);
-        throw;
+        std::cerr << "problem with popen()" << std::endl;
     }
     pclose(pipe);
-    return result;
 }
 
 int main(int argc, char **argv) {
@@ -50,6 +49,23 @@ int main(int argc, char **argv) {
 
     Logger* logger = new Logger();
 
+    // Setting crawlers
+    int regionStart = 0;
+    int regionLength = 32 / CRAWLERS_COUNT;
+    int regionEnd = regionLength;
+    uint16_t port = 6775;
+    for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
+        crawlers[i].init();
+        crawlers[i].setStage(0);
+        crawlers[i].setRegions(regionStart, regionEnd);
+        crawlers[i].setPort(port++);
+        crawlers[i].setCrawlsCount(CRAWLS_COUNT);
+        crawlers[i].initDhtHandler();
+        crawlers[i].start();
+        regionStart = regionEnd + 1;
+        regionEnd = i == CRAWLERS_COUNT - 2 ? 32 : regionEnd + regionLength;
+    }
+    logger->start();
     // One week
     for (short i = 0; i < 7; i++) {
         // Whole day loop
@@ -82,22 +98,10 @@ int main(int argc, char **argv) {
 }
 
 void firstStage(std::vector<Crawler>& crawlers, Logger& logger) {
-    logger.start();
-    // Setting regions
-    int regionStart = 0;
-    int regionLength = 32 / CRAWLERS_COUNT;
-    int regionEnd = regionLength;
-    uint16_t port = 6775;
-    for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
-        crawlers[i].init();
-        crawlers[i].setStage(0);
-        crawlers[i].setRegions(regionStart, regionEnd);
-        crawlers[i].setPort(port++);
-        crawlers[i].setCrawlsCount(CRAWLS_COUNT);
+    for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
         crawlers[i].start();
-        regionStart = regionEnd + 1;
-        regionEnd = i == CRAWLERS_COUNT - 2 ? 32 : regionEnd + regionLength;
-    }
+    logger.start();
+
     std::list<bdNodeId> tempIDStorage;
     for (unsigned int i = 0; i < CRAWLS_COUNT; i++) {
         // Waiting for crawlers duty

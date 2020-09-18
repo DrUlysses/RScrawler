@@ -13,6 +13,7 @@ class Crawler : public bdThread {
 public:
     Crawler();
     ~Crawler();
+    void initDhtHandler();
     void init();
 
     virtual void run();

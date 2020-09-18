@@ -19,12 +19,14 @@ def get_data(path, version=""):
         if data[0].count('0') == 40:
             break
         if len(data[0]) == 40 and data[1].count('.') == 3:
-            if len(data[2]) >= 10:
-                database.add_entry(data[0], data[1], version, data[2].replace("\n", ''))
-                lines_done += 1
-            elif len(data[3]) >= 10:
-                database.add_entry(data[0], data[1], version, data[3].replace("\n", ''))
-                lines_done += 1
+            if len(data) >= 3:
+                if len(data[2]) >= 10:
+                    database.add_entry(data[0], data[1], version, data[2].replace("\n", ''))
+                    lines_done += 1
+                elif len(data) >= 4:
+                    if len(data[3]) >= 10:
+                        database.add_entry(data[0], data[1], version, data[3].replace("\n", ''))
+                        lines_done += 1
         print("Done " + str(lines_done) + " lines")
     file.close()
 
