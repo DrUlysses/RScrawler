@@ -37,16 +37,14 @@ def draw_peers_and_time_plot():
     data = database.get_all_count_to_time_results()
     plot.bar(*zip(*data.items()))
     plot.savefig("Peers count - Elapsed time.png")
-    plot.show()
 
 
 def draw_rs_peers_and_time_plot():
     plot.ylabel("Peers count")
     plot.xlabel("Elapsed time")
-    data = database.get_all_count_to_time_results()
+    data = database.get_rs_count_to_time_results()
     plot.bar(*zip(*data.items()))
     plot.savefig("RS Peers count - Elapsed time.png")
-    plot.show()
 
 
 if __name__ == '__main__':

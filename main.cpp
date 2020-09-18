@@ -41,6 +41,7 @@ void exec(const char* cmd) {
         std::cerr << "problem with popen()" << std::endl;
     }
     pclose(pipe);
+    std::cerr << "Analyzer is closed" << std::endl;
 }
 
 int main(int argc, char **argv) {
