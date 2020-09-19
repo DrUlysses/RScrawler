@@ -27,8 +27,8 @@ def add_entry(new_id="", new_ip='', new_version="", new_time=-1):
     old = session.query(PeerEntry).filter_by(id=new_id).first()
     if old is None:
         session.add(peer)
-    else:
-        old.time = new_time
+    elif old.time != new_time:
+        session.add(peer)
     session.commit()
     return True
 
