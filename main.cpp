@@ -8,12 +8,12 @@
 #include "logger.h"
 #include "crawler.h"
 
-#define CRAWLERS_COUNT 32
+#define CRAWLERS_COUNT 1
 #define CRAWL_DURATION 30 // in seconds
 #define CRAWLS_COUNT 2
 #define DURATION_BETWEEN_CHECKS 30 // in seconds
 #define CHECKS_COUNT 3
-#define DURATION_BETWEEN_CRAWLS 21600 // 6 hours (in seconds)
+#define DURATION_BETWEEN_CRAWLS 21600 // 6 hours (in seconds) 21600
 #define LOG_FILENAME "dhtlogs"
 #define RS_PEERS_FILENAME "rspeers"
 
@@ -62,11 +62,9 @@ int main(int argc, char **argv) {
         crawlers[i].setPort(port++);
         crawlers[i].setCrawlsCount(CRAWLS_COUNT);
         crawlers[i].initDhtHandler();
-        crawlers[i].start();
         regionStart = regionEnd + 1;
         regionEnd = i == CRAWLERS_COUNT - 2 ? 32 : regionEnd + regionLength;
     }
-    logger->start();
     // One week
     for (short i = 0; i < 7; i++) {
         // Whole day loop
@@ -108,18 +106,19 @@ void firstStage(std::vector<Crawler>& crawlers, Logger& logger) {
         // Waiting for crawlers duty
         sleep(CRAWL_DURATION);
         // Sorting out of region IDs
-        tempIDStorage.merge(logger.getDiscoveredPeers());
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
             crawlers[i].setActive(false);
             tempIDStorage.merge(crawlers[j].getToCheckList());
         }
-        tempIDStorage.merge(logger.getDiscoveredPeers());
         crawlers[i].writeLogs();
+        tempIDStorage.merge(logger.getDiscoveredPeers());
 
         crawlers[i].restart();
 
-        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
+        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
             crawlers[j].extractToCheckList(tempIDStorage);
+            crawlers[i].setActive(true);
+        }
     }
     // Pause crawling
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {

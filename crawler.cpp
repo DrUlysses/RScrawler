@@ -118,6 +118,7 @@ void Crawler::iterationSecondStage() {
 }
 
 void Crawler::extractToCheckList(std::list<bdNodeId> peers) {
+    toCheckPeerList.clear();
     for (auto & peer : peers) {
         auto *a_data = (uint32_t *) peer.data;
         if (a_data[0] >= regionStart && a_data[0] < regionEnd)
@@ -138,7 +139,7 @@ void Crawler::setStage(bool stage) {
 void Crawler::setPort(uint16_t newPort) {
     port = newPort;
 }
-
+//TODO: clean this, toCheckList shoulndn't be cleared here
 std::list<bdNodeId> Crawler::getToCheckList() {
     std::list<bdNodeId> res;
     std::list<bdNodeId> newOne;

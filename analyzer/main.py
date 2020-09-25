@@ -49,10 +49,10 @@ def draw_rs_peers_and_time_plot():
 
 if __name__ == '__main__':
     # Read the logs
-    path_to_logs = "/home/ulysses/RS/rs-crawler/cmake-build-debug/"
+    path_to_logs = "/home/ulysses/RS_Gitlab/rs-crawler/cmake-build-debug"
     print("Extracting rspeers")
-    get_data(path_to_logs + "rspeers", "rs")
+    get_data(path_to_logs + "/rspeers", "rs")
     draw_rs_peers_and_time_plot()
     print("Extracting dhtlogs")
-    get_data(path_to_logs + "dhtlogs")
+    get_data(path_to_logs + "/dhtlogs")
     draw_peers_and_time_plot()

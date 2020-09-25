@@ -8,6 +8,7 @@
 #define SEARCH_SHOTS_COUNT 5
 #define SEARCH_ROUNDS_COUNT 3
 #define USED_IDS_FILENAME "my_ids"
+#define PATH_TO_BDBOOT "/home/ulysses/RS_Gitlab/rs-crawler/libbitdht/src/bitdht/bdboot.txt"
 
 class Crawler : public bdThread {
 public:
@@ -43,7 +44,7 @@ private:
     bool isActive = true;
     bdNodeId* peerId;
     bool currentStage;
-    std::string bootstrapfile = "/home/ulysses/RS/rs-crawler/libbitdht/src/bitdht/bdboot.txt";
+    std::string bootstrapfile = PATH_TO_BDBOOT;
     uint16_t port;
     std::string appId = "RS51";
     BitDhtHandler* dhtHandler;
