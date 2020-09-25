@@ -60,6 +60,10 @@
  * #define DISABLE_BAD_PEER_FILTER		1
  *
  ***/
+#define DEBUG_NODE_MSGOUT 1
+#define DEBUG_NODE_MSGIN 1
+#define DEBUG_NODE_MULTIPEER 1
+#define DEBUG_NODE_MSGS 1
 
 //#define DISABLE_BAD_PEER_FILTER		1
 
@@ -424,9 +428,9 @@ void bdNode::send_query(bdId *id, bdNodeId *targetNodeId, bool localnet) {
 
 #ifdef DEBUG_NODE_MSGS 
 	std::cerr << "bdNode::send_query() Find Node Req for : ";
-	mFns->bdPrintId(std::cerr, &id);
+	mFns->bdPrintId(std::cerr, id);
 	std::cerr << " searching for : ";
-	mFns->bdPrintNodeId(std::cerr, &targetNodeId);
+	mFns->bdPrintNodeId(std::cerr, targetNodeId);
 	std::cerr << std::endl;
 #endif
 }
@@ -440,13 +444,13 @@ void bdNode::send_connect_msg(bdId *id, int msgtype, bdId *srcAddr, bdId *destAd
 
 #ifdef DEBUG_NODE_MSGS 
 	std::cerr << "bdNode::send_connect_msg() to: ";
-	mFns->bdPrintId(std::cerr, &id);
+	mFns->bdPrintId(std::cerr, id);
 	std::cerr << std::endl;
 #endif
 }
 
 void bdNode::checkPotentialPeer(bdId *id, bdId *src) {
-    /* Save the peer */
+    /* Save the peer
     std::string tempID;
     std::string tempTime = std::to_string(time(NULL));
     bdStdPrintId(tempID, id, false);
@@ -454,7 +458,7 @@ void bdNode::checkPotentialPeer(bdId *id, bdId *src) {
     std::cout << "Found peer: " << tempID << " time " << tempTime << std::endl;
     tempID += " " + tempTime;
     mFoundPeers.insert(mFoundPeers.end(), tempID);
-
+*/
 
 	/* Check BadPeer Filters for Potential Peers too */
 
@@ -810,7 +814,7 @@ void bdNode::msgout_pong(bdId *id, bdToken *transId) {
 #ifdef DEBUG_NODE_MSGOUT
 	std::cerr << "bdNode::msgout_pong() TransId: ";
 	bdPrintTransId(std::cerr, transId);
-	std::cerr << " Version: " << version;
+	std::cerr << " Version: " << mDhtVersion;
 	std::cerr << " To: ";
 	mFns->bdPrintId(std::cerr, id);
 	std::cerr << std::endl;
@@ -1530,7 +1534,17 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
 	//unsigned char tempStr[8];
     //strncpy((char*)tempStr, "BD02RS51", 8);
     std::string tempTime = std::to_string(time(NULL));
-	if (be_version) {
+    if (messageType == "REPLY NODE") {
+        std::string tempID;
+        bdStdPrintId(tempID, &srcId, false);
+        std::cout << "Message from: " << tempID << " msg " << messageType << " time " << tempTime <<
+            " token " << transId.data << " nodes:" << std::endl;
+        for (auto tempNode : nodes) {
+            bdStdPrintId(tempID, &tempNode, false);
+            std::cout << "Became " << tempID << " token " << transId.data << std::endl;
+            mFoundPeers.insert(mFoundPeers.end(), tempID);
+        }
+    } else if (be_version) {
         std::string tempID;
         std::string tempVersion;
         bdStdPrintId(tempID, &srcId, false);
@@ -1546,14 +1560,16 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
             tempVersion = "BD02RS51";
         else
             tempVersion = "other";
-        std::cout << "Found peer: " << tempID << " ver " << tempVersion << " msg " << messageType << " time " << tempTime << std::endl;
+        std::cout << "Message from: " << tempID << " ver " << tempVersion << " msg "<<
+            messageType << " time " << tempTime << " token " << transId.data << std::endl;
         tempID += " " + tempVersion + " " + tempTime + " " + messageType;
         mFoundPeers.insert(mFoundPeers.end(), tempID);
 	} else {
         std::string tempID;
         bdStdPrintId(tempID, &srcId, false);
         tempID.erase(tempID.find("ip:"), 3);
-        std::cout << "Found peer: " << tempID << " msg "  << messageType << " time " << tempTime << std::endl;
+        std::cout << "Message from: " << tempID << " msg "  <<
+            messageType << " time " << tempTime << " token " << transId.data << std::endl;
         tempID += " " + tempTime + " " + messageType;
         mFoundPeers.insert(mFoundPeers.end(), tempID);
 	}
