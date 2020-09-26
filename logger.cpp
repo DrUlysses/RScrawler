@@ -244,8 +244,8 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
 
 std::list<bdNodeId> Logger::getDiscoveredPeers() {
     std::list<bdNodeId> res;
-    for (std::map<bdNodeId, bdFoundPeer>::iterator it = Logger::discoveredPeers.begin(); it != Logger::discoveredPeers.end(); it++)
-        res.push_back(it->first);
+    for (auto & discoveredPeer : Logger::discoveredPeers)
+        res.push_back(discoveredPeer.first);
     return res;
 }
 

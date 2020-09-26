@@ -29,7 +29,7 @@ public:
     void stop();
 
     void sortRsPeers(std::list<bdId>* result = nullptr);
-    std::list<bdNodeId> getDiscoveredPeers();
+    static std::list<bdNodeId> getDiscoveredPeers();
 
     bdMutex dhtMutex;
 private:

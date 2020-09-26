@@ -201,7 +201,7 @@ void bdNode::restartNode() {
 
 	/* setup */
 	bdPeer peer;
-	while(mStore.getPeer(&peer))
+	while (mStore.getPeer(&peer))
 		addPotentialPeer(&(peer.mPeerId), NULL);
 }
 
@@ -289,7 +289,7 @@ void bdNode::iteration() {
 #endif
 
 	/* process incoming msgs */
-	while(mIncomingMsgs.size() > 0) {
+	while (mIncomingMsgs.size() > 0) {
 		bdNodeNetMsg *msg = mIncomingMsgs.front();
 		mIncomingMsgs.pop_front();
 
@@ -327,7 +327,7 @@ void bdNode::iteration() {
 	}
 	
 
-	while((mPotentialPeers.size() > 0) && (sentMsgs < allowedPings)) {
+	while ((mPotentialPeers.size() > 0) && (sentMsgs < allowedPings)) {
 		/* check history ... is we have pinged them already...
 		 * then simulate / pretend we have received a pong,
 		 * and don't bother sending another ping.
@@ -614,7 +614,7 @@ std::vector<std::string> bdNode::getFoundPeers() {
 void bdNode::processRemoteQuery() {
 	int nProcessed = 0;
 	time_t oldTS = time(NULL) - BITDHT_MAX_REMOTE_QUERY_AGE;
-	while(nProcessed < MAX_REMOTE_PROCESS_PER_CYCLE) {
+	while (nProcessed < MAX_REMOTE_PROCESS_PER_CYCLE) {
 		/* extra exit clause */
 		if (mRemoteQueries.size() < 1) {
 #ifdef USE_HISTORY
@@ -1024,9 +1024,6 @@ void bdNode::msgout_reply_post(bdId *id, bdToken *transId) {
 
 
 void bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr) {
-	//fprintf(stderr, "bdNode::sendPkt(%d) to %s:%d\n", 
-	//		len, inet_ntoa(addr.sin_addr), htons(addr.sin_port));
-
 	/* filter outgoing packets */
     if (mFilterPeers.addrOkay(&addr)) {
 		bdNodeNetMsg *bdmsg = new bdNodeNetMsg(msg, len, &addr);

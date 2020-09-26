@@ -8,7 +8,7 @@
 #define SEARCH_SHOTS_COUNT 5
 #define SEARCH_ROUNDS_COUNT 3
 #define USED_IDS_FILENAME "my_ids"
-#define PATH_TO_BDBOOT "/home/ulysses/RS_Gitlab/rs-crawler/libbitdht/src/bitdht/bdboot.txt"
+#define PATH_TO_BDBOOT "../libbitdht/src/bitdht/bdboot.txt"
 
 class Crawler : public bdThread {
 public:
@@ -29,6 +29,7 @@ public:
     void setRegions(int start, int end);
     void setPort(uint16_t newPort);
     void setCrawlsCount(unsigned int count);
+    void setBDBoot(std::string path);
     void extractToCheckList(std::list<bdNodeId> peers);
     void writeLogs();
     std::list<bdNodeId> getToCheckList();

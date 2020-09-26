@@ -49,16 +49,14 @@
 
 
 bdQueryManager::bdQueryManager(bdSpace *space, bdDhtFunctions *fns, bdNodePublisher *pub)
-	:mNodeSpace(space), mFns(fns), mPub(pub) {
-}
+	:mNodeSpace(space), mFns(fns), mPub(pub) {}
 
 /***** Startup / Shutdown ******/
 void bdQueryManager::shutdownQueries() {
 	/* clear the queries */
 	std::list<bdQuery *>::iterator it;
-	for (it = mLocalQueries.begin(); it != mLocalQueries.end();it++) {
+	for (it = mLocalQueries.begin(); it != mLocalQueries.end();it++)
 		delete (*it);
-	}
 
 	mLocalQueries.clear();
 }
@@ -93,7 +91,7 @@ int bdQueryManager::iterateQueries(int maxQueries) {
 	bdId id;
 	bdNodeId targetNodeId;
 	
-	while((i < numQueries) && (sentQueries < maxQueries)) {
+	while ((i < numQueries) && (sentQueries < maxQueries)) {
 		bdQuery *query = mLocalQueries.front();
 		mLocalQueries.pop_front();
 		mLocalQueries.push_back(query);
@@ -132,15 +130,12 @@ bool bdQueryManager::checkPotentialPeer(bdId *id, bdId *src) {
 	bool isWorthyPeer = false;
 	/* also push to queries */
 	std::list<bdQuery *>::iterator it;
-	for (it = mLocalQueries.begin(); it != mLocalQueries.end(); it++) {
-		if ((*it)->addPotentialPeer(id, src, 0)) {
+	for (it = mLocalQueries.begin(); it != mLocalQueries.end(); it++)
+		if ((*it)->addPotentialPeer(id, src, 0))
 			isWorthyPeer = true;
-		}
-	}
 
-	if (!isWorthyPeer) {
+	if (!isWorthyPeer)
 		isWorthyPeer = checkWorthyPeerSources(src);
-	}
 
 	return isWorthyPeer;
 }
@@ -153,12 +148,10 @@ void bdQueryManager::addPeer(const bdId *id, uint32_t peerflags) {
 	mFns->bdPrintId(std::cerr, id);
 	fprintf(stderr, ")\n");
 #endif
-
 	/* iterate through queries */
 	std::list<bdQuery *>::iterator it;
-	for (it = mLocalQueries.begin(); it != mLocalQueries.end(); it++) {
+	for (it = mLocalQueries.begin(); it != mLocalQueries.end(); it++)
 		(*it)->addPeer(id, peerflags);
-	}
 }
 
 
@@ -177,9 +170,8 @@ void bdQueryManager::addQuery(const bdNodeId *id, uint32_t qflags) {
 	fprintf(stderr, ")\n");
 #endif
 
-	for (it = nearest.begin(); it != nearest.end(); it++) {
+	for (it = nearest.begin(); it != nearest.end(); it++)
 		startList.push_back(it->second);
-	}
 
 	bdQuery *query = new bdQuery(id, startList, qflags, mFns);
 	mLocalQueries.push_back(query);
@@ -193,11 +185,8 @@ void bdQueryManager::clearQuery(const bdNodeId *rmId) {
 			bdQuery *query = (*it);
 			it = mLocalQueries.erase(it);
 			delete query;
-		}
-		else
-		{
+		} else
 			it++;
-		}
 	}
 }
 
@@ -240,16 +229,15 @@ int bdQueryManager::QuerySummary(const bdNodeId *id, bdQuerySummary &query) {
 #define BDQRYMGR_PROXIES	2
 #define BDQRYMGR_POTPROXIES	3
 
-int  bdQueryManager::getResults(bdNodeId *target, std::list<bdId> &answer, int querytype) {
+int bdQueryManager::getResults(bdNodeId *target, std::list<bdId> &answer, int querytype) {
 		
 	/* grab any peers from any existing query */
 	int results = 0;
 	std::list<bdQuery *>::iterator qit;
 	for (qit = mLocalQueries.begin(); qit != mLocalQueries.end(); qit++) {
-		if (!((*qit)->mId == (*target))) {
+		if (!((*qit)->mId == (*target)))
 			continue;
-		}
-		
+
 #ifdef DEBUG_NODE_CONNECTION
 		std::cerr << "bdQueryManager::getResults() Found Matching Query";
 		std::cerr << std::endl;
@@ -321,16 +309,13 @@ bool bdQueryManager::checkWorthyPeerSources(bdId *src) {
 #endif
 
 			it = mWorthyPeerSources.erase(it);
-		}
-		else
-		{
+		} else {
 			if (it->mPeerId == *src) {
 #ifdef DEBUG_NODE_ACTIONS 
 				std::cerr << "bdQueryManager::checkWorthyPeerSource(";
 				mFns->bdPrintId(std::cerr, src);
 				std::cerr << ") = true" << std::endl;
 #endif
-
 				return true;
 			}
 			it++;

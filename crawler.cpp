@@ -2,6 +2,7 @@
 #include <bdstddht.h>
 #include <bootstrap_fn.h>
 #include <cstring>
+#include <utility>
 #include "crawler.h"
 
 Crawler::Crawler() : crwlrMutex(true) {}
@@ -134,6 +135,11 @@ void Crawler::setRegions(int start, int end) {
 
 void Crawler::setStage(bool stage) {
     currentStage = stage;
+}
+
+void Crawler::setBDBoot(std::string path) {
+    if (!path.empty())
+        bootstrapfile = std::move(path);
 }
 
 void Crawler::setPort(uint16_t newPort) {

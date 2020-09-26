@@ -66,7 +66,7 @@ int bdStore::reloadFromStore() {
 	addr.sin_family = PF_INET;
 	unsigned short port;
 
-	while(line == fgets(line, 10240, fd)) {
+	while (line == fgets(line, 10240, fd)) {
 		if (2 == sscanf(line, "%s %hd", addr_str, &port)) {
 			if (bdnet_inet_aton(addr_str, &(addr.sin_addr))) {
 				addr.sin_port = htons(port);
@@ -186,12 +186,7 @@ void bdStore::writeStore(std::string file) {
 	}
 
 	std::string filetmp = file + ".tmp" ;
-    const char *logName = "dhtlogs";
-
 	FILE *fd = fopen(filetmp.c_str(), "w");
-	FILE *crwlrLog = fopen(logName, "a+");
-
-    std::string tempID;
 
 	if (!fd) {
 #ifdef DEBUG_STORE
@@ -206,12 +201,8 @@ void bdStore::writeStore(std::string file) {
 #ifdef DEBUG_STORE
 		fprintf(stderr, "Storing Peer Address: %s %d\n", inet_ntoa(it->mPeerId.addr.sin_addr), ntohs(it->mPeerId.addr.sin_port));
 #endif
-        bdStdPrintNodeId(tempID, &it->mPeerId.id, false);
-        if (fprintf(crwlrLog, "%s %s:%d %lu\n", tempID.c_str(), bdnet_inet_ntoa(it->mPeerId.addr.sin_addr).c_str(), ntohs(it->mPeerId.addr.sin_port), time(NULL)) < 0)
-            std::cerr << "While writing to dht logs accrued an err=%d: %s\n", errno, strerror(errno);
 	}
 	fclose(fd);
-    fclose(crwlrLog);
 
     bdFile::renameFile(filetmp, file);
 	//if (!)

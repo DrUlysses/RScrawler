@@ -32,36 +32,35 @@ class bdNodePublisher;
 ************************************** ProxyTuple + Connection State ****************************************
 ************************************************************************************************************/
 
-#define BITDHT_CONNREQUEST_READY		1
-#define BITDHT_CONNREQUEST_PAUSED		2
-#define BITDHT_CONNREQUEST_INPROGRESS		3
-#define BITDHT_CONNREQUEST_EXTCONNECT		4
-#define BITDHT_CONNREQUEST_DONE			5
+#define BITDHT_CONNREQUEST_READY        1
+#define BITDHT_CONNREQUEST_PAUSED       2
+#define BITDHT_CONNREQUEST_INPROGRESS   3
+#define BITDHT_CONNREQUEST_EXTCONNECT   4
+#define BITDHT_CONNREQUEST_DONE         5
 
-#define BITDHT_CONNREQUEST_TIMEOUT_CONNECT	300  // MAKE THIS LARGE - SHOULD NEVER HAPPEN.
-#define BITDHT_CONNREQUEST_TIMEOUT_INPROGRESS	30
-#define BITDHT_CONNREQUEST_MAX_AGE		60
+#define BITDHT_CONNREQUEST_TIMEOUT_CONNECT      300 // MAKE THIS LARGE - SHOULD NEVER HAPPEN.
+#define BITDHT_CONNREQUEST_TIMEOUT_INPROGRESS   30
+#define BITDHT_CONNREQUEST_MAX_AGE              60
 
 
 #define BITDHT_CONNECTION_WAITING_AUTH		1
 #define BITDHT_CONNECTION_WAITING_REPLY		2
 #define BITDHT_CONNECTION_WAITING_START		3
 #define BITDHT_CONNECTION_WAITING_ACK		4
-#define BITDHT_CONNECTION_COMPLETED		5
+#define BITDHT_CONNECTION_COMPLETED		    5
 
 
 #define BD_CONNECTION_START_RETRY_PERIOD	3  // Should only take a couple of seconds to get reply.
 #define BD_CONNECTION_START_MAX_RETRY		3
-#define BD_CONNECTION_MAX_TIMEOUT		20 /* should be quick */
+#define BD_CONNECTION_MAX_TIMEOUT		    20 /* should be quick */
 
 
 
-class bdProxyTuple 
-{
-	public:
+class bdProxyTuple {
+public:
 	bdProxyTuple() { return; }
 	bdProxyTuple(bdNodeId *s, bdNodeId *p, bdNodeId *d)
-	:srcId(*s), proxyId(*p), destId(*d) { return; }
+	    :srcId(*s), proxyId(*p), destId(*d) { return; }
 
 	bdNodeId srcId;
 	bdNodeId proxyId;
@@ -73,9 +72,8 @@ int operator<(const bdProxyTuple &a, const bdProxyTuple &b);
 int operator==(const bdProxyTuple &a, const bdProxyTuple &b);
 
 
-class bdConnection
-{
-	public:
+class bdConnection {
+public:
 	bdConnection();
 
 	/** Functions to tweak the connection status */
@@ -132,8 +130,6 @@ class bdConnection
 
 	// Completion TS.
 	time_t mCompletedTS;
-
-
 };
 
 #define BD_PI_SRC_UNKNOWN					0
@@ -145,13 +141,13 @@ class bdConnection
 #define BD_PI_SRC_ADDGOODPROXY				6
 
 
-class bdProxyId
-{
+class bdProxyId {
 public:
 	bdProxyId(const bdId &in_id, uint32_t in_srctype, uint32_t in_errcode)
-	:id(in_id), srcType(in_srctype), errcode(in_errcode) { return; }
+	    :id(in_id), srcType(in_srctype), errcode(in_errcode) { return; }
 
-	bdProxyId() :srcType(BD_PI_SRC_UNKNOWN), errcode(0) { return; }
+	bdProxyId()
+	    :srcType(BD_PI_SRC_UNKNOWN), errcode(0) { return; }
 
 	std::string proxySrcType() const;
 
@@ -161,10 +157,10 @@ public:
 };
 
 
-class bdConnectionRequest
-{
+class bdConnectionRequest {
 public:
-	bdConnectionRequest() : mMode(0), mState(0), mStateTS(0), mPauseTS(0), mErrCode(0), mDelay(0), mRequestTS(0), mRecycled(0), mCurrentSrcType(0) {
+	bdConnectionRequest()
+	    : mMode(0), mState(0), mStateTS(0), mPauseTS(0), mErrCode(0), mDelay(0), mRequestTS(0), mRecycled(0), mCurrentSrcType(0) {
 		bdsockaddr_clear(&mLocalAddr);
 	}
 
@@ -210,29 +206,20 @@ std::ostream &operator<<(std::ostream &out, const bdConnection &conn);
  * except for a couple of message in/outs + callback.
  */
 
-class bdConnectManager
-{
-	public:
+class bdConnectManager {
+public:
 
 	bdConnectManager(bdNodeId *ownid, bdSpace *space, bdQueryManager *qmgr, bdDhtFunctions *fns, bdNodePublisher *pub);	
-
-
 	/* connection functions */
 	void requestConnection(bdNodeId *id, uint32_t modes);
 	void allowConnection(bdNodeId *id, uint32_t modes);
-
-
 	/* high level */
-
-        void shutdownConnections();
-        void printConnections();
-
+    void shutdownConnections();
+    void printConnections();
 	/* Connections: Configuration */
 	void defaultConnectionOptions();
 	virtual void setConnectionOptions(uint32_t allowedModes, uint32_t flags);
-
 	/* Connections: Initiation */
-
 	int requestConnection(struct sockaddr_in *laddr, bdNodeId *target, uint32_t mode, uint32_t delay, uint32_t start);
 	int requestConnection_direct(struct sockaddr_in *laddr, bdNodeId *target);	
 	int requestConnection_proxy(struct sockaddr_in *laddr, bdNodeId *target, uint32_t mode, uint32_t delay);
@@ -254,15 +241,11 @@ class bdConnectManager
 				int mode, int point, int param, int cbtype, int errcode);
 
 	/* Connections: Outgoing */
-
 	int  startConnectionAttempt(bdId *proxyId, bdId *srcConnAddr, bdId *destConnAddr, int mode, int delay);
 	void AuthConnectionOk(bdId *srcId, bdId *proxyId, bdId *destId, int mode, int loc, int bandwidth, int delay);
 	void AuthConnectionNo(bdId *srcId, bdId *proxyId, bdId *destId, int mode, int loc, int errcode);
 	void iterateConnections();
-
-
 	/* Connections: Utility State */
-
 	bdConnection *findExistingConnection(bdNodeId *srcId, bdNodeId *proxyId, bdNodeId *destId);
 	bdConnection *newConnection(bdNodeId *srcId, bdNodeId *proxyId, bdNodeId *destId);
 	int cleanConnection(bdNodeId *srcId, bdNodeId *proxyId, bdNodeId *destId);
@@ -288,19 +271,19 @@ class bdConnectManager
 	/* setup Relay Mode */
 	void setRelayMode(uint32_t mode);
 
-	private:
+private:
 
 	std::map<bdProxyTuple, bdConnection> mConnections;
 	std::map<bdNodeId, bdConnectionRequest> mConnectionRequests;
 
-        uint32_t mConfigAllowedModes;
-        bool mConfigAutoProxy;
+    uint32_t mConfigAllowedModes;
+    bool mConfigAutoProxy;
 
 	uint32_t mRelayMode;
 
 	/****************************** Connection Code (in bdconnection.cc) ****************************/
 
-	private:
+private:
 
 	bdNodeId mOwnId;
 	bdSpace *mNodeSpace;

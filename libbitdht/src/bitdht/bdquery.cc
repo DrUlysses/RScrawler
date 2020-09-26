@@ -90,7 +90,7 @@ bdQuery::bdQuery(const bdNodeId *id, std::list<bdId> &startList, uint32_t queryF
 
 bool bdQuery::result(std::list<bdId> &answer) {
 	/* get all the matches to our query */
-        std::multimap<bdMetric, bdPeer>::iterator sit, eit;
+    std::multimap<bdMetric, bdPeer>::iterator sit, eit;
 	sit = mClosest.begin();
 	eit = mClosest.upper_bound(mLimit);
 	int i = 0;
@@ -177,11 +177,9 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId) {
 				mFns->bdRandomMidId(&mId, &(id.id), &midRndId);
 
 				targetNodeId = midRndId;
-			}
-			else
-			{
+			} else
 				targetNodeId = mId;
-			}
+
 #ifdef DEBUG_QUERY 
         		fprintf(stderr, "NextQuery() Querying Peer: ");
 			mFns->bdPrintId(std::cerr, &id);
@@ -209,8 +207,7 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId) {
        		fprintf(stderr, "NextQuery() over Max Time: Query force to Finish\n");
 #endif
 		/* fall through and stop */
-	}
-	else if ((mClosest.size() < mFns->bdNumQueryNodes()) || (notFinished)) {
+	} else if ((mClosest.size() < mFns->bdNumQueryNodes()) || (notFinished)) {
 #ifdef DEBUG_QUERY 
        		fprintf(stderr, "NextQuery() notFinished | !size(): Query not finished / No Query\n");
 #endif
@@ -233,21 +230,14 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId) {
 	/* check if we found the node */
 	if (mClosest.size() > 0) {
 		if (((mClosest.begin()->second).mPeerId.id == mId) && 
-			((mClosest.begin()->second).mLastRecvTime != 0)) {
+			((mClosest.begin()->second).mLastRecvTime != 0))
 			mState = BITDHT_QUERY_SUCCESS;
-		}
-		else if ((mPotentialPeers.begin()->second).mPeerId.id == mId) {
+		else if ((mPotentialPeers.begin()->second).mPeerId.id == mId)
 			mState = BITDHT_QUERY_PEER_UNREACHABLE;
-		}
 		else
-		{
 			mState = BITDHT_QUERY_FOUND_CLOSEST;
-		}
-	}
-	else
-	{
+	} else
 		mState = BITDHT_QUERY_FAILURE;
-	}
 	return 0;
 }
 
@@ -302,10 +292,9 @@ int bdQuery::addClosestPeer(const bdId *id, uint32_t mode) {
 #endif
 			if (mode) {
 				/* also update port from incoming id, as we have definitely recved from it */
-				if (mFns->bdUpdateSimilarId(&(it->second.mPeerId), id)) {
+				if (mFns->bdUpdateSimilarId(&(it->second.mPeerId), id))
 					/* updated it... must be Unstable */
 					it->second.mExtraFlags |= BITDHT_PEER_EXFLAG_UNSTABLE;
-				}
 			}
 			if (mode & BITDHT_PEER_STATUS_RECV_NODES) {
 				/* only update recvTime if sendTime > checkTime.... (then its our query) */
@@ -323,8 +312,7 @@ int bdQuery::addClosestPeer(const bdId *id, uint32_t mode) {
         fprintf(stderr, "Peer not in Query\n");
 #endif
 	/* firstly drop unresponded (bit ugly - but hard structure to extract from) */
-	int j;
-	for (j = 0; j < toDrop; j++) {
+	for (int j = 0; j < toDrop; j++) {
 #ifdef DEBUG_QUERY 
         	fprintf(stderr, "Dropping Peer that dont reply\n");
 #endif
@@ -346,7 +334,7 @@ int bdQuery::addClosestPeer(const bdId *id, uint32_t mode) {
 	}
 
 	/* trim it back */
-	while(mClosest.size() > (uint32_t) (mClosestListSize - 1)) {
+	while (mClosest.size() > (uint32_t) (mClosestListSize - 1)) {
 		std::multimap<bdMetric, bdPeer>::iterator it;
 		it = mClosest.end();
 		if (!mClosest.empty()) {
@@ -375,9 +363,8 @@ int bdQuery::addClosestPeer(const bdId *id, uint32_t mode) {
 	peer.mLastRecvTime = 0;
 	peer.mFoundTime = ts;
 
-	if (mode & BITDHT_PEER_STATUS_RECV_NODES) {
+	if (mode & BITDHT_PEER_STATUS_RECV_NODES)
 		peer.mLastRecvTime = ts;
-	}
 
 	mClosest.insert(std::pair<bdMetric, bdPeer>(dist, peer));
 	return 1;
@@ -414,9 +401,8 @@ int bdQuery::addPotentialPeer(const bdId *id, const bdId *src, uint32_t srcmode)
 
 	int worthy = worthyPotentialPeer(id);
 	int shouldPing = 0;
-	if (worthy) {
+	if (worthy)
 		shouldPing = updatePotentialPeer(id, 0, FIND_NODE_RESPONSE);
-	}
 	return shouldPing;
 }
 
@@ -437,7 +423,6 @@ int bdQuery::addPotentialPeer(const bdId *id, const bdId *src, uint32_t srcmode)
  * Potential Peers are a list of the closest answers to our queries.
  * Lots of these peers will not be reachable.... so will only exist in this list.
  * They will also never have there PeerFlags set ;(
- *
  */
 
 
@@ -528,14 +513,11 @@ int bdQuery::updatePotentialPeer(const bdId *id, uint32_t mode, uint32_t addType
 					it->second.mLastSendTime = now;
 					return 1;
 				}
-			}
-			else if (mode) 
-			{
+			} else if (mode) {
 				/* also update port from incoming id, as we have definitely recved from it */
-				if (mFns->bdUpdateSimilarId(&(it->second.mPeerId), id)) {
+				if (mFns->bdUpdateSimilarId(&(it->second.mPeerId), id))
 					/* updated it... must be Unstable */
 					it->second.mExtraFlags |= BITDHT_PEER_EXFLAG_UNSTABLE;
-				}
 			}
 			return 0;
 		}
@@ -561,9 +543,8 @@ int bdQuery::updatePotentialPeer(const bdId *id, uint32_t mode, uint32_t addType
 	peer.mFoundTime = now;
 	peer.mLastRecvTime = now;
 	peer.mLastSendTime = 0;
-	if (addType == FIND_NODE_RESPONSE) {
+	if (addType == FIND_NODE_RESPONSE)
 		peer.mLastSendTime = now;
-	}
 
 	mPotentialPeers.insert(std::pair<bdMetric, bdPeer>(dist, peer));
 
@@ -579,7 +560,7 @@ int bdQuery::updatePotentialPeer(const bdId *id, uint32_t mode, uint32_t addType
 
 int bdQuery::trimPotentialPeers_FixedLength() {
 	/* trim it back */
-	while(mPotentialPeers.size() > (uint32_t) (mFns->bdNumQueryNodes())) {
+	while (mPotentialPeers.size() > (uint32_t) (mFns->bdNumQueryNodes())) {
 		std::multimap<bdMetric, bdPeer>::iterator it;
 		it = mPotentialPeers.end();
 		it--; // must be more than 1 peer here?
@@ -603,7 +584,7 @@ int bdQuery::trimPotentialPeers_toClosest() {
 	bdMetric lastClosest = it->first;
 	
 	/* trim it back */
-	while(mPotentialPeers.size() > (uint32_t) (mFns->bdNumQueryNodes())) {
+	while (mPotentialPeers.size() > (uint32_t) (mFns->bdNumQueryNodes())) {
 		std::multimap<bdMetric, bdPeer>::iterator it;
 		it = mPotentialPeers.end();
 		it--; // must be more than 1 peer here?
@@ -614,11 +595,8 @@ int bdQuery::trimPotentialPeers_toClosest() {
 			fprintf(stderr, "\n");
 #endif
 			mPotentialPeers.erase(it);
-		}
-		else
-		{
+		} else
 			return 1;
-		}
 	}
 	return 1;
 }
@@ -635,14 +613,12 @@ int bdQuery::trimPotentialPeers_toClosest() {
 #define POT_PEER_RECV_TIMEOUT_PERIOD (mQueryIdlePeerRetryPeriod + EXPECTED_REPLY)
 
 int bdQuery::removeOldPotentialPeers() {
-	if (!(mQueryFlags & BITDHT_QFLAGS_DO_IDLE)) {
+	if (!(mQueryFlags & BITDHT_QFLAGS_DO_IDLE))
 		return 0;
-	}
 
 	time_t now = time(NULL);
-	if (now - mPotPeerCleanTS < POT_PEER_CLEAN_PERIOD) {
+	if (now - mPotPeerCleanTS < POT_PEER_CLEAN_PERIOD)
 		return 0;
-	}
 
 	mPotPeerCleanTS = now;
 
@@ -663,11 +639,8 @@ int bdQuery::removeOldPotentialPeers() {
 
 			// Unfortunately have to start again... as pointers invalidated.
 			//it = mPotentialPeers.begin();
-		}
-		else
-		{
+		} else
 			++it;
-		}
 	}
 	return 1 ;
 }
@@ -684,7 +657,7 @@ int bdQuery::removeOldPotentialPeers() {
  * We are particularly interested in peers with specific flags...
  * But all the peers have been pinged already by the time they reach this list.
  * So there are two options:
- *   1) Track everythings mode history - which is a waste of resources.
+ *   1) Track everything's mode history - which is a waste of resources.
  *   2) Store the list, and ping later.
  *   
  * We will store these in two lists: Flags & Unknown.
@@ -697,37 +670,33 @@ int bdQuery::removeOldPotentialPeers() {
  * We need several functions:
  *
  * For Extracting Proxies.
-bool bdQuery::proxies(std::list<bdId> &answer)
-bool bdQuery::potentialProxies(std::list<bdId> &answer)
+ *  bool bdQuery::proxies(std::list<bdId> &answer)
+ *  bool bdQuery::potentialProxies(std::list<bdId> &answer)
  *
  * For Adding/Updating Proxies.
-int bdQuery::addProxy(const bdId *id, const bdId *src, uint32_t srcmode)
-int bdQuery::updateProxy(const bdId *id, uint32_t mode)
+ *  int bdQuery::addProxy(const bdId *id, const bdId *src, uint32_t srcmode)
+ *  int bdQuery::updateProxy(const bdId *id, uint32_t mode)
  *
  */
 
 /*** Two Functions to extract Proxies... ***/
 bool bdQuery::proxies(std::list<bdId> &answer) {
 	/* get all the matches to our query */
-        std::list<bdPeer>::iterator it;
+    std::list<bdPeer>::iterator it;
 	int i = 0;
-	for (it = mProxiesFlagged.begin(); it != mProxiesFlagged.end(); it++, i++) {
+	for (it = mProxiesFlagged.begin(); it != mProxiesFlagged.end(); it++, i++)
 		answer.push_back(it->mPeerId);
-	}
 	return (i > 0);
 }
 
 bool bdQuery::potentialProxies(std::list<bdId> &answer) {
 	/* get all the matches to our query */
-        std::list<bdPeer>::iterator it;
+    std::list<bdPeer>::iterator it;
 	int i = 0;
-	for (it = mProxiesUnknown.begin(); it != mProxiesUnknown.end(); it++, i++) {
+	for (it = mProxiesUnknown.begin(); it != mProxiesUnknown.end(); it++, i++)
 		answer.push_back(it->mPeerId);
-	}
 	return (i > 0);
 }
-
-
 
 int bdQuery::addProxy(const bdId *id, const bdId *src, uint32_t srcmode) {
 	bdMetric dist;
@@ -737,25 +706,21 @@ int bdQuery::addProxy(const bdId *id, const bdId *src, uint32_t srcmode) {
 	
 	/* finally if it is an exact match, add as potential proxy */
 	int bucket = mFns->bdBucketDistance(&dist);
-	if ((bucket != 0) || (src == NULL)) {
+	if ((bucket != 0) || (src == NULL))
 		/* not a potential proxy */
 		return 0;
-	}
 
 #ifdef DEBUG_QUERY 
 	fprintf(stderr, "Bucket = 0, Have Potential Proxy!\n");
 #endif
 
 	bool found = false;
-	if (updateProxyList(src, srcmode, mProxiesUnknown)) {
+	if (updateProxyList(src, srcmode, mProxiesUnknown))
 		found = true;
-	}
 
-	if (!found) {
-		if (updateProxyList(src, srcmode, mProxiesFlagged)) {
+	if (!found)
+		if (updateProxyList(src, srcmode, mProxiesFlagged))
 			found = true;
-		}
-	}
 
 	if (!found) {
 		/* if we get here. its not in the list */
@@ -770,16 +735,12 @@ int bdQuery::addProxy(const bdId *id, const bdId *src, uint32_t srcmode) {
 		peer.mFoundTime = now;
 	
 		/* add it in */
-		if ((srcmode & mRequiredPeerFlags) == mRequiredPeerFlags) {
+		if ((srcmode & mRequiredPeerFlags) == mRequiredPeerFlags)
 			mProxiesFlagged.push_front(peer);
-		}
 		else
-		{
 			mProxiesUnknown.push_front(peer);
-		}
 	}
 
-	
 	trimProxies();
 	
 	return 1;
@@ -787,9 +748,8 @@ int bdQuery::addProxy(const bdId *id, const bdId *src, uint32_t srcmode) {
 
 
 int bdQuery::updateProxy(const bdId *id, uint32_t mode) {
-	if (!updateProxyList(id, mode, mProxiesUnknown)) {
+	if (!updateProxyList(id, mode, mProxiesUnknown))
 		updateProxyList(id, mode, mProxiesFlagged);
-	}
 
 	trimProxies();
 	return 1;
@@ -826,16 +786,11 @@ int bdQuery::updateProxyList(const bdId *id, uint32_t mode, std::list<bdPeer> &s
 			bdPeer peer = *it;
 			it = searchProxyList.erase(it);
 
-			if ((peer.mPeerFlags & mRequiredPeerFlags) == mRequiredPeerFlags) {
+			if ((peer.mPeerFlags & mRequiredPeerFlags) == mRequiredPeerFlags)
 				mProxiesFlagged.push_front(peer);
-			}
 			else
-			{
 				mProxiesUnknown.push_front(peer);
-			}
-
 			return 1;
-			break;
 		}
 	}
 
@@ -847,13 +802,11 @@ int bdQuery::updateProxyList(const bdId *id, uint32_t mode, std::list<bdPeer> &s
 int bdQuery::trimProxies() {
 
 	/* drop excess Potential Proxies */
-	while(mProxiesUnknown.size() > MAX_POTENTIAL_PROXIES) {
+	while(mProxiesUnknown.size() > MAX_POTENTIAL_PROXIES)
 		mProxiesUnknown.pop_back();
-	}
 
-	while(mProxiesFlagged.size() > MAX_POTENTIAL_PROXIES) {
+	while(mProxiesFlagged.size() > MAX_POTENTIAL_PROXIES)
 		mProxiesFlagged.pop_back();
-	}
 	return 1;
 }
 
@@ -862,12 +815,10 @@ int bdQuery::trimProxies() {
  ******************************** Potential Proxies ****************************************
  *******************************************************************************************/
 
-
-
 /* print query.
  */
 
-int     bdQuery::printQuery() {
+int bdQuery::printQuery() {
 #ifdef DEBUG_QUERY 
 	fprintf(stderr, "bdQuery::printQuery()\n");
 #endif
@@ -877,9 +828,8 @@ int     bdQuery::printQuery() {
 	mFns->bdPrintNodeId(std::cerr, &mId);
 	fprintf(stderr, " Query State: %d", mState);
 	fprintf(stderr, " Query Age %ld secs", ts-mQueryTS);
-	if (mState >= BITDHT_QUERY_FAILURE) {
+	if (mState >= BITDHT_QUERY_FAILURE)
 		fprintf(stderr, " Search Time: %d secs", mSearchTime);
-	}
 	fprintf(stderr, "\n");
 
 #ifdef DEBUG_QUERY 
@@ -960,9 +910,6 @@ int     bdQuery::printQuery() {
 	return 1;
 }
 
-
-
-
 /********************************* Remote Query **************************************/
 
 #define QUERY_HISTORY_LIMIT	10 // Typically get max of 4-6 per 10minutes.
@@ -973,14 +920,8 @@ bdRemoteQuery::bdRemoteQuery(bdId *id, bdNodeId *query, bdToken *transId, uint32
 	mQueryTS = time(NULL);
 }
 
-
-
-
 bdQueryHistoryList::bdQueryHistoryList()
-	:mBadPeer(false) {
-
-}
-
+	:mBadPeer(false) {}
 
 bool bdQueryHistoryList::addIncomingQuery(time_t recvd, const bdNodeId *aboutId) {
 	mList.insert(std::make_pair(recvd, *aboutId));
@@ -996,22 +937,19 @@ bool bdQueryHistoryList::cleanupMsgs(time_t before) {
 		return true;
 	}
 
-        // Delete the old stuff in the list.
-        while((mList.begin() != mList.end()) && (mList.begin()->first < before)) {
-                mList.erase(mList.begin());
-        }
+    // Delete the old stuff in the list.
+    while((mList.begin() != mList.end()) && (mList.begin()->first < before))
+        mList.erase(mList.begin());
 
-        // return true if empty.
-        if (mList.begin() == mList.end()) {
-                return true;
-        }
-        return false;
+    // return true if empty.
+    if (mList.begin() == mList.end())
+        return true;
+
+    return false;
 }
 
 bdQueryHistory::bdQueryHistory()
- :mStorePeriod(QUERY_HISTORY_PERIOD) {
-	return;
-}
+    :mStorePeriod(QUERY_HISTORY_PERIOD) {}
 
 bool bdQueryHistory::addIncomingQuery(time_t recvd, const bdId *id, const bdNodeId *aboutId) {
 	std::map<bdId, bdQueryHistoryList>::iterator it;
@@ -1029,18 +967,16 @@ bool bdQueryHistory::isBadPeer(const bdId *id) {
 	std::map<bdId, bdQueryHistoryList>::iterator it;
 
 	it = mHistory.find(*id);
-	if (it == mHistory.end()) {
+	if (it == mHistory.end())
 		return false;
-	}
 
 	return it->second.mBadPeer;
 }
 
 
 void bdQueryHistory::cleanupOldMsgs() {
-	if (mStorePeriod == 0) {
+	if (mStorePeriod == 0)
 		return; // no cleanup.
-	}
 
 	time_t before = time(NULL) - mStorePeriod;
 	std::map<bdId, bdQueryHistoryList>::iterator it;
@@ -1050,11 +986,8 @@ void bdQueryHistory::cleanupOldMsgs() {
 			++tit;
 			mHistory.erase(it);
 			it = tit;
-		}
-		else
-		{
-			++it;
-		}
+		} else
+            ++it;
 	}
 }
 
@@ -1070,9 +1003,8 @@ void bdQueryHistory::printMsgs() {
 		out << "\t";
 		bdStdPrintId(out, &(it->first));
 		out << " " << it->second.mList.size();
-		if (it->second.mBadPeer) {
+		if (it->second.mBadPeer)
 			out << " BadPeer";
-		}
 		out << std::endl;
 	}
 }
