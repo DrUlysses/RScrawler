@@ -3,8 +3,16 @@
 
 #include <util/bdthreads.h>
 #include <bdiface.h>
+#include <zconf.h>
+#include <bdstddht.h>
+#include <algorithm>
+#include <cstring>
+#include <utility>
+#include <bdhandler.h>
 
 #define TICK_PAUSE 5 // in seconds
+#define TICK_LENGTH 1
+#define PEER_RECONNECT_TICKS 2
 #define SEARCH_SHOTS_COUNT 5
 #define SEARCH_ROUNDS_COUNT 3
 #define USED_IDS_FILENAME "my_ids"

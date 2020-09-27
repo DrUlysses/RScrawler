@@ -39,10 +39,10 @@
 #include <iomanip>
 
 
-#define BITDHT_QUERY_START_PEERS    10
+#define BITDHT_QUERY_START_PEERS        10
 #define BITDHT_QUERY_NEIGHBOUR_PEERS    8
 
-#define BITDHT_MAX_REMOTE_QUERY_AGE	3 //  3 seconds, keep it fresh.
+#define BITDHT_MAX_REMOTE_QUERY_AGE	    3 //  3 seconds, keep it fresh.
 #define MAX_REMOTE_PROCESS_PER_CYCLE	5
 
 /****
@@ -60,10 +60,10 @@
  * #define DISABLE_BAD_PEER_FILTER		1
  *
  ***/
-#define DEBUG_NODE_MSGOUT 1
-#define DEBUG_NODE_MSGIN 1
-#define DEBUG_NODE_MULTIPEER 1
-#define DEBUG_NODE_MSGS 1
+#define DEBUG_NODE_MSGOUT       1
+#define DEBUG_NODE_MSGIN        1
+#define DEBUG_NODE_MULTIPEER    1
+#define DEBUG_NODE_MSGS         1
 
 //#define DISABLE_BAD_PEER_FILTER		1
 

@@ -281,17 +281,6 @@ int BitDhtHandler::PeerCallback(const bdId *id, uint32_t status) {
             std::cerr << "BitDhtHandler::PeerCallback() QUERY PEER UNREACHABLE ... saving address ";
             std::cerr << std::endl;
 
-            const char *logName = "dhtlogs";
-            FILE *tempFile = fopen(logName, "a+");
-            if (!tempFile)
-                std::cerr << "Can't open dhtlogs file! err=%d: %s\n", errno, strerror(errno);
-            std::string tempID;
-            bdStdPrintId(tempID, id, false);
-            tempID.erase(tempID.find("ip:"), 3);
-            if (fprintf(tempFile, "%s %lu\n", tempID.c_str(), time(NULL)) < 0)
-                std::cerr << "While writing to dht logs accrued an err=%d: %s\n", errno, strerror(errno);
-            fclose(tempFile);
-
             it->second.id = *id;
             break;
         }
@@ -300,17 +289,6 @@ int BitDhtHandler::PeerCallback(const bdId *id, uint32_t status) {
 
             std::cerr << "BitDhtHandler::PeerCallback() QUERY PEER ONLINE ... saving address";
             std::cerr << std::endl;
-
-            const char *logName = "dhtlogs";
-            FILE *tempFile = fopen(logName, "a+");
-            if (!tempFile)
-                std::cerr << "Can't open dhtlogs file! err=%d: %s\n", errno, strerror(errno);
-            std::string tempID;
-            bdStdPrintId(tempID, id, false);
-            tempID.erase(tempID.find("ip:"), 3);
-            if (fprintf(tempFile, "%s %lu\n", tempID.c_str(), time(NULL)) < 0)
-                std::cerr << "While writing to dht logs accrued an err=%d: %s\n", errno, strerror(errno);
-            fclose(tempFile);
 
             it->second.id = *id;
             break;

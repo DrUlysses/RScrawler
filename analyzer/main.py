@@ -39,12 +39,28 @@ def draw_peers_and_time_plot():
     plot.savefig("Peers count - Elapsed time.png")
 
 
+def draw_unique_peers_and_time_plot():
+    plot.ylabel("Unique peers count")
+    plot.xlabel("Elapsed time")
+    data = database.get_unique_all_count_to_time_results()
+    plot.bar(*zip(*data.items()))
+    plot.savefig("Unique Peers count - Elapsed time.png")
+
+
 def draw_rs_peers_and_time_plot():
-    plot.ylabel("Peers count")
+    plot.ylabel("RS Peers count")
     plot.xlabel("Elapsed time")
     data = database.get_rs_count_to_time_results()
     plot.bar(*zip(*data.items()))
     plot.savefig("RS Peers count - Elapsed time.png")
+
+
+def draw_unique_rs_peers_and_time_plot():
+    plot.ylabel("Unique RS peers count")
+    plot.xlabel("Elapsed time")
+    data = database.get_unique_rs_count_to_time_results()
+    plot.bar(*zip(*data.items()))
+    plot.savefig("Unique RS Peers count - Elapsed time.png")
 
 
 if __name__ == '__main__':
@@ -53,6 +69,8 @@ if __name__ == '__main__':
     print("Extracting rspeers")
     get_data(path_to_logs + "/rspeers", "rs")
     draw_rs_peers_and_time_plot()
+    draw_unique_rs_peers_and_time_plot()
     print("Extracting dhtlogs")
     get_data(path_to_logs + "/dhtlogs")
     draw_peers_and_time_plot()
+    draw_unique_peers_and_time_plot()

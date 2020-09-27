@@ -1,8 +1,3 @@
-#include <zconf.h>
-#include <bdstddht.h>
-#include <bootstrap_fn.h>
-#include <cstring>
-#include <utility>
 #include "crawler.h"
 
 Crawler::Crawler() : crwlrMutex(true) {}
@@ -100,22 +95,41 @@ void Crawler::run() {
 }
 
 void Crawler::iterationFirstStage() {
-    // Start random requests from separate threads
-    if (!readyToCheck)
-        bdSingleSourceFindPeers(*dhtHandler, SEARCH_SHOTS_COUNT, SEARCH_ROUNDS_COUNT, regionStart, regionEnd, toCheckPeerList);
-    else {
-        bdCheckPeersFromList(*dhtHandler, toCheckPeerList);
-        readyToCheck = false;
+    // Send random request to unknown peer
+    bdNodeId searchId{};
+    bdStdRandomIdFromRegion(&searchId, regionStart, regionEnd);
+    while (std::find(toCheckPeerList.begin(), toCheckPeerList.end(), searchId) != toCheckPeerList.end())
+        bdStdRandomIdFromRegion(&searchId, regionStart, regionEnd);
+    bdId resultId;
+    uint32_t status;
+
+    resultId.id = searchId;
+
+    short ticksDone = 0;
+    while (!(dhtHandler->SearchResult(&resultId, status) || ticksDone >= PEER_RECONNECT_TICKS)) {
+        sleep(TICK_LENGTH);
+        ticksDone++;
     }
 }
 
 void Crawler::iterationSecondStage() {
     if (!toCheckPeerList.empty()) {
         time_t tempTime = time(NULL);
-        bdFindPeers(*dhtHandler, toCheckPeerList);
+        bdId resultId;
+        uint32_t status;
+        for (auto peerId : toCheckPeerList) {
+            resultId.id = peerId;
+
+            short ticksDone = 0;
+            while (!(dhtHandler->SearchResult(&resultId, status) || ticksDone >= PEER_RECONNECT_TICKS)) {
+                sleep(TICK_LENGTH);
+                ticksDone++;
+            }
+        }
         tempTime = time(NULL) - tempTime;
         printf("Finished status check and save in (sec): %lu\n", tempTime);
-    }
+    } else
+        iterationFirstStage();
 }
 
 void Crawler::extractToCheckList(std::list<bdNodeId> peers) {

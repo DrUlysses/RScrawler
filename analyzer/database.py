@@ -45,6 +45,21 @@ def get_all_count_to_time_results():
     return res
 
 
+def get_unique_all_count_to_time_results():
+    # there should be more efficient way to do this
+    # Iterate the database and count the number of rs results based on the time
+    res = dict([])
+    ids = []
+    entries = session.query(PeerEntry)
+    for entry in entries:
+        if entry.id not in ids:
+            time = entry.time
+            current = res.get(time, 0)
+            res[time] = current + 1
+            ids.append(entry.id)
+    return res
+
+
 def get_rs_count_to_time_results():
     # there should be more efficient way to do this
     # Iterate the database and count the number of rs results based on the time
@@ -55,4 +70,19 @@ def get_rs_count_to_time_results():
             time = entry.time
             current = res.get(time, 0)
             res[time] = current + 1
+    return res
+
+
+def get_unique_rs_count_to_time_results():
+    # there should be more efficient way to do this
+    # Iterate the database and count the number of rs results based on the time
+    res = dict([])
+    ids = []
+    entries = session.query(PeerEntry)
+    for entry in entries:
+        if entry.version == "rs" and entry.id not in ids:
+            time = entry.time
+            current = res.get(time, 0)
+            res[time] = current + 1
+            ids.append(entry.id)
     return res

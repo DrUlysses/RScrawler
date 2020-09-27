@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <bdstddht.h>
-#include "libbitdht/src/example/bootstrap_fn.h"
 #include "libbitdht/src/rsids.h"
 #include "logger.h"
 #include "crawler.h"

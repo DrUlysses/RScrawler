@@ -72,8 +72,6 @@ add_library(${LIB_NAME}
     bitdht/bdfriendlist.cc
     example/bdhandler.cc
     example/bdhandler.h
-    example/bootstrap_fn.cc
-    example/bootstrap_fn.h
     rsdebug.cc
     rsdebug.h
     rsdeprecate.h
