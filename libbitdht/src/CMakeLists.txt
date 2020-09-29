@@ -6,7 +6,7 @@ set(OPENSSL_USE_STATIC_LIBS TRUE)
 
 project(${PROJECT_NAME} C CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bitdht)
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/example)

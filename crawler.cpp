@@ -31,7 +31,7 @@ void Crawler::initDhtHandler() {
     }
 }
 
-void Crawler::stop() {
+void Crawler::stopDht() {
     isActive = false;
     {
         bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
@@ -40,7 +40,7 @@ void Crawler::stop() {
     }
 }
 
-void Crawler::start() {
+void Crawler::startDht() {
     isActive = true;
     {
         bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
@@ -78,13 +78,13 @@ void Crawler::setCrawlsCount(unsigned int count) {
 }
 
 void Crawler::run() {
+    std::cerr << "ENTERED RUN" << std::endl;
     for (unsigned int i = 0; i < crawlsCount; i++) {
         if (isActive) {
             if (currentStage == 0) {
                 bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
                 Crawler::iterationFirstStage();
-            }
-            else {
+            } else {
                 bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
                 Crawler::iterationSecondStage();
             }

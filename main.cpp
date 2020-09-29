@@ -7,7 +7,7 @@
 #include "logger.h"
 #include "crawler.h"
 
-#define CRAWLERS_COUNT 32 // <= 32
+#define CRAWLERS_COUNT 1 // <= 32
 #define CRAWL_DURATION 30 // in seconds
 #define CRAWLS_COUNT 2
 #define DURATION_BETWEEN_CHECKS 30 // in seconds

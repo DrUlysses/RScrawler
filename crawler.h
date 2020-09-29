@@ -26,9 +26,9 @@ public:
     void init();
 
     virtual void run();
-    virtual void stop();
+    void stopDht();
     void restart();
-    void start();
+    void startDht();
     void enable(bool state);
     void setActive(bool state);
     bool getActive();

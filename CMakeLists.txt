@@ -28,6 +28,6 @@ add_executable(${PROJECT_NAME} main.cpp logger.cpp logger.h crawler.cpp crawler.
 find_package(OpenSSL REQUIRED)
 find_package(Threads REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC libbitdht Threads::Threads OpenSSL::Crypto)# example tests udp util bitdht)
+target_link_libraries(${PROJECT_NAME} PUBLIC libbitdht Threads::Threads OpenSSL::Crypto stdc++fs)# example tests udp util bitdht)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
