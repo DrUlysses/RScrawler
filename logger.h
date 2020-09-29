@@ -34,8 +34,7 @@ public:
     bdMutex dhtMutex;
 private:
     bool isAlive = true;
-    bool isActive = true;
-    bool isSecondStage = false;
+    bool isActive = false;
     static std::map<bdNodeId, bdFoundPeer> discoveredPeers;
 
     void iteration();

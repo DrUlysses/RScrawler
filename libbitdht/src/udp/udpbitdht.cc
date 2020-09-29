@@ -216,8 +216,7 @@ int UdpBitDht::stopDht() {
 	return mBitDhtManager->stopDht();
 }
 
-int UdpBitDht::stateDht() 
-{
+int UdpBitDht::stateDht() {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
 	return mBitDhtManager->stateDht();
@@ -241,12 +240,11 @@ uint32_t UdpBitDht::setDhtMode(uint32_t dhtFlags) {
 	return mBitDhtManager->setDhtMode(dhtFlags);
 }
 
+/******************* Internals *************************/
 
-        /******************* Internals *************************/
+/***** Iteration / Loop Management *****/
 
-        /***** Iteration / Loop Management *****/
-
-        /*** Overloaded from UdpSubReceiver ***/
+/*** Overloaded from UdpSubReceiver ***/
 int UdpBitDht::recvPkt(void *data, int size, struct sockaddr_in &from) {
 	/* pass onto bitdht */
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/

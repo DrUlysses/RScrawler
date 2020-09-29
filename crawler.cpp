@@ -1,6 +1,6 @@
 #include "crawler.h"
 
-Crawler::Crawler() : crwlrMutex(true) {}
+Crawler::Crawler(): crwlrMutex(true) {}
 
 void Crawler::init() {
     bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
@@ -19,16 +19,17 @@ void Crawler::init() {
 }
 
 Crawler::~Crawler() noexcept {
+    bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+    delete dhtHandler;
     std::cerr << "Crawler object destroyed, id: ";
     bdStdPrintNodeId(std::cerr, peerId);
     std::cerr << std::endl;
 }
 
 void Crawler::initDhtHandler() {
-    {
-        bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
-        dhtHandler = new BitDhtHandler(peerId, port, appId, bootstrapfile);
-    }
+    bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+    dhtHandler = new BitDhtHandler(peerId, port, appId, bootstrapfile);
+    dhtHandler->enable(false);
 }
 
 void Crawler::stopDht() {
@@ -59,18 +60,13 @@ void Crawler::restart() {
 
 void Crawler::enable(bool state) {
     isActive = state;
+}
+
+void Crawler::enableDht(bool state) {
     {
         bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
         dhtHandler->enable(state);
     }
-}
-
-void Crawler::setActive(bool state) {
-    isActive = state;
-}
-
-bool Crawler::getActive() {
-    return isActive && dhtHandler->getEnabled();
 }
 
 void Crawler::setCrawlsCount(unsigned int count) {
@@ -78,16 +74,13 @@ void Crawler::setCrawlsCount(unsigned int count) {
 }
 
 void Crawler::run() {
-    std::cerr << "ENTERED RUN" << std::endl;
-    for (unsigned int i = 0; i < crawlsCount; i++) {
+    while (true) {
         if (isActive) {
-            if (currentStage == 0) {
-                bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+            bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+            if (currentStage == 0)
                 Crawler::iterationFirstStage();
-            } else {
-                bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+             else
                 Crawler::iterationSecondStage();
-            }
             writeLogs();
         }
         sleep(TICK_PAUSE);
@@ -100,6 +93,9 @@ void Crawler::iterationFirstStage() {
     bdStdRandomIdFromRegion(&searchId, regionStart, regionEnd);
     while (std::find(toCheckPeerList.begin(), toCheckPeerList.end(), searchId) != toCheckPeerList.end())
         bdStdRandomIdFromRegion(&searchId, regionStart, regionEnd);
+
+    dhtHandler->FindNode(&searchId);
+
     bdId resultId;
     uint32_t status;
 
@@ -117,9 +113,12 @@ void Crawler::iterationSecondStage() {
         time_t tempTime = time(NULL);
         bdId resultId;
         uint32_t status;
-        for (auto peerId : toCheckPeerList) {
-            resultId.id = peerId;
+        for (auto peerID : toCheckPeerList) {
+            if (!isActive)
+                break;
+            dhtHandler->FindNode(&peerID);
 
+            resultId.id = peerID;
             short ticksDone = 0;
             while (!(dhtHandler->SearchResult(&resultId, status) || ticksDone >= PEER_RECONNECT_TICKS)) {
                 sleep(TICK_LENGTH);
@@ -133,13 +132,13 @@ void Crawler::iterationSecondStage() {
 }
 
 void Crawler::extractToCheckList(std::list<bdNodeId> peers) {
+    bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
     toCheckPeerList.clear();
     for (auto & peer : peers) {
         auto *a_data = (uint32_t *) peer.data;
         if (a_data[0] >= regionStart && a_data[0] < regionEnd)
             toCheckPeerList.push_back(peer);
     }
-    readyToCheck = true;
 }
 
 void Crawler::setRegions(int start, int end) {
@@ -148,6 +147,7 @@ void Crawler::setRegions(int start, int end) {
 }
 
 void Crawler::setStage(bool stage) {
+    bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
     currentStage = stage;
 }
 
@@ -161,11 +161,11 @@ void Crawler::setPort(uint16_t newPort) {
 }
 
 std::list<bdNodeId> Crawler::getToCheckList() {
+    bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
     return toCheckPeerList;
 }
 
 void Crawler::writeLogs() {
-    bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
     const char *logName = "dhtlogs";
     if (!dhtHandler) {
         std::cerr << "Problem with dhtHandler, can't write to logs" << std::endl;
@@ -175,11 +175,10 @@ void Crawler::writeLogs() {
         std::cerr << "dhtHandler is disabled, can't write to logs" << std::endl;
         return;
     }
-
     std::vector<std::string> logs(dhtHandler->mUdpBitDht->getFoundPeers());
     FILE *tempFile = fopen(logName, "a+");
     bdNodeId tempId = {};
-    for (auto & log : logs) {
+    for (auto &log : logs) {
         if (log.empty())
             continue;
         // TODO: can be done better

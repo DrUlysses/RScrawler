@@ -77,7 +77,6 @@ public:
     }
 
 private:
-
 	BitDhtHandler *mParent;
 };
 
@@ -144,8 +143,7 @@ void BitDhtHandler::shutdown() /* blocking call */ {
 }
 
 void BitDhtHandler::start() /* blocking call */ {
-	if (this != nullptr)
-		mUdpBitDht->startDht();
+    mUdpBitDht->startDht();
 }
 
 

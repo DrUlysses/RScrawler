@@ -317,9 +317,8 @@ public:
 #define BITDHT_RELAYS_SERVER		3
 
 
-class BitDhtCallback
-{
-	public:
+class BitDhtCallback {
+public:
 //        ~BitDhtCallback();
 
 	// dummy cos not needed for standard dht behaviour;
@@ -344,50 +343,49 @@ class BitDhtCallback
 };
 
 
-class BitDhtInterface
-{
-	public:
+class BitDhtInterface {
+public:
 
 	/* bad peer notification */
-virtual void addBadPeer(const struct sockaddr_in &addr, uint32_t source, uint32_t reason, uint32_t age) = 0;
+    virtual void addBadPeer(const struct sockaddr_in &addr, uint32_t source, uint32_t reason, uint32_t age) = 0;
 
 	/* Friend Tracking */
-virtual void updateKnownPeer(const bdId *id, uint32_t type, uint32_t flags) = 0;
+    virtual void updateKnownPeer(const bdId *id, uint32_t type, uint32_t flags) = 0;
 
         /***** Request Lookup (DHT Peer & Keyword) *****/
-virtual void addFindNode(bdNodeId *id, uint32_t mode) = 0;
-virtual void removeFindNode(bdNodeId *id) = 0;
-virtual void findDhtValue(bdNodeId *id, std::string key, uint32_t mode) = 0;
+    virtual void addFindNode(bdNodeId *id, uint32_t mode) = 0;
+    virtual void removeFindNode(bdNodeId *id) = 0;
+    virtual void findDhtValue(bdNodeId *id, std::string key, uint32_t mode) = 0;
 
 	/***** Connections Requests *****/
-virtual bool ConnectionRequest(struct sockaddr_in *laddr, bdNodeId *target, uint32_t mode, uint32_t delay, uint32_t start) = 0;
-virtual void ConnectionAuth(bdId *srcId, bdId *proxyId, bdId *destId, uint32_t mode, uint32_t loc, 
-						uint32_t bandwidth, uint32_t delay, uint32_t answer) = 0;
-virtual void ConnectionOptions(uint32_t allowedModes, uint32_t flags) = 0;
+    virtual bool ConnectionRequest(struct sockaddr_in *laddr, bdNodeId *target, uint32_t mode, uint32_t delay, uint32_t start) = 0;
+    virtual void ConnectionAuth(bdId *srcId, bdId *proxyId, bdId *destId, uint32_t mode, uint32_t loc,
+                            uint32_t bandwidth, uint32_t delay, uint32_t answer) = 0;
+    virtual void ConnectionOptions(uint32_t allowedModes, uint32_t flags) = 0;
 
-virtual bool setAttachMode(bool on) = 0;
+    virtual bool setAttachMode(bool on) = 0;
 
 
         /***** Add / Remove Callback Clients *****/
-virtual void addCallback(BitDhtCallback *cb) = 0;
-virtual void removeCallback(BitDhtCallback *cb) = 0;
+    virtual void addCallback(BitDhtCallback *cb) = 0;
+    virtual void removeCallback(BitDhtCallback *cb) = 0;
 
 	/***** Get Results Details *****/
-virtual int getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from) = 0;
-virtual int getDhtValue(const bdNodeId *id, std::string key, std::string &value) = 0;
-virtual int getDhtBucket(const int idx, bdBucket &bucket) = 0;
+    virtual int getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from) = 0;
+    virtual int getDhtValue(const bdNodeId *id, std::string key, std::string &value) = 0;
+    virtual int getDhtBucket(const int idx, bdBucket &bucket) = 0;
 
-virtual int getDhtQueries(std::map<bdNodeId, bdQueryStatus> &queries) = 0;
-virtual int getDhtQueryStatus(const bdNodeId *id, bdQuerySummary &query) = 0;
+    virtual int getDhtQueries(std::map<bdNodeId, bdQueryStatus> &queries) = 0;
+    virtual int getDhtQueryStatus(const bdNodeId *id, bdQuerySummary &query) = 0;
 
         /* stats and Dht state */
-virtual int startDht() = 0;
-virtual int stopDht() = 0;
-virtual int stateDht() = 0; /* STOPPED, STARTING, ACTIVE, FAILED */
-virtual uint32_t statsNetworkSize() = 0;
-virtual uint32_t statsBDVersionSize() = 0; /* same version as us! */
+    virtual int startDht() = 0;
+    virtual int stopDht() = 0;
+    virtual int stateDht() = 0; /* STOPPED, STARTING, ACTIVE, FAILED */
+    virtual uint32_t statsNetworkSize() = 0;
+    virtual uint32_t statsBDVersionSize() = 0; /* same version as us! */
 
-virtual uint32_t setDhtMode(uint32_t dhtFlags) = 0;
+    virtual uint32_t setDhtMode(uint32_t dhtFlags) = 0;
 };
 
 

@@ -30,8 +30,7 @@ public:
     void restart();
     void startDht();
     void enable(bool state);
-    void setActive(bool state);
-    bool getActive();
+    void enableDht(bool state);
 
     void setStage(bool stage);
     void setRegions(int start, int end);
@@ -49,8 +48,7 @@ private:
 
     std::list<bdNodeId> toCheckPeerList;
     unsigned int crawlsCount = 1;
-    bool readyToCheck = false;
-    bool isActive = true;
+    bool isActive = false;
     bdNodeId* peerId;
     bool currentStage;
     std::string bootstrapfile = PATH_TO_BDBOOT;

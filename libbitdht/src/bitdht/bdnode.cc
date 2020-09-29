@@ -2040,16 +2040,6 @@ void bdNode::msgin_connect_genmsg(bdId *id, bdToken *transId, int msgtype,
 
 }
 
-
-
-
-
-
-
-
-
-
-
 /****************** Other Functions ******************/
 
 void bdNode::genNewToken(bdToken *token) {
@@ -2081,19 +2071,16 @@ void bdNode::genNewTransId(bdToken *token) {
 	fprintf(stderr, "bdNode::genNewTransId()");
 	fprintf(stderr, ")\n");
 #endif
-
 	std::string num;
 	bd_sprintf(num, "%02lx", transIdCounter++);
 	int len = num.size();
 	if (len > BITDHT_TOKEN_MAX_LEN)
 		len = BITDHT_TOKEN_MAX_LEN;
 
-	for (int i = 0; i < len; i++) {
+	for (int i = 0; i < len; i++)
 		token->data[i] = num[i];
-	}
 	token->len = len;
 }
-
 
 /* Store Remote Query for processing */
 int bdNode::queueQuery(bdId *id, bdNodeId *query, bdToken *transId, uint32_t query_type) {
@@ -2121,7 +2108,6 @@ void bdNode::registerOutgoingMsg(bdId *id, bdToken *transId, uint32_t msgType, b
 #endif
 	
 #ifdef USE_HISTORY
-
 	// splitting up - to see if we can isolate the crash causes.
 	switch(msgType) {
 		// disabled types (which appear to crash it!)
@@ -2154,8 +2140,6 @@ void bdNode::registerOutgoingMsg(bdId *id, bdToken *transId, uint32_t msgType, b
 	(void) transId;
 	(void) aboutId;
 #endif
-	
-	
 
 /****
 #define BITDHT_MSG_TYPE_UNKNOWN         0
@@ -2171,8 +2155,6 @@ void bdNode::registerOutgoingMsg(bdId *id, bdToken *transId, uint32_t msgType, b
 ***/
 
 }
-
-
 
 uint32_t bdNode::registerIncomingMsg(bdId *id, bdToken *transId, uint32_t msgType, bdNodeId *aboutId) {
 	
@@ -2219,12 +2201,9 @@ void bdNodeNetMsg::print(std::ostream &out) {
 	out << std::endl;
 }
 
-
 bdNodeNetMsg::~bdNodeNetMsg() {
 	free(data);
 }
-
-
 
 /**************** In/Out of Relay Mode ******************/
 
@@ -2235,10 +2214,8 @@ void bdNode::dropRelayServers() {
 	std::list<bdNodeId>::iterator it;
 
 	mFriendList.findPeersWithFlags(flags, peerList);
-	for (it = peerList.begin(); it != peerList.end(); it++) {
+	for (it = peerList.begin(); it != peerList.end(); it++)
 		mFriendList.removePeer(&(*it));
-	}
-
 	mNodeSpace.clean_node_flags(flags);
 }
 
@@ -2268,11 +2245,7 @@ void bdNode::pingRelayServers() {
 #endif
 
 		}
-		else
-		{
-			/* try ping - if we have an address??? */
-
-		}
+        /* try ping - if we have an address??? */
 	}
 }
 

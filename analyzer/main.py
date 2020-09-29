@@ -37,6 +37,8 @@ def draw_peers_and_time_plot():
     data = database.get_all_count_to_time_results()
     plot.bar(*zip(*data.items()))
     plot.savefig("Peers count - Elapsed time.png")
+    # Close, so the pics won't overlap
+    plot.close("all")
 
 
 def draw_unique_peers_and_time_plot():
@@ -45,6 +47,8 @@ def draw_unique_peers_and_time_plot():
     data = database.get_unique_all_count_to_time_results()
     plot.bar(*zip(*data.items()))
     plot.savefig("Unique Peers count - Elapsed time.png")
+    # Close, so the pics won't overlap
+    plot.close("all")
 
 
 def draw_rs_peers_and_time_plot():
@@ -53,6 +57,8 @@ def draw_rs_peers_and_time_plot():
     data = database.get_rs_count_to_time_results()
     plot.bar(*zip(*data.items()))
     plot.savefig("RS Peers count - Elapsed time.png")
+    # Close, so the pics won't overlap
+    plot.close("all")
 
 
 def draw_unique_rs_peers_and_time_plot():
@@ -61,6 +67,8 @@ def draw_unique_rs_peers_and_time_plot():
     data = database.get_unique_rs_count_to_time_results()
     plot.bar(*zip(*data.items()))
     plot.savefig("Unique RS Peers count - Elapsed time.png")
+    # Close, so the pics won't overlap
+    plot.close("all")
 
 
 if __name__ == '__main__':

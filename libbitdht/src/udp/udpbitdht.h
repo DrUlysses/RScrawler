@@ -44,7 +44,7 @@
 class UdpBitDht: public UdpSubReceiver, public bdThread, public BitDhtInterface {
 public:
 
-    UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string dhtVersion, std::string bootstrapfile, const std::string& filteredipfile,bdDhtFunctions *fns);
+    UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string dhtVersion, std::string bootstrapfile, const std::string& filteredipfile, bdDhtFunctions *fns);
     virtual ~UdpBitDht();
 
 
@@ -118,7 +118,6 @@ private:
 
 	uint32_t mReadBytes;
 	uint32_t mWriteBytes;
-
 };
 
 
