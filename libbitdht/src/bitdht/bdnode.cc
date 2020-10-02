@@ -1538,6 +1538,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
             " token " << transId.data << " nodes:" << std::endl;
         for (auto tempNode : nodes) {
             bdStdPrintId(tempID, &tempNode, false);
+            tempID.erase(tempID.find("ip:"), 3);
             std::cout << "Became " << tempID << " token " << transId.data << std::endl;
             mFoundPeers.insert(mFoundPeers.end(), tempID);
         }

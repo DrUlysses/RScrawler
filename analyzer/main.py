@@ -16,17 +16,16 @@ def get_data(path, version=""):
         if line == '':
             break
         data = line.split(' ')
-        if data[0].count('0') == 40:
+        if len(data) < 3:
             continue
-        if len(data[0]) == 40 and data[1].count('.') == 3:
-            if len(data) >= 3:
-                if len(data[2]) >= 10:
-                    database.add_entry(data[0], data[1], version, data[2].replace("\n", ''))
+        if len(data) >= 3:
+            if len(data[2]) >= 10:
+                database.add_entry(data[0], data[1], version, data[2].replace("\n", ''))
+                lines_done += 1
+            elif len(data) >= 4:
+                if len(data[3]) >= 10:
+                    database.add_entry(data[0], data[1], version, data[3].replace("\n", ''))
                     lines_done += 1
-                elif len(data) >= 4:
-                    if len(data[3]) >= 10:
-                        database.add_entry(data[0], data[1], version, data[3].replace("\n", ''))
-                        lines_done += 1
         print("Done " + str(lines_done) + " lines")
     file.close()
 
@@ -39,6 +38,9 @@ def draw_peers_and_time_plot():
     plot.savefig("Peers count - Elapsed time.png")
     # Close, so the pics won't overlap
     plot.close("all")
+    # Save as text file just in case
+    with open("Peers count - Elapsed time.txt", 'w') as f:
+        print(data, file=f)
 
 
 def draw_unique_peers_and_time_plot():
@@ -49,6 +51,9 @@ def draw_unique_peers_and_time_plot():
     plot.savefig("Unique Peers count - Elapsed time.png")
     # Close, so the pics won't overlap
     plot.close("all")
+    # Save as text file just in case
+    with open("Unique Peers count - Elapsed time.txt", 'w') as f:
+        print(data, file=f)
 
 
 def draw_rs_peers_and_time_plot():
@@ -59,6 +64,9 @@ def draw_rs_peers_and_time_plot():
     plot.savefig("RS Peers count - Elapsed time.png")
     # Close, so the pics won't overlap
     plot.close("all")
+    # Save as text file just in case
+    with open("RS Peers count - Elapsed time.txt", 'w') as f:
+        print(data, file=f)
 
 
 def draw_unique_rs_peers_and_time_plot():
@@ -69,6 +77,9 @@ def draw_unique_rs_peers_and_time_plot():
     plot.savefig("Unique RS Peers count - Elapsed time.png")
     # Close, so the pics won't overlap
     plot.close("all")
+    # Save as text file just in case
+    with open("Unique RS Peers count - Elapsed time.txt", 'w') as f:
+        print(data, file=f)
 
 
 if __name__ == '__main__':

@@ -22,7 +22,9 @@ Base.metadata.create_all(engine)
 
 
 # Add a song
-def add_entry(new_id="", new_ip='', new_version="", new_time=-1):
+def add_entry(new_id="", new_ip='', new_version="", new_time=""):
+    if new_id.count('0') == 40 or len(new_id) != 40 or new_ip.count('.') != 3 or not new_time.isnumeric():
+        return False
     peer = PeerEntry(id=new_id, ip=new_ip, version=new_version, time=new_time)
     old = session.query(PeerEntry).filter_by(id=new_id).first()
     if old is None:
@@ -39,7 +41,7 @@ def get_all_count_to_time_results():
     res = dict([])
     entries = session.query(PeerEntry)
     for entry in entries:
-        time = entry.time
+        time = int(entry.time / 100)
         current = res.get(time, 0)
         res[time] = current + 1
     return res
@@ -53,7 +55,7 @@ def get_unique_all_count_to_time_results():
     entries = session.query(PeerEntry)
     for entry in entries:
         if entry.id not in ids:
-            time = entry.time
+            time = int(entry.time / 100)
             current = res.get(time, 0)
             res[time] = current + 1
             ids.append(entry.id)
@@ -67,7 +69,7 @@ def get_rs_count_to_time_results():
     entries = session.query(PeerEntry)
     for entry in entries:
         if entry.version == "rs":
-            time = entry.time
+            time = int(entry.time / 100)
             current = res.get(time, 0)
             res[time] = current + 1
     return res
@@ -81,7 +83,7 @@ def get_unique_rs_count_to_time_results():
     entries = session.query(PeerEntry)
     for entry in entries:
         if entry.version == "rs" and entry.id not in ids:
-            time = entry.time
+            time = int(entry.time / 100)
             current = res.get(time, 0)
             res[time] = current + 1
             ids.append(entry.id)

@@ -91,6 +91,7 @@ void Crawler::iterationFirstStage() {
     // Send random request to unknown peer
     bdNodeId searchId{};
     bdStdRandomIdFromRegion(&searchId, regionStart, regionEnd);
+    // Find random, unknown peer
     while (std::find(toCheckPeerList.begin(), toCheckPeerList.end(), searchId) != toCheckPeerList.end())
         bdStdRandomIdFromRegion(&searchId, regionStart, regionEnd);
 

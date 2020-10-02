@@ -310,8 +310,7 @@ void bdNodeManager::iteration() {
 					if (nodeSpaceSize >= MIN_OP_SPACE_SIZE) {
 						mMode = BITDHT_MGR_STATE_REFRESH;
 						mModeTS = now;
-					}
-					else {
+					} else {
 						mMode = BITDHT_MGR_STATE_FAILED;
 						mModeTS = now;
 					}
@@ -385,9 +384,7 @@ void bdNodeManager::iteration() {
 						/* if the network size is very small */
 						SearchForLocalNet();
 						mSearchingDone = false;
-					}
-					else
-					{
+					} else {
 						if (!mSearchingDone) {
 							mSearchingDone = true;
 							mSearchTS = now;
@@ -504,9 +501,7 @@ int bdNodeManager::QueryRandomLocalNet() {
 		}
 
 		return 1;
-	}
-	else
-	{
+	} else {
 #ifdef DEBUG_MGR
 		std::cerr << "bdNodeManager::QueryRandomLocalNet() No LocalNet Peer Found";
 		std::cerr << std::endl;
@@ -1052,10 +1047,8 @@ void bdNodeManager::doValueCallback(const bdNodeId *id, std::string key, uint32_
 #endif
         /* search list */
         std::list<BitDhtCallback *>::iterator it;
-        for (it = mCallbacks.begin(); it != mCallbacks.end(); it++) {
+        for (it = mCallbacks.begin(); it != mCallbacks.end(); it++)
                 (*it)->dhtValueCallback(id, key, status);
-        }
-        return;
 }
 
 void bdNodeManager::doInfoCallback(const bdId *id, uint32_t type, uint32_t flags, std::string info) {
@@ -1065,10 +1058,8 @@ void bdNodeManager::doInfoCallback(const bdId *id, uint32_t type, uint32_t flags
 #endif
         /* search list */
         std::list<BitDhtCallback *>::iterator it;
-        for (it = mCallbacks.begin(); it != mCallbacks.end(); it++) {
+        for (it = mCallbacks.begin(); it != mCallbacks.end(); it++)
                 (*it)->dhtInfoCallback(id, type, flags, info);
-        }
-        return;
 }
 
 void bdNodeManager::doIsBannedCallback(const sockaddr_in *addr, bool *isAvailable, bool *isBanned) {
