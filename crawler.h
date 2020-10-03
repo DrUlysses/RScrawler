@@ -38,7 +38,7 @@ public:
     void setPort(uint16_t newPort);
     void setCrawlsCount(unsigned int count);
     void setBDBoot(std::string path);
-    void extractToCheckList(std::list<bdNodeId> peers);
+    void extractToCheckList(const std::list<bdNodeId>& peers);
     void writeLogs();
     std::list<bdNodeId> getToCheckList();
 

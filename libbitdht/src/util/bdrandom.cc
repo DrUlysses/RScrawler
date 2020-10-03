@@ -70,10 +70,8 @@ void bdRandom::locked_next_state()
 	index = 0 ;
 }
 
-uint32_t bdRandom::random_u32() 
-{
+uint32_t bdRandom::random_u32() {
 	uint32_t y;
-
 	{
 		bdStackMutex mtx(rndMtx) ;
 

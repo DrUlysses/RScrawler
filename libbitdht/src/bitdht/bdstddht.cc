@@ -41,30 +41,33 @@ void bdStdRandomId(bdId *id) {
 	bdStdRandomNodeId(&(id->id));
 	id->addr.sin_addr.s_addr = bdRandom::random_u32();
 	id->addr.sin_port = (bdRandom::random_u32() % USHRT_MAX);
-
-	return;
 }
 
 void bdStdRandomNodeId(bdNodeId *id) {
 	uint32_t *a_data = (uint32_t *) id->data;
 	for (int i = 0; i < BITDHT_KEY_INTLEN; i++)
 		a_data[i] = bdRandom::random_u32();
-	return;
 }
 
 void bdStdRandomIdFromRegion(bdNodeId *id, int start, int end) {
     uint32_t *a_data = (uint32_t *) id->data;
-    a_data[0] = bdRandom::random_u32() % end + start;
-    for (int i = 1; i < BITDHT_KEY_INTLEN; i++)
+    for (int i = 0; i < BITDHT_KEY_INTLEN; i++)
         a_data[i] = bdRandom::random_u32();
-    return;
+
+    if (start == 0 && end == 0)
+        id->data[0] = 0;
+    else if (start == 0)
+        id->data[0] = id->data[0] % end;
+    else if (end - start == 0)
+        id->data[0] = start;
+    else
+        id->data[0] = (id->data[0] % (end - start)) + start;
 }
 
 void bdStdZeroNodeId(bdNodeId *id) {
 	uint32_t *a_data = (uint32_t *) id->data;
 	for (int i = 0; i < BITDHT_KEY_INTLEN; i++)
 		a_data[i] = 0;
-	return;
 }
 
 bool bdStdIsZeroNodeId(bdNodeId *id) {

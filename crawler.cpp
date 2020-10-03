@@ -146,12 +146,12 @@ void Crawler::iterationSecondStage() {
         iterationFirstStage();
 }
 
-void Crawler::extractToCheckList(std::list<bdNodeId> peers) {
+void Crawler::extractToCheckList(const std::list<bdNodeId>& peers) {
     bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
     toCheckPeerList.clear();
     for (auto & peer : peers) {
-        auto *a_data = (uint32_t *) peer.data;
-        if (a_data[0] >= regionStart && a_data[0] < regionEnd)
+        // Region sort
+        if (peer.data[0] >= regionStart && peer.data[0] <= regionEnd)
             toCheckPeerList.push_back(peer);
     }
 }

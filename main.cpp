@@ -7,12 +7,12 @@
 #include "logger.h"
 #include "crawler.h"
 
-#define CRAWLERS_COUNT 32 // <= 32
+#define CRAWLERS_COUNT 64 // <= 256
 #define CRAWL_DURATION 15 // in seconds
 #define CRAWLS_COUNT 4
 #define DURATION_BETWEEN_CHECKS 30 // in seconds >= 80
 #define CHECKS_COUNT 3
-#define DURATION_BETWEEN_CRAWLS 3600 // 6 hours (in seconds) 21600
+#define DURATION_BETWEEN_CRAWLS 3600 // 6 hours = 21600 seconds
 #define LOG_FILENAME "dhtlogs"
 #define RS_PEERS_FILENAME "rspeers"
 #define OWN_IDS_FILENAME "my_ids"
@@ -28,7 +28,7 @@ void firstStage(std::vector<Crawler*>& crawlers, Logger& logger);
 void secondStage(std::vector<Crawler*>& crawlers, Logger& logger);
 
 void exec(const char* cmd) {
-    char buffer[16];
+    char buffer[8];
     std::string result;
     FILE* pipe = popen(cmd, "r");
     if (!pipe)
@@ -56,7 +56,7 @@ std::string copyBDBoot(unsigned int crwlrNumber) {
 }
 
 int main(int argc, char **argv) {
-
+    // Create objects
     std::vector<Crawler*> crawlers(CRAWLERS_COUNT);
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
         crawlers[i] = new Crawler();
@@ -66,7 +66,8 @@ int main(int argc, char **argv) {
     logger->start();
     // Crawlers initialization
     int regionStart = 0;
-    int regionLength = 32 / CRAWLERS_COUNT;
+    // Round the regionLength
+    int regionLength = (256 + (CRAWLERS_COUNT / 2)) / CRAWLERS_COUNT;
     int regionEnd = regionLength;
     uint16_t port = 6775;
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
@@ -79,7 +80,7 @@ int main(int argc, char **argv) {
         crawlers[i]->initDhtHandler();
         crawlers[i]->start();
         regionStart = regionEnd + 1;
-        regionEnd = i == CRAWLERS_COUNT - 2 ? 32 : regionEnd + regionLength;
+        regionEnd = i == CRAWLERS_COUNT - 2 ? 256 : regionEnd + regionLength;
     }
     // One week
     for (short i = 0; i < 7; i++) {
@@ -156,8 +157,11 @@ void firstStage(std::vector<Crawler*>& crawlers, Logger& logger) {
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
             std::cerr << "Waiting for crawler " << std::to_string(j) << std::endl;
             crawlers[j]->enableDht(false);
+        }
+        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
             // Get the found nodes lists
             tempIDStorage.merge(crawlers[j]->getToCheckList());
+        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
             // Restart nodes, not to hold the handler for too long
             crawlers[j]->restart();
             // Inject new peers to check and activate crawlers
@@ -197,8 +201,9 @@ void secondStage(std::vector<Crawler*>& crawlers, Logger& logger) {
             tempIDStorage.merge(crawlers[j]->getToCheckList());
         }
         tempIDStorage.merge(Logger::getDiscoveredPeers());
-        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
+        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
             crawlers[j]->extractToCheckList(tempIDStorage);
+        for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
             crawlers[j]->restart();
             crawlers[j]->enableDht(true);
             crawlers[j]->enable(true);

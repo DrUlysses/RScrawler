@@ -34,9 +34,6 @@
 #include <map>
 #include <vector>
 
-
-
-
 void bdStdRandomNodeId(bdNodeId *id);
 void bdStdRandomIdFromRegion(bdNodeId *id, int start, int end);
 void bdStdZeroNodeId(bdNodeId *id);
@@ -61,39 +58,37 @@ std::string bdStdConvertToPrintable(std::string input);
 //uint32_t bdStdSimilarNode(const bdId*, const bdId*);
 
 
-class bdStdDht: public bdDhtFunctions
-{
-	public:
+class bdStdDht: public bdDhtFunctions {
+public:
 
-        bdStdDht();
-        /* setup variables */
-virtual uint16_t bdNumBuckets();
-virtual uint16_t bdNodesPerBucket(); /* used for bdspace */
-virtual uint16_t bdNumQueryNodes(); /* used for queries */
-virtual uint16_t bdBucketBitSize();
+    bdStdDht();
+    /* setup variables */
+    virtual uint16_t bdNumBuckets();
+    virtual uint16_t bdNodesPerBucket(); /* used for bdspace */
+    virtual uint16_t bdNumQueryNodes(); /* used for queries */
+    virtual uint16_t bdBucketBitSize();
 
-virtual int bdDistance(const bdNodeId *n1, const bdNodeId *n2, bdMetric *metric);
-virtual int bdBucketDistance(const bdNodeId *n1, const bdNodeId *n2);
-virtual int bdBucketDistance(const bdMetric *metric);
+    virtual int bdDistance(const bdNodeId *n1, const bdNodeId *n2, bdMetric *metric);
+    virtual int bdBucketDistance(const bdNodeId *n1, const bdNodeId *n2);
+    virtual int bdBucketDistance(const bdMetric *metric);
 
-virtual bool bdSimilarId(const bdId *id1, const bdId *id2);
-virtual bool bdUpdateSimilarId(bdId *dest, const bdId *src); /* returns true if update was necessary */
+    virtual bool bdSimilarId(const bdId *id1, const bdId *id2);
+    virtual bool bdUpdateSimilarId(bdId *dest, const bdId *src); /* returns true if update was necessary */
 
-virtual void bdRandomMidId(const bdNodeId *target, const bdNodeId *other, bdNodeId *mid);
+    virtual void bdRandomMidId(const bdNodeId *target, const bdNodeId *other, bdNodeId *mid);
 
-virtual void bdPrintId(std::ostream &out, const bdId *a);
-virtual void bdPrintNodeId(std::ostream &out, const bdNodeId *a);
+    virtual void bdPrintId(std::ostream &out, const bdId *a);
+    virtual void bdPrintNodeId(std::ostream &out, const bdNodeId *a);
 
 };
 
-class bdModDht: public bdStdDht
-{
-	public:
+class bdModDht: public bdStdDht {
+public:
 	bdModDht();
-virtual void setNodesPerBucket(uint16_t nodesPerBucket);
-virtual uint16_t bdNodesPerBucket(); /* used for bdspace */
+    virtual void setNodesPerBucket(uint16_t nodesPerBucket);
+    virtual uint16_t bdNodesPerBucket(); /* used for bdspace */
 
-	private:
+private:
 	uint16_t mNodesPerBucket;
 };
 

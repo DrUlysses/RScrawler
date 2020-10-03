@@ -42,31 +42,30 @@
 #include <vector>
 #include "bdthreads.h"
 
-class bdRandom
-{
-	public:
-		static uint32_t random_u32() ;
-		static uint64_t random_u64() ;
-		static float 	 random_f32() ;
-		static double	 random_f64() ;
+class bdRandom {
+public:
+    static uint32_t random_u32() ;
+    static uint64_t random_u64() ;
+    static float random_f32() ;
+    static double random_f64() ;
 
-		static bool     seed(uint32_t s) ;
+    static bool seed(uint32_t s) ;
 
-		static std::string random_alphaNumericString(uint32_t length) ; 
+    static std::string random_alphaNumericString(uint32_t length) ;
 
-	private:
-		static bdMutex rndMtx ;
+private:
+    static bdMutex rndMtx ;
 
-		static const uint32_t N = 624;
-		static const uint32_t M = 397;
+    static const uint32_t N = 624;
+    static const uint32_t M = 397;
 
-		static const uint32_t MATRIX_A 	= 0x9908b0dfUL;
-		static const uint32_t UMASK 		= 0x80000000UL;
-		static const uint32_t LMASK 		= 0x7fffffffUL;
+    static const uint32_t MATRIX_A 	= 0x9908b0dfUL;
+    static const uint32_t UMASK 		= 0x80000000UL;
+    static const uint32_t LMASK 		= 0x7fffffffUL;
 
-		static void locked_next_state() ;
-		static uint32_t index ;
-		static std::vector<uint32_t> MT ;
+    static void locked_next_state() ;
+    static uint32_t index ;
+    static std::vector<uint32_t> MT ;
 };
 
 #endif

@@ -4,7 +4,22 @@ from os import remove
 from matplotlib import pyplot as plot
 
 
-def get_data(path, version=""):
+def load_ids(path):
+    # Format is "id(40 chars) ip(any) time(started with 15961) rest(unused here)"
+    file = open(path, "r")
+    if file.mode != 'r':
+        print("Failed to read the file: " + path)
+        return
+    while True:
+        res = []
+        line = file.readline()
+        if line == '':
+            break
+        res.append(line)
+    return res
+
+
+def get_data(path, ids, version=""):
     # Format is "id(40 chars) ip(any) time(started with 15961) rest(unused here)"
     file = open(path, "r", newline='', encoding='ISO-8859-1')
     if file.mode != 'r':
@@ -18,10 +33,13 @@ def get_data(path, version=""):
             break
         data = line.split(' ')
         if len(data) < 3:
-            print("Skipped line: " + str(line))
+            print("Skipped line: " + str(line) + " reason: Wrong entry")
             continue
-        if len(data) >= 3:
-            if len(data[2]) >= 10:
+        elif len(data) >= 3:
+            if data[0] in ids:
+                print("Skipped line: " + str(line) + " reason: My ID")
+                continue
+            elif len(data[2]) >= 10:
                 res = database.add_entry(data[0], data[1], version, data[2].replace("\n", ''))
                 lines_done += 1
             elif len(data) >= 4:
@@ -97,12 +115,14 @@ def draw_unique_rs_peers_and_time_plot():
 
 
 if __name__ == '__main__':
-    # Read the logs
     path_to_logs = "../cmake-build-debug"
+    # Load my_ids
+    ids = load_ids(path_to_logs + "/my_ids")
+    # Read the logs
     print("Extracting dhtlogs")
-    get_data(path_to_logs + "/dhtlogs")
+    get_data(path_to_logs + "/dhtlogs", ids)
     print("Extracting rspeers")
-    get_data(path_to_logs + "/rspeers", "rs")
+    get_data(path_to_logs + "/rspeers", ids, "rs")
     draw_rs_peers_and_time_plot()
     draw_unique_rs_peers_and_time_plot()
     draw_peers_and_time_plot()
