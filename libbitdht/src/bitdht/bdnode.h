@@ -141,9 +141,9 @@ public:
 	virtual void send_connect_msg(bdId *id, int msgtype, 
 				bdId *srcAddr, bdId *destAddr, int mode, int param, int status);
 
-// This is implemented in bdManager.
-//        virtual void callbackConnect(bdId *srcId, bdId *proxyId, bdId *destId,
-//                                int mode, int point, int param, int cbtype, int errcode);
+    // This is implemented in bdManager.
+    //        virtual void callbackConnect(bdId *srcId, bdId *proxyId, bdId *destId,
+    //                                int mode, int point, int param, int cbtype, int errcode);
 
 	/* interaction with outside world (Accessed by controller to deliver us msgs) */
     int outgoingMsg(struct sockaddr_in *addr, char *msg, int *len);
@@ -153,7 +153,7 @@ public:
     void dropRelayServers();
     void pingRelayServers();
 
-// Below is internal Management of incoming / outgoing messages.
+    // Below is internal Management of incoming / outgoing messages.
 
 private:
 	/* internal interaction with network */
@@ -230,7 +230,7 @@ protected:
 	bdConnectManager *mConnMgr;
 
 	bdNodeId mOwnId;
-	bdId 	mLikelyOwnId; // Try to workout own id address.
+	bdId mLikelyOwnId; // Try to workout own id address.
 	std::string mDhtVersion;
 
 	bdAccount mAccount;

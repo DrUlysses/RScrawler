@@ -26,6 +26,20 @@ Crawler::~Crawler() noexcept {
     std::cerr << std::endl;
 }
 
+void Crawler::genNewId() {
+    bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+    peerId = new bdNodeId();
+    bdStdRandomNodeId(peerId);
+    std::cerr << "Starting with ownID: ";
+    bdStdPrintNodeId(std::cerr, peerId);
+    std::cerr << std::endl;
+    FILE *myIDs = fopen(USED_IDS_FILENAME, "a+");
+    std::string stringID;
+    bdStdPrintNodeId(stringID, peerId, false);
+    fprintf(myIDs, "%s\n", stringID.c_str());
+    fclose(myIDs);
+}
+
 void Crawler::initDhtHandler() {
     bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
     dhtHandler = new BitDhtHandler(peerId, port, appId, bootstrapfile);

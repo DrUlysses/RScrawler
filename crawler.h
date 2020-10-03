@@ -31,6 +31,7 @@ public:
     void startDht();
     void enable(bool state);
     void enableDht(bool state);
+    void genNewId();
 
     void setStage(bool stage);
     void setRegions(int start, int end);

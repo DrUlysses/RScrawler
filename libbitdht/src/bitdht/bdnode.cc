@@ -1531,9 +1531,10 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
 	//unsigned char tempStr[8];
     //strncpy((char*)tempStr, "BD02RS51", 8);
     std::string tempTime = std::to_string(time(NULL));
+    std::string tempID;
+    bdStdPrintId(tempID, &srcId, false);
+    tempID.erase(tempID.find("ip:"), 3);
     if (messageType == "REPLY NODE") {
-        std::string tempID;
-        bdStdPrintId(tempID, &srcId, false);
         std::cout << "Message from: " << tempID << " msg " << messageType << " time " << tempTime <<
             " token " << transId.data << " nodes:" << std::endl;
         for (auto tempNode : nodes) {
@@ -1543,10 +1544,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
             mFoundPeers.insert(mFoundPeers.end(), tempID);
         }
     } else if (be_version) {
-        std::string tempID;
         std::string tempVersion;
-        bdStdPrintId(tempID, &srcId, false);
-        tempID.erase(tempID.find("ip:"), 3);
         if (versionId.data[0] == 'B' &&
             versionId.data[1] == 'D' &&
             versionId.data[2] == '0' &&
@@ -1563,9 +1561,6 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
         tempID += " " + tempVersion + " " + tempTime + " " + messageType;
         mFoundPeers.insert(mFoundPeers.end(), tempID);
 	} else {
-        std::string tempID;
-        bdStdPrintId(tempID, &srcId, false);
-        tempID.erase(tempID.find("ip:"), 3);
         std::cout << "Message from: " << tempID << " msg "  <<
             messageType << " time " << tempTime << " token " << transId.data << std::endl;
         tempID += " " + tempTime + " " + messageType;

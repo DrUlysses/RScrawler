@@ -8,13 +8,14 @@
 #include "crawler.h"
 
 #define CRAWLERS_COUNT 32 // <= 32
-#define CRAWL_DURATION 30 // in seconds
-#define CRAWLS_COUNT 2
+#define CRAWL_DURATION 15 // in seconds
+#define CRAWLS_COUNT 4
 #define DURATION_BETWEEN_CHECKS 30 // in seconds >= 80
 #define CHECKS_COUNT 3
-#define DURATION_BETWEEN_CRAWLS 21600 // 6 hours (in seconds) 21600
+#define DURATION_BETWEEN_CRAWLS 3600 // 6 hours (in seconds) 21600
 #define LOG_FILENAME "dhtlogs"
 #define RS_PEERS_FILENAME "rspeers"
+#define OWN_IDS_FILENAME "my_ids"
 
 //void args(char *name) {
 //    std::cerr << std::endl << "Dht Single Shot Searcher" << std::endl;
@@ -83,20 +84,34 @@ int main(int argc, char **argv) {
     // One week
     for (short i = 0; i < 7; i++) {
         // Whole day loop
-        for (unsigned int  j = 0; j < (24 * 60 * 60) / DURATION_BETWEEN_CRAWLS; j++) {
+        //for (unsigned int  j = 0; j < (24 * 60 * 60) / DURATION_BETWEEN_CRAWLS; j++) {
+        for (unsigned int  j = 0; j < 10; j++) {
+            // Time
+            time_t startFirstStageTime = time(NULL);
             // Find node search
             firstStage(crawlers, *logger);
 
-            std::cerr << "Crawls are finished" << std::endl;
+            std::cerr << "Crawls are finished in ";
+            // Time
+            time_t startSecondStageTime = time(NULL);
+            std::cerr << startSecondStageTime - startFirstStageTime << " seconds" << std::endl;
 
             // Ping-pong status and version check
             secondStage(crawlers, *logger);
 
-            std::cerr << "Watchers are finished" << std::endl;
+            std::cerr << "Watchers are finished in ";
+            // Time
+            time_t EndSecondStageTime = time(NULL);
+            std::cerr << EndSecondStageTime - startSecondStageTime << " seconds" << std::endl;
 
             // Run analyzer
             exec("../analyzer/run.sh");
 
+            // Time
+            time_t EndAnalyzerTime = time(NULL);
+
+            std::cerr << "Analyzer done in " << EndAnalyzerTime - EndSecondStageTime << " seconds" << std::endl;
+            std::cerr << "Full crawl cycle done in " << EndSecondStageTime - startFirstStageTime << " seconds" << std::endl;
             std::cerr << "Waiting for the next crawl" << std::endl;
 
             // Wait for the next crawl
@@ -105,6 +120,13 @@ int main(int argc, char **argv) {
             // Delete old log files
             remove(LOG_FILENAME);
             remove(RS_PEERS_FILENAME);
+            remove(OWN_IDS_FILENAME);
+
+            // Gen new IDs and reset bdboot files
+            for (unsigned int k = 0; k < CRAWLERS_COUNT; k++) {
+                crawlers[k]->genNewId();
+                crawlers[k]->setBDBoot(copyBDBoot(k));
+            }
         }
     }
 

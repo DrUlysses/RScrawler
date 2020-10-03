@@ -33,9 +33,7 @@ bdMsgHistoryList::bdMsgHistoryList()
 	return;
 }
 
-
-
-void	bdMsgHistoryList::addMsg(time_t ts, uint32_t msgType, bool incoming, const bdNodeId *aboutId) {
+void bdMsgHistoryList::addMsg(time_t ts, uint32_t msgType, bool incoming, const bdNodeId *aboutId) {
 //	std::cerr << "bdMsgHistoryList::addMsg()";
 //	std::cerr << std::endl;
 
@@ -43,7 +41,7 @@ void	bdMsgHistoryList::addMsg(time_t ts, uint32_t msgType, bool incoming, const 
 	msgHistory.insert(std::make_pair(ts, msg));
 }
 
-void 	bdMsgHistoryList::setPeerType(time_t /* ts */, std::string version) {
+void  bdMsgHistoryList::setPeerType(time_t /* ts */, std::string version) {
 	mPeerVersion = version;
 }
 
@@ -57,34 +55,32 @@ int	bdMsgHistoryList::msgCount(time_t start_ts, time_t end_ts) {
 	return count;
 }
 
-bool    bdMsgHistoryList::msgClear(time_t before) {
+bool bdMsgHistoryList::msgClear(time_t before) {
 	if (before == 0) {
 		msgHistory.clear();
 		return true;
 	}
 
 	// Delete the old stuff in the list.
-	while((msgHistory.begin() != msgHistory.end()) && (msgHistory.begin()->first < before)) {
+	while((msgHistory.begin() != msgHistory.end()) && (msgHistory.begin()->first < before))
 		msgHistory.erase(msgHistory.begin());
-	}
 
 	// return true if empty.
-	if (msgHistory.begin() == msgHistory.end()) {
+	if (msgHistory.begin() == msgHistory.end())
 		return true;
-	}
+
 	return false;
 }
 
-void	bdMsgHistoryList::msgClear() {
+void bdMsgHistoryList::msgClear() {
 	msgHistory.clear();
 }
 
-
-void	bdMsgHistoryList::clearHistory() {
+void bdMsgHistoryList::clearHistory() {
 	msgClear();
 }
 
-void	bdMsgHistoryList::printHistory(std::ostream &out, int mode, time_t start_ts, time_t end_ts) {
+void bdMsgHistoryList::printHistory(std::ostream &out, int mode, time_t start_ts, time_t end_ts) {
 	//out << "AGE: MSGS  => incoming, <= outgoing"  << std::endl;
 	std::multimap<time_t, bdMsgHistoryItem>::iterator sit, eit, it;
 	sit = msgHistory.lower_bound(start_ts);
@@ -104,27 +100,21 @@ void	bdMsgHistoryList::printHistory(std::ostream &out, int mode, time_t start_ts
 		{
 			/* print one line per ts */
 			if (time_changed) {
-				if (!first_line) {
+				if (!first_line)
 					/* finish existing line */
 					out << " " << std::endl;
-				}
 				else
-				{
 					first_line = false;
-				}
 				out << "\tTS: " << time(NULL) - curr_ts << " ";
 			}
 	
 			std::string name;
 			bitdht_msgtype(it->second.msgType, name);
 
-			if (it->second.incoming) {
+			if (it->second.incoming)
 				out << "( =I> ";
-			}
 			else
-			{
 				out << "( <O= ";
-			}
 
 			out << name << " ";
 			if ((it->second.aboutId.data[0] == 0)
@@ -132,11 +122,8 @@ void	bdMsgHistoryList::printHistory(std::ostream &out, int mode, time_t start_ts
 				&& (it->second.aboutId.data[3] == 0)
 				&& (it->second.aboutId.data[3] == 0)) {
 				/* don't print anything */
-			}
-			else
-			{
+			} else
 				bdStdPrintNodeId(out, &(it->second.aboutId));
-			}
 			out << " )";
 
 		}
@@ -145,13 +132,11 @@ void	bdMsgHistoryList::printHistory(std::ostream &out, int mode, time_t start_ts
 	}
 
 	/* finish up last line */
-	if (!first_line) {
+	if (!first_line)
 		out << " " << std::endl;
-	}
 }
 
-
-bool	bdMsgHistoryList::canSend() {
+bool bdMsgHistoryList::canSend() {
 	std::cerr << "bdMsgHistoryList::canSend()";
 
 	std::multimap<time_t, bdMsgHistoryItem>::reverse_iterator rit;
@@ -180,7 +165,7 @@ bool	bdMsgHistoryList::canSend() {
 	return false;
 }
 
-bool	bdMsgHistoryList::validPeer() {
+bool bdMsgHistoryList::validPeer() {
 	std::cerr << "bdMsgHistoryList::validPeer()";
 
 	std::multimap<time_t, bdMsgHistoryItem>::iterator it;
@@ -200,7 +185,6 @@ bool	bdMsgHistoryList::validPeer() {
 	return false;
 }
 
-
 #define MAX_PING_PER_MINUTE  	2
 #define MAX_QUERY_PER_MINUTE 	2
 
@@ -212,20 +196,17 @@ bool bdMsgHistoryList::analysePeer() {
 	std::multimap<time_t, bdMsgHistoryItem>::iterator sit, eit, it;
 	sit = msgHistory.begin();
 	eit = msgHistory.end();
-	if (sit == eit) {
+	if (sit == eit)
 		// nothing here.
 		return false;
-	}
 
 	time_t start_ts = sit->first;
 	time_t end_ts = msgHistory.rbegin()->first; // must exist.
 
 
 	// don't divide by zero.
-	if (end_ts - start_ts < 60) {
+	if (end_ts - start_ts < 60)
 		end_ts = start_ts + 60;
-	}
-
 
 	/* what do we want to analyse? */
 
@@ -251,9 +232,7 @@ bool bdMsgHistoryList::analysePeer() {
 					in_other++;
 					break;
 			}
-		}
-		else
-		{
+		} else {
 			switch(it->second.msgType) {
 				case BITDHT_MSG_TYPE_PING:
 					out_ping++;
@@ -277,9 +256,8 @@ bool bdMsgHistoryList::analysePeer() {
 	if ((in_ping_per_min > MAX_PING_PER_MINUTE) ||
 		(out_ping_per_min > MAX_PING_PER_MINUTE) ||
 		(in_query_per_min > MAX_PING_PER_MINUTE) ||
-		(out_query_per_min > MAX_PING_PER_MINUTE)) {
+		(out_query_per_min > MAX_PING_PER_MINUTE))
 		flagged = true;
-	}
 
 	if (flagged) {
 		/* print header */
@@ -339,8 +317,7 @@ void bdHistory::printMsgs() {
 
 	std::map<bdId, bdMsgHistoryList> ::iterator it;
 	for (it = mHistory.begin(); it != mHistory.end(); it++) {
-		if (it->second.msgCount(0, time(NULL))) // all msg count.
-		{
+		if (it->second.msgCount(0, time(NULL))) { // all msg count.
 			/* print header */
 			out << "Msgs for ";
 			bdStdPrintId(out, &(it->first));
@@ -358,34 +335,26 @@ void bdHistory::printMsgs() {
 		out << now - hit->first << "   ";
 		bdStdPrintId(out, &(hit->second.id));
 
-		if (hit->second.incoming) {
+		if (hit->second.incoming)
 			out << " =I> ";
-		}
 		else
-		{
 			out << " <O= ";
-		}
 
 		std::string name;
-		if (bitdht_msgtype(hit->second.msgType, name)) {
+		if (bitdht_msgtype(hit->second.msgType, name))
 			out << name;
-		}
 		else
-		{
 			out << "UNKNOWN MSG";
-		}
 		out << std::endl;
 	}
 }
-
 
 void bdHistory::cleanupOldMsgs() {
 	std::cerr << "bdHistory::cleanupOldMsgs()";
 	std::cerr << std::endl;
 
-	if (mStorePeriod == 0) {
+	if (mStorePeriod == 0)
 		return; // no cleanup
-	}
 
 	std::set<bdId> to_cleanup;
 	std::set<bdId>::iterator cit;
@@ -412,13 +381,9 @@ void bdHistory::cleanupOldMsgs() {
 	}
 }
 
-
-
 void bdHistory::clearHistory() {
 	// Switched to a alternative clear, so we don't drop peers, and remember their type.
 	//mHistory.clear();
-	
-
 	std::map<bdId, bdMsgHistoryList> ::iterator it;
 	for (it = mHistory.begin(); it != mHistory.end(); it++) {
 		it->second.clearHistory();
@@ -426,12 +391,10 @@ void bdHistory::clearHistory() {
 }
 
 bool bdHistory::canSend(const bdId *id) {
-
 	std::map<bdId, bdMsgHistoryList> ::iterator it;
 	it = mHistory.find(*id);
-	if (it != mHistory.end()) {
+	if (it != mHistory.end())
 		return (it->second.canSend());
-	}
 
 	/* if not found - then can send */
 	return true;
@@ -441,43 +404,38 @@ bool bdHistory::canSend(const bdId *id) {
 bool bdHistory::validPeer(const bdId *id) {
 	std::map<bdId, bdMsgHistoryList> ::iterator it;
 	it = mHistory.find(*id);
-	if (it != mHistory.end()) {
+	if (it != mHistory.end())
 		return (it->second.validPeer());
-	}
-
 	/* if not found - then can send */
 	return false;
 }
 
 bool bdHistory::analysePeers() {
 	std::map<bdId, bdMsgHistoryList> ::iterator it;
-	for (it = mHistory.begin(); it != mHistory.end(); it++) {
+	for (it = mHistory.begin(); it != mHistory.end(); it++)
 		it->second.analysePeer();
-	}
 	return true;
 }
 
 
 
 /* Temp data class. */
-class TypeStats
-{
-	public:
-
+class TypeStats {
+public:
 	TypeStats() :nodes(0) { return; }
 
 	std::map<uint32_t, uint32_t> incoming, outgoing;
 	int nodes;
 
 
-void	printStats(std::ostream &out, const TypeStats *refStats) {
+void printStats(std::ostream &out, const TypeStats *refStats) {
 	std::map<uint32_t, uint32_t>::iterator it;
 	std::map<uint32_t, uint32_t>::const_iterator rit;
 
 	out << "  Nodes: " << nodes;
-	if (refStats) {
+	if (refStats)
 		out << " (" << 100.0 * nodes / (float) refStats->nodes << " %)";
-	}
+
 	out << std::endl;
 
 	out << "  Incoming Msgs";
@@ -486,9 +444,8 @@ void	printStats(std::ostream &out, const TypeStats *refStats) {
 		uint32_t count = 0;
 		if (refStats) {
 			rit = refStats->incoming.find(it->first);
-			if (rit != refStats->incoming.end()) {
+			if (rit != refStats->incoming.end())
 				count = rit->second;
-			}
 		}
 		printStatsLine(out, it->first, it->second, count);
 	}
@@ -499,17 +456,14 @@ void	printStats(std::ostream &out, const TypeStats *refStats) {
 		uint32_t count = 0;
 		if (refStats) {
 			rit = refStats->outgoing.find(it->first);
-			if (rit != refStats->outgoing.end()) {
+			if (rit != refStats->outgoing.end())
 				count = rit->second;
-			}
 		}
 		printStatsLine(out, it->first, it->second, count);
 	}
 }
 
-
-
-void   printStatsLine(std::ostream &out, uint32_t msgType, uint32_t count, uint32_t global) {
+void printStatsLine(std::ostream &out, uint32_t msgType, uint32_t count, uint32_t global) {
 	std::string name;
 	bitdht_msgtype(msgType, name);
 	out << "\t" << name << " " << count;
@@ -518,19 +472,16 @@ void   printStatsLine(std::ostream &out, uint32_t msgType, uint32_t count, uint3
 	}
 	out << std::endl;
 }
-
 }; /* end of TypeStats */
 
 bool bdHistory::peerTypeAnalysis() {
-
 	std::map<std::string, TypeStats> mTypeStats;
 	TypeStats globalStats;
 
 	std::map<bdId, bdMsgHistoryList> ::iterator it;
 	for (it = mHistory.begin(); it != mHistory.end(); it++) {
-		if (it->second.msgHistory.empty()) {
+		if (it->second.msgHistory.empty())
 			continue;
-		}
 
 		std::string version = it->second.mPeerVersion;
 		// group be first two bytes.
@@ -545,9 +496,7 @@ bool bdHistory::peerTypeAnalysis() {
 			if (lit->second.incoming) {
 				stats.incoming[lit->second.msgType]++;
 				globalStats.incoming[lit->second.msgType]++;
-			}
-			else
-			{
+			} else {
 				stats.outgoing[lit->second.msgType]++;
 				globalStats.outgoing[lit->second.msgType]++;
 			}
@@ -567,7 +516,6 @@ bool bdHistory::peerTypeAnalysis() {
 
 	globalStats.printStats(std::cerr, NULL);
 	return true;
-
 }
 
 
