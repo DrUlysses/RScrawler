@@ -189,7 +189,7 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
                             accum = "";
                             break;
                         case 1:
-                            if (std::count(accum.begin(), accum.end(), '.') != 3 || std::count(accum.begin(), accum.end(), '.') != 1)
+                            if (std::count(accum.begin(), accum.end(), '.') != 3 || std::count(accum.begin(), accum.end(), ':') != 1)
                                 counter = -10;
                             else {
                                 accum.erase(accum.find(':'), 6);

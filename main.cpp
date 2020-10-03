@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
     for (short i = 0; i < 7; i++) {
         // Whole day loop
         //for (unsigned int  j = 0; j < (24 * 60 * 60) / DURATION_BETWEEN_CRAWLS; j++) {
-        for (unsigned int  j = 0; j < 10; j++) {
+        for (unsigned int  j = 0; j < 24; j++) {
             // Time
             time_t startFirstStageTime = time(NULL);
             // Find node search
