@@ -7,7 +7,7 @@
 #include "logger.h"
 #include "crawler.h"
 
-#define CRAWLERS_COUNT 64 // <= 256
+#define CRAWLERS_COUNT 8 // <= 256 More crawlers == more RAM usage, be careful
 #define CRAWL_DURATION 15 // in seconds
 #define CRAWLS_COUNT 4
 #define DURATION_BETWEEN_CHECKS 30 // in seconds >= 80

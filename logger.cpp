@@ -64,7 +64,7 @@ void Logger::iteration() {
         addr_str = "";
         addr = {};
         id = {};
-        timeStamp = 0;
+        timeStamp = time(NULL);
         if (line.empty())
             continue;
         // I HATE C++ STRINGS
@@ -113,8 +113,7 @@ void Logger::iteration() {
                             counter++;
                             accum = "";
                         } else {
-                            accum = "";
-                            counter = -10;
+                            timeStamp = time(NULL);
                             break;
                         }
                         break;
@@ -148,7 +147,6 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
     bdToken version;
     std::map<bdId, std::string> RSPeers;
     std::string timeStamp;
-
     {
         bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
         std::ifstream myIDs(USED_IDS_FILENAME);
@@ -241,10 +239,9 @@ void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
             /*if (result != nullptr)
                 result->push_back(it->first);*/
             bdStdPrintNodeId(line, &RSPeer.first.id, false);
-            if (std::find(myIDsList.begin(), myIDsList.end(), line) == myIDsList.end()) {
+            if (std::find(myIDsList.begin(), myIDsList.end(), line) == myIDsList.end())
                 fprintf(filtered, "%s %s %s\n", line.c_str(),
                         bdnet_inet_ntoa(RSPeer.first.addr.sin_addr).c_str(), RSPeer.second.c_str());
-            }
         }
         fclose(filtered);
     }
