@@ -7,12 +7,12 @@
 #include "logger.h"
 #include "crawler.h"
 
-#define CRAWLERS_COUNT 8 // <= 256 More crawlers == more RAM usage, be careful
+#define CRAWLERS_COUNT 16 // <= 256 More crawlers == more RAM usage, be careful
 #define CRAWL_DURATION 15 // in seconds
 #define CRAWLS_COUNT 4
 #define DURATION_BETWEEN_CHECKS 30 // in seconds >= 80
 #define CHECKS_COUNT 3
-#define DURATION_BETWEEN_CRAWLS 3600 // 6 hours = 21600 seconds
+#define DURATION_BETWEEN_CRAWLS 600 // 6 hours = 21600 seconds
 #define LOG_FILENAME "dhtlogs"
 #define RS_PEERS_FILENAME "rspeers"
 #define OWN_IDS_FILENAME "my_ids"
@@ -58,8 +58,6 @@ std::string copyBDBoot(unsigned int crwlrNumber) {
 int main(int argc, char **argv) {
     // Create objects
     std::vector<Crawler*> crawlers(CRAWLERS_COUNT);
-    for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
-        crawlers[i] = new Crawler();
 
     auto* logger = new Logger();
     logger->disable();
@@ -68,25 +66,26 @@ int main(int argc, char **argv) {
     int regionStart = 0;
     // Round the regionLength
     int regionLength = (256 + (CRAWLERS_COUNT / 2)) / CRAWLERS_COUNT;
-    int regionEnd = regionLength;
-    uint16_t port = 6775;
-    for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
-        crawlers[i]->init();
-        crawlers[i]->setBDBoot(copyBDBoot(i));
-        crawlers[i]->setStage(0);
-        crawlers[i]->setRegions(regionStart, regionEnd);
-        crawlers[i]->setPort(port++);
-        crawlers[i]->setCrawlsCount(CRAWLS_COUNT);
-        crawlers[i]->initDhtHandler();
-        crawlers[i]->start();
-        regionStart = regionEnd + 1;
-        regionEnd = i == CRAWLERS_COUNT - 2 ? 256 : regionEnd + regionLength;
-    }
     // One week
     for (short i = 0; i < 7; i++) {
         // Whole day loop
-        //for (unsigned int  j = 0; j < (24 * 60 * 60) / DURATION_BETWEEN_CRAWLS; j++) {
-        for (unsigned int  j = 0; j < 24; j++) {
+        for (unsigned int  j = 0; j < (24 * 60 * 60) / DURATION_BETWEEN_CRAWLS; j++) {
+            for (unsigned int k = 0; k < CRAWLERS_COUNT; k++)
+                crawlers[k] = new Crawler();
+            int regionEnd = regionLength;
+            uint16_t port = 6775;
+            for (unsigned int k = 0; k < CRAWLERS_COUNT; k++) {
+                crawlers[k]->init();
+                crawlers[k]->setBDBoot(copyBDBoot(k));
+                crawlers[k]->setStage(0);
+                crawlers[k]->setRegions(regionStart, regionEnd);
+                crawlers[k]->setPort(port++);
+                crawlers[k]->setCrawlsCount(CRAWLS_COUNT);
+                crawlers[k]->initDhtHandler();
+                crawlers[k]->start();
+                regionStart = regionEnd + 1;
+                regionEnd = k == CRAWLERS_COUNT - 2 ? 256 : regionEnd + regionLength;
+            }
             // Time
             time_t startFirstStageTime = time(NULL);
             // Find node search
@@ -123,17 +122,13 @@ int main(int argc, char **argv) {
             remove(RS_PEERS_FILENAME);
             remove(OWN_IDS_FILENAME);
 
-            // Gen new IDs and reset bdboot files
-            for (unsigned int k = 0; k < CRAWLERS_COUNT; k++) {
-                crawlers[k]->genNewId();
-                crawlers[k]->setBDBoot(copyBDBoot(k));
-            }
+            // Cleanup
+            for (unsigned int k = 0; k < CRAWLERS_COUNT; k++)
+                delete crawlers[k];
         }
     }
 
     // Cleanup
-    for (unsigned i = 0; i < CRAWLERS_COUNT; i++)
-        delete crawlers[i];
     delete logger;
 
     return 0;
