@@ -138,7 +138,7 @@ BitDhtHandler::~BitDhtHandler() {
 
 /* pqiNetAssist - external interface functions */
 void BitDhtHandler::enable(bool on) {
-    std::cerr << "p3BitDht::enable(" << on << ")" << std::endl;
+    //std::cerr << "p3BitDht::enable(" << on << ")" << std::endl;
     if (on)
         mUdpBitDht->startDht();
     else

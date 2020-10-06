@@ -121,7 +121,7 @@ int  UdpStack::sendPkt(const void *data, int size, const struct sockaddr_in &to,
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
 	std::cerr << "UdpStack::sendPkt(" << size << ") ttl: " << ttl;
-	std::cerr << " to: " << to;
+	std::cerr << " to: " << &to;
 	std::cerr << std::endl;
 #endif
 
@@ -224,7 +224,7 @@ int  UdpSubReceiver::sendPkt(const void *data, int size, const struct sockaddr_i
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
 	std::cerr << "UdpSubReceiver::sendPkt(" << size << ") ttl: " << ttl;
-	std::cerr << " to: " << to;
+	std::cerr << " to: " << &to;
 	std::cerr << std::endl;
 #endif
 

@@ -7,7 +7,7 @@
 #include "logger.h"
 #include "crawler.h"
 
-#define CRAWLERS_COUNT 256 // <= 256 More crawlers == more RAM usage, be careful
+#define CRAWLERS_COUNT 64 // <= 256 More crawlers == more RAM usage, more time to stop them, be careful
 #define CRAWL_DURATION 15 // in seconds
 #define CRAWLS_COUNT 4
 #define DURATION_BETWEEN_CHECKS 30 // in seconds >= 80
@@ -71,6 +71,9 @@ int main(int argc, char **argv) {
     for (short i = 0; i < 7; i++) {
         // Whole day loop
         for (unsigned int  j = 0; j < (24 * 60 * 60) / DURATION_BETWEEN_CRAWLS; j++) {
+            // Time
+            time_t startFirstStageTime = time(NULL);
+
             for (unsigned int k = 0; k < CRAWLERS_COUNT; k++)
                 crawlers[k] = new Crawler();
             int regionEnd = regionLength;
@@ -90,8 +93,7 @@ int main(int argc, char **argv) {
                 regionStart = regionEnd + 1;
                 regionEnd = k == CRAWLERS_COUNT - 2 ? 256 : regionEnd + regionLength;
             }
-            // Time
-            time_t startFirstStageTime = time(NULL);
+
             // Find node search
             firstStage(crawlers, *logger);
 
@@ -105,17 +107,19 @@ int main(int argc, char **argv) {
 
             std::cerr << "Watchers are finished in ";
             // Time
-            time_t EndSecondStageTime = time(NULL);
-            std::cerr << EndSecondStageTime - startSecondStageTime << " seconds" << std::endl;
+            time_t endSecondStageTime = time(NULL);
+            std::cerr << endSecondStageTime - startSecondStageTime << " seconds" << std::endl;
+
+            time_t nextCrawlStart = startFirstStageTime + DURATION_BETWEEN_CRAWLS;
 
             // Run analyzer
             exec("../analyzer/run.sh");
 
             // Time
-            time_t EndAnalyzerTime = time(NULL);
+            time_t endAnalyzerTime = time(NULL);
 
-            std::cerr << "Analyzer done in " << EndAnalyzerTime - EndSecondStageTime << " seconds" << std::endl;
-            std::cerr << "Full crawl cycle done in " << EndSecondStageTime - startFirstStageTime << " seconds" << std::endl;
+            std::cerr << "Analyzer done in " << endAnalyzerTime - endSecondStageTime << " seconds" << std::endl;
+            std::cerr << "Full crawl cycle done in " << endSecondStageTime - startFirstStageTime << " seconds" << std::endl;
 
             // Cleanup
             for (unsigned int k = 0; k < CRAWLERS_COUNT; k++) {
@@ -126,8 +130,9 @@ int main(int argc, char **argv) {
             }
 
             // Wait for the next crawl
-            std::cerr << "Waiting for the next crawl" << std::endl;
-            sleep(DURATION_BETWEEN_CRAWLS);
+            nextCrawlStart -= time(NULL);
+            std::cerr << "Waiting for the next crawl (" << nextCrawlStart / 60 << " minutes)" << std::endl;
+            sleep(nextCrawlStart);
 
             // Delete old log files
             remove(LOG_FILENAME);

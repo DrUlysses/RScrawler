@@ -101,7 +101,7 @@ void Crawler::run() {
             bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
             if (currentStage == 0)
                 Crawler::iterationFirstStage();
-             else
+            else
                 Crawler::iterationSecondStage();
             writeLogs();
         }
@@ -216,8 +216,8 @@ void Crawler::writeLogs() {
 
         if (!log.empty())
             if (fprintf(tempFile, "%s\n", log.c_str()) < 0)
-                std::cerr << "While whiting to dhtlogs accrued an err=%d: %s\n", errno, strerror(errno);
+                std::cerr << "While whiting to dhtlogs by " << peerId <<  " accrued an err=%d: %s\n", errno, strerror(errno);
     }
     fclose(tempFile);
-    std::cout << "Successfully written to logs" << std::endl;
+    std::cout << "Successfully written to logs by " << peerId << std::endl;
 }

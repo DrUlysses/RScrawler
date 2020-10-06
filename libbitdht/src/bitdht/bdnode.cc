@@ -1536,8 +1536,6 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
 	}
 
 	/* Handle version + id runs from locked thread, so should be secure to write to the file */
-	//unsigned char tempStr[8];
-    //strncpy((char*)tempStr, "BD02RS51", 8);
     std::string tempTime = std::to_string(time(NULL));
     std::string tempID;
     bdStdPrintId(tempID, &srcId, false);

@@ -56,17 +56,17 @@ static const int UDP_DEF_TTL = 64;
 #define OPEN_UNIVERSAL_PORT 1
 
 
-class   udpPacket
-{
-	public:
+class udpPacket {
+public:
 	udpPacket(struct sockaddr_in *addr, void *dta, int dlen)
-	:raddr(*addr), len(dlen) {
-		data = malloc(len);
+	    :raddr(*addr), len(dlen) {
+
+	    data = malloc(len);
         
-        	if (data != NULL)
-			memcpy(data, dta, len);
-                else
-                    std::cerr << "(EE) error in memory allocation in " << __PRETTY_FUNCTION__ << std::endl;
+        if (data != NULL)
+            memcpy(data, dta, len);
+        else
+            std::cerr << "(EE) error in memory allocation in " << __PRETTY_FUNCTION__ << std::endl;
 	}
 
 	~udpPacket() {
@@ -146,12 +146,14 @@ std::string printPktOffset(unsigned int offset, void *d, unsigned int size) {
 	return out;
 }
 
-
-
 UdpLayer::UdpLayer(UdpReceiver *udpr, struct sockaddr_in &local)
 	:recv(udpr), laddr(local), errorState(0), ttl(UDP_DEF_TTL) {
 	openSocket();
 	return;
+}
+
+UdpLayer::~UdpLayer() noexcept {
+    closeSocket();
 }
 
 int UdpLayer::status(std::ostream &out) {
@@ -249,6 +251,7 @@ void UdpLayer::recv_loop() {
 #ifdef DEBUG_UDP_LAYER
 				std::cerr << "UdpLayer::recv_loop() stopping thread" << std::endl;
 #endif
+				closeSocket();
 				free(inbuf);
 				stop();
 				return; // Avoid compiler warning about usage of inbuf after free
@@ -291,7 +294,7 @@ int UdpLayer::sendPkt(const void *data, int size, const sockaddr_in &to, int ttl
 
 	/* and send! */
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "UdpLayer::sendPkt()  to: " << to << std::endl;
+	std::cerr << "UdpLayer::sendPkt()  to: " << &to << std::endl;
 	std::cerr << printPkt((void *) data, size);
 #endif
 	sendUdpPacket(data, size, to);
@@ -299,12 +302,11 @@ int UdpLayer::sendPkt(const void *data, int size, const sockaddr_in &to, int ttl
 }
 
 /* setup connections */
-int UdpLayer::openSocket()	
-{
+int UdpLayer::openSocket() {
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	/* make a socket */
-       	sockfd = bdnet_socket(PF_INET, SOCK_DGRAM, 0);
+    sockfd = bdnet_socket(PF_INET, SOCK_DGRAM, 0);
 #ifdef DEBUG_UDP_LAYER
 	std::cerr << "UpdStreamer::openSocket()" << std::endl;
 #endif
@@ -316,8 +318,8 @@ int UdpLayer::openSocket()
 #endif
 
 #ifdef OPEN_UNIVERSAL_PORT
-        struct sockaddr_in tmpaddr = laddr;
-        tmpaddr.sin_addr.s_addr = 0;
+    struct sockaddr_in tmpaddr = laddr;
+    tmpaddr.sin_addr.s_addr = 0;
 	if (0 != bdnet_bind(sockfd, (struct sockaddr *) (&tmpaddr), sizeof(tmpaddr)))
 #else
 	if (0 != bdnet_bind(sockfd, (struct sockaddr *) (&laddr), sizeof(laddr)))
@@ -372,7 +374,6 @@ int UdpLayer::openSocket()
 	start();
 
 	return 1;
-
 }
 
 int UdpLayer::setTTL(int t) {
@@ -483,7 +484,7 @@ int UdpLayer::sendUdpPacket(const void *data, int size, const struct sockaddr_in
 	/* send out */
 #ifdef DEBUG_UDP_LAYER
 	std::cerr << "UdpLayer::sendUdpPacket(): size: " << size;
-	std::cerr << " To: " << to << std::endl;
+	std::cerr << " To: " << &to << std::endl;
 #endif
 	struct sockaddr_in toaddr = to;
 

@@ -62,7 +62,7 @@ class UdpLayer: public bdThread {
 public:
 
 	UdpLayer(UdpReceiver *recv, struct sockaddr_in &local);
-    virtual ~UdpLayer() { return; }
+    virtual ~UdpLayer();
 
     int reset(struct sockaddr_in &local); /* calls join, close, openSocket */
     void getDataTransferred(uint32_t &read, uint32_t &write);
