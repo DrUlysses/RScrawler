@@ -18,12 +18,20 @@ void Crawler::init() {
     fclose(myIDs);
 }
 
+void Crawler::kill() {
+    isAlive = false;
+}
+
 Crawler::~Crawler() noexcept {
-    bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
+    isAlive = false;
+    isActive = false;
+    dhtHandler->enable(false);
+    dhtHandler->shutdown();
     delete dhtHandler;
     std::cerr << "Crawler object destroyed, id: ";
     bdStdPrintNodeId(std::cerr, peerId);
     std::cerr << std::endl;
+    delete peerId;
 }
 
 void Crawler::genNewId() {
@@ -88,7 +96,7 @@ void Crawler::setCrawlsCount(unsigned int count) {
 }
 
 void Crawler::run() {
-    while (true) {
+    while (isAlive) {
         if (isActive) {
             bdStackMutex stack(crwlrMutex); /********** MUTEX LOCKED *************/
             if (currentStage == 0)

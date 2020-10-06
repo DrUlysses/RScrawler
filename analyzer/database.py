@@ -66,7 +66,7 @@ def sort_dict(dictionary):
     # Simplify values
     dictionary = deepcopy(res)
     for key in dictionary:
-        res[biggest - key] = res.pop(key)
+        res[int((biggest - key) / 3600)] = res.pop(key)
     return res
 
 

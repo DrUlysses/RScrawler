@@ -30,6 +30,7 @@ public:
     void restart();
     void startDht();
     void enable(bool state);
+    void kill();
     void enableDht(bool state);
     void genNewId();
 
@@ -50,6 +51,7 @@ private:
     std::list<bdNodeId> toCheckPeerList;
     unsigned int crawlsCount = 1;
     bool isActive = false;
+    bool isAlive = true;
     bdNodeId* peerId;
     bool currentStage;
     std::string bootstrapfile = PATH_TO_BDBOOT;

@@ -59,11 +59,11 @@
  *
  * #define DISABLE_BAD_PEER_FILTER		1
  *
- ***/
 #define DEBUG_NODE_MSGOUT       1
 #define DEBUG_NODE_MSGIN        1
 #define DEBUG_NODE_MULTIPEER    1
 #define DEBUG_NODE_MSGS         1
+ ***/
 
 //#define DISABLE_BAD_PEER_FILTER		1
 
@@ -83,6 +83,12 @@ bdNode::bdNode(bdNodeId *ownId, std::string dhtVersion, const std::string& bootf
       mFriendList(ownId),
       mHistory(HISTORY_PERIOD) {
 	init(); /* (uses this pointers) stuff it - do it here! */
+}
+
+bdNode::~bdNode() {
+    shutdownNode();
+    delete mQueryMgr;
+    delete mConnMgr;
 }
 
 void bdNode::init() {
@@ -272,13 +278,15 @@ void bdNode::printState() {
 
 void bdNode::iterationOff() {
 	/* clean up any incoming messages */
-	while(mIncomingMsgs.size() > 0) {
-		bdNodeNetMsg *msg = mIncomingMsgs.front();
-		mIncomingMsgs.pop_front();
+	while(!mIncomingMsgs.empty()) {
+	    if (&mIncomingMsgs != nullptr) {
+            bdNodeNetMsg *msg = mIncomingMsgs.front();
+            mIncomingMsgs.pop_front();
 
-		/* cleanup message */
-		delete msg;
-	}
+            /* cleanup message */
+            delete msg;
+        }
+    }
 }
 
 void bdNode::iteration() {

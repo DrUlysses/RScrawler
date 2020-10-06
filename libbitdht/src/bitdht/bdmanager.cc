@@ -89,6 +89,10 @@ bdNodeManager::bdNodeManager(bdNodeId *id, std::string dhtVersion, std::string b
 	mLocalNetEnhancements = true;
 }
 
+bdNodeManager::~bdNodeManager() {
+    stopDht();
+}
+
 int	bdNodeManager::stopDht() {
 	time_t now = time(NULL);
 
@@ -98,9 +102,8 @@ int	bdNodeManager::stopDht() {
 	/* flag queries as inactive */
 	/* check if exists already */
 	std::map<bdNodeId, bdQueryPeer>::iterator it;	
-	for (it = mActivePeers.begin(); it != mActivePeers.end(); it++) {
+	for (it = mActivePeers.begin(); it != mActivePeers.end(); it++)
 		it->second.mStatus = BITDHT_QUERY_READY;
-	}
 
 	/* set state flag */
 	mMode = BITDHT_MGR_STATE_OFF;

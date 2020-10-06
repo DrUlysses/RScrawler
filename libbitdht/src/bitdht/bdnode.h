@@ -104,6 +104,8 @@ public:
     bdNode(bdNodeId *id, std::string dhtVersion, const std::string& bootfile, const std::string& filterfile,
 		bdDhtFunctions *fns, bdNodeManager* manager);
 
+    ~bdNode();
+
 	void init(); /* sets up the self referential classes (mQueryMgr & mConnMgr) */
 
 	void setNodeOptions(uint32_t optFlags);

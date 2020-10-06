@@ -24,11 +24,10 @@ public:
     ~Logger();
 
     virtual void run();
-    void disable();
-    void enable();
+    void enable(bool state);
     void stop();
 
-    void sortRsPeers(std::list<bdId>* result = nullptr);
+    static std::list<bdNodeId> getDiscoveredRSPeers();
     static std::list<bdNodeId> getDiscoveredPeers();
 
     bdMutex dhtMutex;
@@ -36,6 +35,7 @@ private:
     bool isAlive = true;
     bool isActive = false;
     static std::map<bdNodeId, bdFoundPeer> discoveredPeers;
+    static std::map<bdNodeId, bdFoundPeer> discoveredRSPeers;
 
     void iteration();
 };

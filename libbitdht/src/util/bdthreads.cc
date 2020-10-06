@@ -145,6 +145,52 @@ void bdThread::join() /* waits for the the mTid thread to stop */ {
     mMutex.unlock();
 }
 
+void bdThread::detach() {
+#ifdef DEBUG_THREADS
+    std::cerr << "bdThread::detach() Called! Waiting for Thread.mTid: ";
+
+#if defined(_WIN32) || defined(__MINGW32__)
+    std::cerr << "WIN32: Cannot print mTid ";
+#else
+    std::cerr << mTid;
+#endif
+
+    std::cerr << std::endl;
+#endif
+
+    mMutex.lock();
+    {
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__APPLE__)
+        /* Its a struct in Windows compile and the member .p ist checked in the pthreads library */
+#else
+        if (mTid > 0)
+#endif
+            pthread_detach(mTid);
+
+#ifdef DEBUG_THREADS
+        std::cerr << "bdThread::detach() Detached Thread.mTid: ";
+
+#if defined(_WIN32) || defined(__MINGW32__)
+    std::cerr << "WIN32: Cannot print mTid ";
+#else
+    std::cerr << mTid;
+#endif
+
+    std::cerr << std::endl;
+    std::cerr << "bdThread::detach() Setting mTid = 0";
+    std::cerr << std::endl;
+#endif
+
+#if defined(_WIN32) || defined(__MINGW32__)
+        memset (&mTid, 0, sizeof(mTid));
+#else
+        mTid = 0;
+#endif
+
+    }
+    mMutex.unlock();
+}
+
 void bdThread::stop() {
 #ifdef DEBUG_THREADS
     	std::cerr << "bdThread::stop() Called!";

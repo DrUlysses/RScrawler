@@ -1,5 +1,5 @@
 #include <iostream>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <stdio.h>
 #include <inttypes.h>
 #include <bdstddht.h>
@@ -7,12 +7,12 @@
 #include "logger.h"
 #include "crawler.h"
 
-#define CRAWLERS_COUNT 16 // <= 256 More crawlers == more RAM usage, be careful
+#define CRAWLERS_COUNT 256 // <= 256 More crawlers == more RAM usage, be careful
 #define CRAWL_DURATION 15 // in seconds
 #define CRAWLS_COUNT 4
 #define DURATION_BETWEEN_CHECKS 30 // in seconds >= 80
 #define CHECKS_COUNT 3
-#define DURATION_BETWEEN_CRAWLS 600 // 6 hours = 21600 seconds
+#define DURATION_BETWEEN_CRAWLS 1800 // 6 hours = 21600 seconds
 #define LOG_FILENAME "dhtlogs"
 #define RS_PEERS_FILENAME "rspeers"
 #define OWN_IDS_FILENAME "my_ids"
@@ -44,14 +44,15 @@ void exec(const char* cmd) {
     std::cerr << "Analyzer is closed" << std::endl;
 }
 
-std::string copyBDBoot(unsigned int crwlrNumber) {
-    const std::filesystem::path src = "../libbitdht/src/example/bdboot.txt";
+std::string copyBDBoot(unsigned int crwlrNumber, bool genNew) {
     std::string dstPath = "bdboots/bdboot_crwlr_" + std::to_string(crwlrNumber) + ".txt";
-    std::filesystem::create_directory("bdboots");
-    const std::filesystem::path dst = dstPath;
+    if (genNew) {
+        const std::experimental::filesystem::path src = "../libbitdht/src/example/bdboot.txt";
+        std::experimental::filesystem::create_directory("bdboots");
+        const std::experimental::filesystem::path dst = dstPath;
 
-    std::filesystem::copy(src, dst, std::filesystem::copy_options::overwrite_existing);
-
+        std::experimental::filesystem::copy(src, dst, std::experimental::filesystem::copy_options::overwrite_existing);
+    }
     return dstPath;
 }
 
@@ -60,7 +61,7 @@ int main(int argc, char **argv) {
     std::vector<Crawler*> crawlers(CRAWLERS_COUNT);
 
     auto* logger = new Logger();
-    logger->disable();
+    logger->enable(false);
     logger->start();
     // Crawlers initialization
     int regionStart = 0;
@@ -76,7 +77,10 @@ int main(int argc, char **argv) {
             uint16_t port = 6775;
             for (unsigned int k = 0; k < CRAWLERS_COUNT; k++) {
                 crawlers[k]->init();
-                crawlers[k]->setBDBoot(copyBDBoot(k));
+                if (i == 0 && j == 0)
+                    crawlers[k]->setBDBoot(copyBDBoot(k, true));
+                else
+                    crawlers[k]->setBDBoot(copyBDBoot(k, false));
                 crawlers[k]->setStage(0);
                 crawlers[k]->setRegions(regionStart, regionEnd);
                 crawlers[k]->setPort(port++);
@@ -112,19 +116,23 @@ int main(int argc, char **argv) {
 
             std::cerr << "Analyzer done in " << EndAnalyzerTime - EndSecondStageTime << " seconds" << std::endl;
             std::cerr << "Full crawl cycle done in " << EndSecondStageTime - startFirstStageTime << " seconds" << std::endl;
-            std::cerr << "Waiting for the next crawl" << std::endl;
+
+            // Cleanup
+            for (unsigned int k = 0; k < CRAWLERS_COUNT; k++) {
+                std::cerr << "Deleting crawler " << k << std::endl;
+                crawlers[k]->kill();
+                crawlers[k]->join();
+                delete crawlers[k];
+            }
 
             // Wait for the next crawl
+            std::cerr << "Waiting for the next crawl" << std::endl;
             sleep(DURATION_BETWEEN_CRAWLS);
 
             // Delete old log files
             remove(LOG_FILENAME);
             remove(RS_PEERS_FILENAME);
             remove(OWN_IDS_FILENAME);
-
-            // Cleanup
-            for (unsigned int k = 0; k < CRAWLERS_COUNT; k++)
-                delete crawlers[k];
         }
     }
 
@@ -138,7 +146,7 @@ void firstStage(std::vector<Crawler*>& crawlers, Logger& logger) {
     // Launch crawlers and logger
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++)
         crawlers[i]->startDht();
-    logger.enable();
+    logger.enable(true);
 
     std::list<bdNodeId> tempIDStorage;
     for (unsigned int i = 0; i < CRAWLS_COUNT; i++) {
@@ -172,12 +180,12 @@ void firstStage(std::vector<Crawler*>& crawlers, Logger& logger) {
         std::cerr << "Waiting for crawler " << std::to_string(i) << std::endl;
         crawlers[i]->enableDht(false);
     }
-    logger.disable();
+    logger.enable(false);
 }
 
 void secondStage(std::vector<Crawler*>& crawlers, Logger& logger) {
     // Enable logger and crawlers, set second stage
-    logger.enable();
+    logger.enable(true);
     for (unsigned int i = 0; i < CRAWLERS_COUNT; i++) {
         crawlers[i]->setStage(1);
         crawlers[i]->enableDht(true);
@@ -187,7 +195,6 @@ void secondStage(std::vector<Crawler*>& crawlers, Logger& logger) {
     std::list<bdNodeId> tempIDStorage;
     for (unsigned int i = 0; i < CHECKS_COUNT; i++) {
         sleep(DURATION_BETWEEN_CHECKS);
-        logger.sortRsPeers();
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
             crawlers[j]->enable(false);
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
@@ -195,7 +202,7 @@ void secondStage(std::vector<Crawler*>& crawlers, Logger& logger) {
             crawlers[j]->enableDht(false);
             tempIDStorage.merge(crawlers[j]->getToCheckList());
         }
-        tempIDStorage.merge(Logger::getDiscoveredPeers());
+        tempIDStorage.merge(logger.getDiscoveredRSPeers());
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
             crawlers[j]->extractToCheckList(tempIDStorage);
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
@@ -212,5 +219,5 @@ void secondStage(std::vector<Crawler*>& crawlers, Logger& logger) {
         crawlers[i]->enableDht(false);
         crawlers[i]->stopDht();
     }
-    logger.disable();
+    logger.enable(false);
 }

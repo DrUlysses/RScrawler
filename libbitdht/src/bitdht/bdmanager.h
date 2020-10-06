@@ -87,6 +87,7 @@ public:
 class bdNodeManager: public bdNode, public BitDhtInterface {
 public:
     bdNodeManager(bdNodeId *id, std::string dhtVersion, std::string bootfile, const std::string &filterfile, bdDhtFunctions *fns);
+    ~bdNodeManager();
 
     void 	iteration();
 
@@ -146,8 +147,6 @@ public:
     void doIsBannedCallback(const sockaddr_in *addr, bool *isAvailable, bool* isBanned);
 
 private:
-
-
     void doNodeCallback(const bdId *id, uint32_t peerflags);
     void doPeerCallback(const bdId *id, uint32_t status);
     void doValueCallback(const bdNodeId *id, std::string key, uint32_t status);

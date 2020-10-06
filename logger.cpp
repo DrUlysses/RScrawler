@@ -26,13 +26,8 @@ void Logger::stop() {
     isAlive = false;
 }
 
-void Logger::disable() {
-    isActive = false;
-    sortRsPeers();
-}
-
-void Logger::enable() {
-    isActive = true;
+void Logger::enable(bool state) {
+    isActive = state;
 }
 
 /*** Overloaded from iThread ***/
@@ -140,111 +135,13 @@ void Logger::iteration() {
     logsFile.close();
 }
 
-void Logger::sortRsPeers(std::list<bdId>* /*result*/) {
-    std::string line;
-    std::string addr_str;
-    bdId id;
-    bdToken version;
-    std::map<bdId, std::string> RSPeers;
-    std::string timeStamp;
-    {
-        bdStackMutex stack(dhtMutex); /********** MUTEX LOCKED *************/
-        std::ifstream myIDs(USED_IDS_FILENAME);
-        if (!myIDs) {
-            std::cerr << "Failed to open my IDs file" << std::endl;
-            return;
-        }
-        std::list<std::string> myIDsList;
-        while (std::getline(myIDs, line))
-            myIDsList.push_back(line);
-        myIDs.close();
-
-        std::ifstream logsFile;
-        logsFile.open(LOG_FILENAME, std::fstream::out | std::fstream::in);
-        while (std::getline(logsFile, line)) {
-            version = {};
-            addr_str = "";
-            id = {};
-            timeStamp = std::to_string(time(NULL));
-            // I HATE C++ STRINGS
-            std::string accum;
-            short counter = 0;
-            for (short i = 0; i < line.length() - 1; i++) {
-                if (counter == -10)
-                    break;
-                if (line[i] != ' ')
-                    accum += line[i];
-                else {
-                    switch (counter) {
-                        case 0:
-                            bdStdLoadNodeId(&id.id, accum);
-                            if (accum.length() != 40) {
-                                accum = "";
-                                counter = -10;
-                                break;
-                            }
-                            counter++;
-                            accum = "";
-                            break;
-                        case 1:
-                            if (std::count(accum.begin(), accum.end(), '.') != 3 || std::count(accum.begin(), accum.end(), ':') != 1)
-                                counter = -10;
-                            else {
-                                accum.erase(accum.find(':'), 6);
-                                addr_str = accum;
-                                counter++;
-                            }
-                            accum = "";
-                            break;
-                        case 2:
-                            if (accum[0] == 'B' &&
-                                accum[1] == 'D' &&
-                                accum[2] == '0' &&
-                                accum[3] == '2' &&
-                                accum[4] == 'R' &&
-                                accum[5] == 'S' &&
-                                accum[6] == '5' &&
-                                accum[7] == '1') {
-                                    memcpy(version.data, accum.c_str(), sizeof(version.data));
-                                    counter++;
-                            } else
-                                counter = -10;
-                            accum = "";
-                            break;
-                        case 3:
-                            // Won't work after some time (kinda current time dependent)
-                            if (accum.length() >= 10)
-                                timeStamp = accum;
-                            else
-                                timeStamp = std::to_string(time(NULL));
-                            counter++;
-                            accum = "";
-                            break;
-                        default:
-                            accum = "";
-                            break;
-                    }
-                }
-            }
-            char addr_c_str[addr_str.length()];
-            memcpy(addr_c_str, addr_str.c_str(), sizeof(addr_str));
-            if (bdnet_inet_aton(addr_c_str, &(id.addr.sin_addr)))
-                RSPeers[id] = timeStamp;
-        }
-        logsFile.close();
-
-        //result = new std::list<bdId>[RSPeers.size()]();
-        FILE *filtered = fopen(RS_PEERS_FILENAME, "a+");
-        for (auto & RSPeer : RSPeers) {
-            /*if (result != nullptr)
-                result->push_back(it->first);*/
-            bdStdPrintNodeId(line, &RSPeer.first.id, false);
-            if (std::find(myIDsList.begin(), myIDsList.end(), line) == myIDsList.end())
-                fprintf(filtered, "%s %s %s\n", line.c_str(),
-                        bdnet_inet_ntoa(RSPeer.first.addr.sin_addr).c_str(), RSPeer.second.c_str());
-        }
-        fclose(filtered);
+std::list<bdNodeId> Logger::getDiscoveredRSPeers() {
+    std::list<bdNodeId> res;
+    for (auto & discoveredPeer : Logger::discoveredPeers) {
+        if (discoveredPeer.second.mVersion == "BD02RS51")
+            res.push_back(discoveredPeer.first);
     }
+    return res;
 }
 
 std::list<bdNodeId> Logger::getDiscoveredPeers() {

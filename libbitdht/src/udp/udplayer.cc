@@ -217,6 +217,11 @@ void UdpLayer::run() {
 	return recv_loop();
 }
 
+void UdpLayer::kill() {
+    isAlive = false;
+    stopThread = true;
+}
+
 /* higher level interface */
 void UdpLayer::recv_loop() {
 	size_t maxsize = 16000;
@@ -231,7 +236,7 @@ void UdpLayer::recv_loop() {
 	int status;
 	struct timeval timeout;
 
-	while(1) {
+	while(isAlive) {
 		for (;;) {
 			/* check if we need to stop */
 			bool toStop = false;
@@ -423,7 +428,7 @@ int UdpLayer::tick() {
 	return 1;
 }
 
-void    UdpLayer::getDataTransferred(uint32_t &read, uint32_t &write) {
+void UdpLayer::getDataTransferred(uint32_t &read, uint32_t &write) {
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	read = readBytes;
@@ -434,7 +439,7 @@ void    UdpLayer::getDataTransferred(uint32_t &read, uint32_t &write) {
 	clearDataTransferred();
 }
 
-void    UdpLayer::clearDataTransferred() {
+void UdpLayer::clearDataTransferred() {
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	readBytes = 0;

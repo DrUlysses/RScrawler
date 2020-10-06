@@ -78,6 +78,7 @@ public:
 
     void recv_loop(); /* uses callback to UdpReceiver */
 
+    void kill();
 	/* Higher Level Interface */
 	//int  readPkt(void *data, int *size, struct sockaddr_in &from);
 	int sendPkt(const void *data, int size, const struct sockaddr_in &to, int ttl);
@@ -115,6 +116,8 @@ private:
 	bool stopThread;
 
 	bdMutex sockMtx;
+
+	bool isAlive = true;
 };
 
 

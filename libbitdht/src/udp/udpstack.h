@@ -64,32 +64,31 @@ virtual int sendPkt(const void *data, int size, const struct sockaddr_in &to, in
 
 #define UDP_TEST_LOSSY_FRAC		(0.10)
 
-class UdpStack: public UdpReceiver, public UdpPublisher
-{
-	public:
+class UdpStack: public UdpReceiver, public UdpPublisher {
+public:
 
 	UdpStack(struct sockaddr_in &local);
 	UdpStack(int testmode, struct sockaddr_in &local);
-virtual ~UdpStack() { return; }
+    virtual ~UdpStack();
 
-UdpLayer *getUdpLayer(); /* for testing only */
+    UdpLayer *getUdpLayer(); /* for testing only */
 
-bool    getLocalAddress(struct sockaddr_in &local);
-bool	resetAddress(struct sockaddr_in &local);
+    bool getLocalAddress(struct sockaddr_in &local);
+    bool resetAddress(struct sockaddr_in &local);
 
 
 	/* add in a receiver */
-int	addReceiver(UdpReceiver *recv);
-int 	removeReceiver(UdpReceiver *recv);
+    int	addReceiver(UdpReceiver *recv);
+    int removeReceiver(UdpReceiver *recv);
 
 	/* Packet IO */
-		/* pass-through send packets */
-virtual int sendPkt(const void *data, int size, const struct sockaddr_in &to, int ttl);
-		/* callback for recved data (overloaded from UdpReceiver) */
+    /* pass-through send packets */
+    virtual int sendPkt(const void *data, int size, const struct sockaddr_in &to, int ttl);
+    /* callback for recved data (overloaded from UdpReceiver) */
 
-virtual int recvPkt(void *data, int size, struct sockaddr_in &from);
+    virtual int recvPkt(void *data, int size, struct sockaddr_in &from);
 
-int     status(std::ostream &out);
+    int status(std::ostream &out);
 
 	/* setup connections */
 	int openSocket();
@@ -100,7 +99,7 @@ int     status(std::ostream &out);
 
 	int close();
 
-	private:
+private:
 
 	UdpLayer *udpLayer;
 

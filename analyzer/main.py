@@ -121,8 +121,8 @@ if __name__ == '__main__':
     # Read the logs
     print("Extracting dhtlogs")
     get_data(path_to_logs + "/dhtlogs", ids)
-    print("Extracting rspeers")
-    get_data(path_to_logs + "/rspeers", ids, "rs")
+    # print("Extracting rspeers")
+    # get_data(path_to_logs + "/rspeers", ids, "rs")
     draw_rs_peers_and_time_plot()
     draw_unique_rs_peers_and_time_plot()
     draw_peers_and_time_plot()

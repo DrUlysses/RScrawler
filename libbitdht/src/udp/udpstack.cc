@@ -66,17 +66,22 @@ UdpStack::UdpStack(int testmode, struct sockaddr_in &local)
 	return;
 }
 
-UdpLayer *UdpStack::getUdpLayer() /* for testing only */
-{
+UdpStack::~UdpStack() noexcept {
+    udpLayer->kill();
+    udpLayer->join();
+    delete udpLayer;
+}
+
+UdpLayer *UdpStack::getUdpLayer() { /* for testing only */
 	return udpLayer;
 }
 
-bool    UdpStack::getLocalAddress(struct sockaddr_in &local) {
+bool UdpStack::getLocalAddress(struct sockaddr_in &local) {
 	local = laddr;
 	return true;
 }
 
-bool    UdpStack::resetAddress(struct sockaddr_in &local) {
+bool UdpStack::resetAddress(struct sockaddr_in &local) {
 #ifdef DEBUG_UDP_RECV
     std::cerr << "UdpStack::resetAddress(" << local << ")";
 	std::cerr << std::endl;
@@ -96,9 +101,9 @@ int UdpStack::recvPkt(void *data, int size, struct sockaddr_in &from) {
 	std::cerr << std::endl;
 #endif
 
-        bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
+    bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
 
-        std::list<UdpReceiver *>::iterator it;
+    std::list<UdpReceiver *>::iterator it;
 	for (it = mReceivers.begin(); it != mReceivers.end(); it++) {
 		// See if they want the packet.
 		if ((*it)->recvPkt(data, size, from)) {

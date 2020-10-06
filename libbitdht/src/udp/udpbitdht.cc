@@ -54,8 +54,8 @@
 /*************************************/
 
 UdpBitDht::UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string appVersion, std::string bootstrapfile, const std::string& filteredipfile, bdDhtFunctions *fns)
-	:UdpSubReceiver(pub), dhtMtx(true)//, mFns(fns)
-	{
+	:UdpSubReceiver(pub), dhtMtx(true) { //, mFns(fns)
+
 	std::string usedVersion;
 
 #ifdef BITDHT_VERSION_IDENTIFER
@@ -77,9 +77,13 @@ UdpBitDht::UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string appVersion, st
 
 
 UdpBitDht::~UdpBitDht() {
-	return; 
+    isAlive = false;
+    delete mBitDhtManager;
 }
 
+void UdpBitDht::kill() {
+    isAlive = false;
+}
 
         /*********** External Interface to the World ************/
 
@@ -291,7 +295,7 @@ void UdpBitDht::getDataTransferred(uint32_t &read, uint32_t &write) {
 #define TICK_PAUSE_USEC		20000  /* 20ms secs .. max messages = 50 x 100 = 5000 */
 
 void UdpBitDht::run() {
-	while(1) {
+	while(isAlive) {
 		while(tick())
 			usleep(TICK_PAUSE_USEC);
 		{

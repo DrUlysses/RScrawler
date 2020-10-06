@@ -53,6 +53,7 @@ class BitDhtHandler {
 public:
 
 	BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, std::string bootstrapfile);
+    ~BitDhtHandler();
 
     void enable(bool on);
     void shutdown(); /* blocking call */

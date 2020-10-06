@@ -45,7 +45,7 @@ class UdpBitDht: public UdpSubReceiver, public bdThread, public BitDhtInterface 
 public:
 
     UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string dhtVersion, std::string bootstrapfile, const std::string& filteredipfile, bdDhtFunctions *fns);
-    virtual ~UdpBitDht();
+    ~UdpBitDht();
 
 
 	/*********** External Interface to the World (BitDhtInterface) ************/
@@ -98,6 +98,7 @@ public:
 
 	/******************* Internals *************************/
 	/***** Iteration / Loop Management *****/
+    virtual void kill();
 
 	/*** Overloaded from UdpSubReceiver ***/
     virtual int recvPkt(void *data, int size, struct sockaddr_in &from);
@@ -115,7 +116,7 @@ private:
 	bdMutex dhtMtx; /* for all class data (below) */
 	bdNodeManager *mBitDhtManager;
 	//bdDhtFunctions *mFns;
-
+    bool isAlive = true;
 	uint32_t mReadBytes;
 	uint32_t mWriteBytes;
 };

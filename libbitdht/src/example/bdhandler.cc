@@ -129,6 +129,13 @@ BitDhtHandler::BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, 
 	mUdpBitDht->startDht();
 }
 
+BitDhtHandler::~BitDhtHandler() {
+    delete mStack;
+    mUdpBitDht->kill();
+    mUdpBitDht->join();
+    delete mUdpBitDht;
+}
+
 /* pqiNetAssist - external interface functions */
 void BitDhtHandler::enable(bool on) {
     std::cerr << "p3BitDht::enable(" << on << ")" << std::endl;
@@ -153,11 +160,17 @@ void BitDhtHandler::restart() {
 }
 
 bool BitDhtHandler::getEnabled() {
-    return (mUdpBitDht->stateDht() != 0);
+    if (mUdpBitDht)
+        return (mUdpBitDht->stateDht() != 0);
+    else
+        return false;
 }
 
 bool BitDhtHandler::getActive() {
-    return (mUdpBitDht->stateDht() >= BITDHT_MGR_STATE_ACTIVE);
+    if (mUdpBitDht)
+        return (mUdpBitDht->stateDht() >= BITDHT_MGR_STATE_ACTIVE);
+    else
+        return false;
 }
 
 std::vector<std::string> BitDhtHandler::getFoundPeers() {
