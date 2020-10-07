@@ -1,4 +1,4 @@
 #!/bin/bash
 
 source ../analyzer/venv/bin/activate
-python ../analyzer/main.py
+python3 ../analyzer/main.py
