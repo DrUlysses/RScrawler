@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
             uint16_t port = 6775;
             for (unsigned int k = 0; k < CRAWLERS_COUNT; k++) {
                 crawlers[k]->init();
-                if (i == 0 && j == 0)
+                if (j == 0)
                     crawlers[k]->setBDBoot(copyBDBoot(k, true));
                 else
                     crawlers[k]->setBDBoot(copyBDBoot(k, false));

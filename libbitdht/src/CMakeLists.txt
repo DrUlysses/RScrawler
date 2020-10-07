@@ -1,12 +1,10 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.7)
 set(PROJECT_NAME RScrawler)
 set(LIB_NAME libbitdht)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(OPENSSL_USE_STATIC_LIBS TRUE)
 
 project(${PROJECT_NAME} C CXX)
-
-set(CMAKE_CXX_STANDARD 17)
 
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bitdht)
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/example)

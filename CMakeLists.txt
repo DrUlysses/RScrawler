@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.7)
 set(PROJECT_NAME RScrawler)
 project(${PROJECT_NAME} C CXX)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-set(CMAKE_CXX_STANDARD 17)
 set(OPENSSL_USE_STATIC_LIBS TRUE)
 
 #add_subdirectory(libbitdht/src/example)
