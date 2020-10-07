@@ -189,6 +189,7 @@ std::list<bdNodeId> Crawler::getToCheckList() {
 }
 
 void Crawler::writeLogs() {
+    dhtHandler->mUdpBitDht->updateStore();
     const char *logName = "dhtlogs";
     if (!dhtHandler) {
         std::cerr << "Problem with dhtHandler, can't write to logs" << std::endl;

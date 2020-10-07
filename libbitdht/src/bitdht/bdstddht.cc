@@ -240,7 +240,6 @@ bdStdDht::bdStdDht() {
 }
         /* setup variables */
 uint16_t bdStdDht::bdNumBuckets() {
-
 	return BITDHT_STANDARD_N_BUCKETS;
 }
 

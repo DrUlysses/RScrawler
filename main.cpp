@@ -10,8 +10,8 @@
 #define CRAWLERS_COUNT 64 // <= 256 More crawlers == more RAM usage, more time to stop them, be careful
 #define CRAWL_DURATION 15 // in seconds
 #define CRAWLS_COUNT 4
-#define DURATION_BETWEEN_CHECKS 30 // in seconds >= 80
-#define CHECKS_COUNT 3
+#define DURATION_BETWEEN_CHECKS 60 // in seconds >= 80
+#define CHECKS_COUNT 2
 #define DURATION_BETWEEN_CRAWLS 1800 // 6 hours = 21600 seconds
 #define LOG_FILENAME "dhtlogs"
 #define RS_PEERS_FILENAME "rspeers"
@@ -171,7 +171,7 @@ void firstStage(std::vector<Crawler*>& crawlers, Logger& logger) {
             tempIDStorage.merge(crawlers[j]->getToCheckList());
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
             // Restart nodes, not to hold the handler for too long
-            crawlers[j]->restart();
+//            crawlers[j]->restart();
             // Inject new peers to check and activate crawlers
             crawlers[j]->extractToCheckList(tempIDStorage);
             crawlers[j]->enableDht(true);
@@ -211,7 +211,7 @@ void secondStage(std::vector<Crawler*>& crawlers, Logger& logger) {
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++)
             crawlers[j]->extractToCheckList(tempIDStorage);
         for (unsigned int j = 0; j < CRAWLERS_COUNT; j++) {
-            crawlers[j]->restart();
+//            crawlers[j]->restart();
             crawlers[j]->enableDht(true);
             crawlers[j]->enable(true);
         }

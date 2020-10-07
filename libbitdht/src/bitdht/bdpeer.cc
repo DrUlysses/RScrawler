@@ -55,9 +55,9 @@ bdId::bdId(bdNodeId in_id, struct sockaddr_in in_addr) {
 	addr.sin_addr.s_addr = in_addr.sin_addr.s_addr;
 	addr.sin_port = in_addr.sin_port;
 
-	for (int i = 0; i < BITDHT_KEY_LEN; i++) {
+	for (int i = 0; i < BITDHT_KEY_LEN; i++)
 		id.data[i] = in_id.data[i];
-	}
+
 };
 
 
@@ -178,8 +178,8 @@ bdSpace::bdSpace(bdNodeId *ownId, bdDhtFunctions *fns)
 	return;
 }
 
-	/* empty the buckets */
-int     bdSpace::clear() {
+/* empty the buckets */
+int bdSpace::clear() {
 	std::vector<bdBucket>::iterator it;
         /* iterate through the buckets, and sort by distance */
         for (it = buckets.begin(); it != buckets.end(); it++) {
@@ -188,7 +188,7 @@ int     bdSpace::clear() {
 	return 1;
 }
 
-int     bdSpace::setAttachedFlag(uint32_t withflags, int count) {
+int bdSpace::setAttachedFlag(uint32_t withflags, int count) {
 	mAttachedFlags = withflags;
 	mAttachedCount = count;
 	mAttachTS = 0;
@@ -196,8 +196,8 @@ int     bdSpace::setAttachedFlag(uint32_t withflags, int count) {
 }
 
 int bdSpace::find_nearest_nodes_with_flags(const bdNodeId *id, int number, 
-		std::list<bdId> /* excluding */, 
-		std::multimap<bdMetric, bdId> &nearest, uint32_t with_flags) {
+    std::list<bdId> /* excluding */,
+    std::multimap<bdMetric, bdId> &nearest, uint32_t with_flags) {
 	std::multimap<bdMetric, bdId> closest;
 	std::multimap<bdMetric, bdId>::iterator mit;
 
@@ -219,12 +219,10 @@ int bdSpace::find_nearest_nodes_with_flags(const bdNodeId *id, int number,
 	std::list<bdPeer>::iterator eit;
 	/* iterate through the buckets, and sort by distance */
 	for (it = buckets.begin(); it != buckets.end(); it++) {
-		for (eit = it->entries.begin(); eit != it->entries.end(); eit++)
-		{
-			if ((!with_flags) || ((with_flags & eit->mPeerFlags) == with_flags)) {
-			  mFns->bdDistance(id, &(eit->mPeerId.id), &dist);
-			  closest.insert(std::pair<bdMetric, bdId>(dist, eit->mPeerId));
-
+		for (eit = it->entries.begin(); eit != it->entries.end(); eit++) {
+            if ((!with_flags) || ((with_flags & eit->mPeerFlags) == with_flags)) {
+                mFns->bdDistance(id, &(eit->mPeerId.id), &dist);
+                closest.insert(std::pair<bdMetric, bdId>(dist, eit->mPeerId));
 #if 0
 			  std::cerr << "Added NodeId: ";
 			  bdPrintNodeId(std::cerr, &(eit->mPeerId.id));

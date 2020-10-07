@@ -147,64 +147,62 @@ class bdBucket
  *
  *****/
 
-class bdSpace
-{
-	public:
+class bdSpace {
+public:
 
 	bdSpace(bdNodeId *ownId, bdDhtFunctions *fns);
 
-int	clear();
+    int	clear();
 
-int	setAttachedFlag(uint32_t withflags, int count);
+    int	setAttachedFlag(uint32_t withflags, int count);
 
 	/* accessors */
-int 	find_nearest_nodes(const bdNodeId *id, int number, 
-		std::multimap<bdMetric, bdId> &nearest);
+    int find_nearest_nodes(const bdNodeId *id, int number,
+    std::multimap<bdMetric, bdId> &nearest);
 
-int 	find_nearest_nodes_with_flags(const bdNodeId *id, int number, 
-		std::list<bdId> excluding, 
-		std::multimap<bdMetric, bdId> &nearest, uint32_t with_flag);
+    int find_nearest_nodes_with_flags(const bdNodeId *id, int number,
+    std::list<bdId> excluding,
+    std::multimap<bdMetric, bdId> &nearest, uint32_t with_flag);
 
-int 	find_node(const bdNodeId *id, int number, 
-		std::list<bdId> &matchIds, uint32_t with_flag);
-int 	find_exactnode(const bdId *id, bdPeer &peer);
+    int find_node(const bdNodeId *id, int number,
+    std::list<bdId> &matchIds, uint32_t with_flag);
+    int find_exactnode(const bdId *id, bdPeer &peer);
 
-// switched to more efficient single sweep.
-//int	out_of_date_peer(bdId &id); // side-effect updates, send flag on peer.
-int     scanOutOfDatePeers(std::list<bdId> &peerIds);
-int     updateAttachedPeers();
+    // switched to more efficient single sweep.
+    //int	out_of_date_peer(bdId &id); // side-effect updates, send flag on peer.
+    int scanOutOfDatePeers(std::list<bdId> &peerIds);
+    int updateAttachedPeers();
 
-int     add_peer(const bdId *id, uint32_t mode);
-int     printDHT();
-int     getDhtBucket(const int idx, bdBucket &bucket);
+    int add_peer(const bdId *id, uint32_t mode);
+    int printDHT();
+    int getDhtBucket(const int idx, bdBucket &bucket);
 
-uint32_t calcNetworkSize();
-uint32_t calcNetworkSizeWithFlag(uint32_t withFlag);
-uint32_t calcNetworkSizeWithFlag_old(uint32_t withFlag);
-uint32_t calcSpaceSize();
-uint32_t calcSpaceSizeWithFlag(uint32_t withFlag);
+    uint32_t calcNetworkSize();
+    uint32_t calcNetworkSizeWithFlag(uint32_t withFlag);
+    uint32_t calcNetworkSizeWithFlag_old(uint32_t withFlag);
+    uint32_t calcSpaceSize();
+    uint32_t calcSpaceSizeWithFlag(uint32_t withFlag);
 
-        /* special function to enable DHT localisation (i.e find peers from own network) */
-bool 	findRandomPeerWithFlag(bdId &id, uint32_t withFlag);
+    /* special function to enable DHT localisation (i.e find peers from own network) */
+    bool findRandomPeerWithFlag(bdId &id, uint32_t withFlag);
 
 	/* strip out flags - to switch in/out of relay mode */
-int 	clean_node_flags(uint32_t flags);
+    int clean_node_flags(uint32_t flags);
 
 	/* to add later */
-int	updateOwnId(bdNodeId *newOwnId);
+    int	updateOwnId(bdNodeId *newOwnId);
 
 	/* flag peer */
-bool	flagpeer(const bdId *id, uint32_t flags, uint32_t ex_flags);
+    bool flagpeer(const bdId *id, uint32_t flags, uint32_t ex_flags);
 
-	private:
-
+private:
 	std::vector<bdBucket> buckets;
 	bdNodeId mOwnId;
 	bdDhtFunctions *mFns;
 
 	uint32_t mAttachedFlags;
 	uint32_t mAttachedCount;
-	time_t   mAttachTS;
+	time_t mAttachTS;
 };
 
 

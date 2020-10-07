@@ -56,6 +56,7 @@
 UdpBitDht::UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string appVersion, std::string bootstrapfile, const std::string& filteredipfile, bdDhtFunctions *fns)
 	:UdpSubReceiver(pub), dhtMtx(true) { //, mFns(fns)
 
+    isAlive = true;
 	std::string usedVersion;
 
 #ifdef BITDHT_VERSION_IDENTIFER
@@ -141,7 +142,10 @@ bool UdpBitDht::ConnectionRequest(struct sockaddr_in *laddr, bdNodeId *target, u
 	return mBitDhtManager->ConnectionRequest(laddr, target, mode, delay, start);
 }
 
-
+void UdpBitDht::updateStore() {
+    bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
+    mBitDhtManager->updateStore();
+}
 
 void UdpBitDht::ConnectionAuth(bdId *srcId, bdId *proxyId, bdId *destId, uint32_t mode, uint32_t loc, 
 								uint32_t bandwidth, uint32_t delay, uint32_t answer) {

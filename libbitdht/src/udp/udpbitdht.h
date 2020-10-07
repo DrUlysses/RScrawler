@@ -99,6 +99,7 @@ public:
 	/******************* Internals *************************/
 	/***** Iteration / Loop Management *****/
     virtual void kill();
+	void updateStore();
 
 	/*** Overloaded from UdpSubReceiver ***/
     virtual int recvPkt(void *data, int size, struct sockaddr_in &from);
