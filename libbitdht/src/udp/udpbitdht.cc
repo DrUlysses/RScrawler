@@ -166,7 +166,6 @@ bool UdpBitDht::setAttachMode(bool on) {
 	return mBitDhtManager->setAttachMode(on);
 }
 
-
 int UdpBitDht::getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
@@ -184,8 +183,6 @@ int UdpBitDht::getDhtBucket(const int idx, bdBucket &bucket) {
 
 	return mBitDhtManager->getDhtBucket(idx, bucket);
 }
-
-
 
 int UdpBitDht::getDhtQueries(std::map<bdNodeId, bdQueryStatus> &queries) {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/

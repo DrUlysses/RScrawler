@@ -1543,10 +1543,13 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
     if (messageType == "REPLY NODE") {
         std::cout << "Message from: " << tempID << " msg " << messageType << " time " << tempTime <<
             " token " << transId.data << " nodes:" << std::endl;
+        tempID += " " + tempTime + " " + messageType;
+        mFoundPeers.insert(mFoundPeers.end(), tempID);
         for (auto tempNode : nodes) {
             bdStdPrintId(tempID, &tempNode, false);
             tempID.erase(tempID.find("ip:"), 3);
             std::cout << "Became " << tempID << " token " << transId.data << std::endl;
+            tempID += " " + tempTime + " " + messageType;
             mFoundPeers.insert(mFoundPeers.end(), tempID);
         }
     } else if (be_version) {
