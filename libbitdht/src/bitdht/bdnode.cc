@@ -1545,7 +1545,9 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
             " token " << transId.data << " nodes:" << std::endl;
         tempID += " " + tempTime + " " + messageType;
         mFoundPeers.insert(mFoundPeers.end(), tempID);
+        tempID = "";
         for (auto tempNode : nodes) {
+            tempID = "";
             bdStdPrintId(tempID, &tempNode, false);
             tempID.erase(tempID.find("ip:"), 3);
             std::cout << "Became " << tempID << " token " << transId.data << std::endl;
@@ -1569,12 +1571,14 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr) {
             messageType << " time " << tempTime << " token " << transId.data << std::endl;
         tempID += " " + tempVersion + " " + tempTime + " " + messageType;
         mFoundPeers.insert(mFoundPeers.end(), tempID);
+        tempID = "";
 	} else {
         std::cout << "Message from: " << tempID << " msg "  <<
             messageType << " time " << tempTime << " token " << transId.data << std::endl;
         tempID += " " + tempTime + " " + messageType;
         mFoundPeers.insert(mFoundPeers.end(), tempID);
-	}
+        tempID = "";
+    }
 
 	be_free(node);
 }

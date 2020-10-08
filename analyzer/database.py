@@ -22,7 +22,7 @@ class PeerEntry(Base):
 Base.metadata.create_all(engine)
 
 
-# Add a song
+# Add a peer
 def add_entry(new_id="", new_ip='', new_version="", new_time=""):
     if new_id.count('0') == 40 or len(new_id) != 40 or new_ip.count('.') != 3 or not new_time.isnumeric():
         return False
@@ -37,6 +37,26 @@ def add_entry(new_id="", new_ip='', new_version="", new_time=""):
         session.commit()
         return True
     return False
+
+
+# Add multiple peers
+def add_entries(entries):
+    res = 0
+    overall = len(entries)
+    for entry in entries:
+        if entry.id.count('0') == 40 or len(entry.id) != 40 or entry.ip.count('.') != 3 or not entry.time.isnumeric():
+            continue
+        peer = PeerEntry(id=entry.id, ip=entry.ip, version=entry.version, time=entry.time)
+        old = session.query(PeerEntry).filter_by(id=entry.id).first()
+        if old is None:
+            session.add(peer)
+            res += 1
+        elif old.time != entry.time:
+            session.add(peer)
+            res += 1
+        print("Added " + str(res) + " entries")
+    session.commit()
+    return overall - res
 
 
 def sort_dict(dictionary):
@@ -66,7 +86,10 @@ def sort_dict(dictionary):
     # Simplify values
     dictionary = deepcopy(res)
     for key in dictionary:
-        res[int((biggest - key) / 3600)] = res.pop(key)
+        delta = biggest - key
+        if delta > biggest:
+            delta = 0
+        res[int(delta / 3600)] = res.pop(key)
     return res
 
 

@@ -7,22 +7,21 @@
 #include "logger.h"
 #include "crawler.h"
 
-#define CRAWLERS_COUNT 64 // <= 256 More crawlers == more RAM usage, more time to stop them, be careful
+#define CRAWLERS_COUNT 256 // <= 256 More crawlers == more RAM usage, more time to stop them, be careful
 #define CRAWL_DURATION 15 // in seconds
 #define CRAWLS_COUNT 4
-#define DURATION_BETWEEN_CHECKS 60 // in seconds >= 80
+#define DURATION_BETWEEN_CHECKS 80 // in seconds >= 80
 #define CHECKS_COUNT 2
-#define DURATION_BETWEEN_CRAWLS 1800 // 6 hours = 21600 seconds
+#define DURATION_BETWEEN_CRAWLS 10800 // 6 hours = 21600 seconds
 #define LOG_FILENAME "dhtlogs"
-#define RS_PEERS_FILENAME "rspeers"
 #define OWN_IDS_FILENAME "my_ids"
 
-//void args(char *name) {
-//    std::cerr << std::endl << "Dht Single Shot Searcher" << std::endl;
-//    std::cerr << "Usage:" << std::endl;
-//    std::cerr << "\t" << name << " -p <peerId> " << std::endl << std::endl;
-//    std::cerr << "NB: The PeerId is Required to Run" << std::endl << std::endl;
-//}
+void args(char *name) {
+    std::cerr << std::endl << "RetroShare crawler" << std::endl;
+    std::cerr << "Usage:" << std::endl;
+    std::cerr << "\t" << name << " -f <0 or 1> (first run?) " << std::endl << std::endl;
+    std::cerr << "NB: The -f Flag set is Required to Run" << std::endl << std::endl;
+}
 
 void firstStage(std::vector<Crawler*>& crawlers, Logger& logger);
 void secondStage(std::vector<Crawler*>& crawlers, Logger& logger);
@@ -56,7 +55,36 @@ std::string copyBDBoot(unsigned int crwlrNumber, bool genNew) {
     return dstPath;
 }
 
+void createBackup(std::string fileName, int dublicateNumber) {
+    std::string dstPath = "backups/" + fileName + std::to_string(dublicateNumber) + ".log";
+    const std::experimental::filesystem::path src = fileName;
+    std::experimental::filesystem::create_directory("backups");
+    const std::experimental::filesystem::path dst = dstPath;
+    std::experimental::filesystem::copy(src, dst, std::experimental::filesystem::copy_options::overwrite_existing);
+}
+
 int main(int argc, char **argv) {
+    int c;
+    bool isFlagSet = false;
+    bool isFirstRun = true;
+    while((c = getopt(argc, argv,"f:")) != -1) {
+        switch (c) {
+            case 'f':
+                isFirstRun = optarg;
+                isFlagSet = true;
+                break;
+            default:
+                args(argv[0]);
+                return 1;
+                break;
+        }
+    }
+
+    if (!isFlagSet) {
+        args(argv[0]);
+        return 1;
+    }
+
     // Create objects
     std::vector<Crawler*> crawlers(CRAWLERS_COUNT);
 
@@ -80,7 +108,7 @@ int main(int argc, char **argv) {
             uint16_t port = 6775;
             for (unsigned int k = 0; k < CRAWLERS_COUNT; k++) {
                 crawlers[k]->init();
-                if (j == 0)
+                if (isFirstRun && j == 0)
                     crawlers[k]->setBDBoot(copyBDBoot(k, true));
                 else
                     crawlers[k]->setBDBoot(copyBDBoot(k, false));
@@ -112,6 +140,10 @@ int main(int argc, char **argv) {
 
             time_t nextCrawlStart = startFirstStageTime + DURATION_BETWEEN_CRAWLS;
 
+            // Create backup
+            createBackup(LOG_FILENAME, startFirstStageTime);
+            createBackup(OWN_IDS_FILENAME, startFirstStageTime);
+
             // Run analyzer
             exec("../analyzer/run.sh");
 
@@ -131,12 +163,12 @@ int main(int argc, char **argv) {
 
             // Wait for the next crawl
             nextCrawlStart -= time(NULL);
+
             std::cerr << "Waiting for the next crawl (" << nextCrawlStart / 60 << " minutes)" << std::endl;
             sleep(nextCrawlStart);
 
             // Delete old log files
             remove(LOG_FILENAME);
-            remove(RS_PEERS_FILENAME);
             remove(OWN_IDS_FILENAME);
         }
     }
