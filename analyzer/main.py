@@ -81,7 +81,7 @@ def get_all_data(path, ids, version=""):
         else:
             print("Skipped line: " + str(line).replace("\n", ''))
     actual_done = database.add_entries(peers)
-    print("Committed " + actual_done + " out of " + lines_done)
+    print("Committed " + str(actual_done) + " out of " + str(lines_done))
     file.close()
 
 
@@ -123,6 +123,15 @@ def get_data(path, ids, version=""):
             print("Done " + str(lines_done) + " lines")
         else:
             print("Skipped line: " + str(line).replace("\n", ''))
+    file.close()
+
+
+def gen_rs_peers_list(path):
+    data = database.get_rs_peers_list()
+    open(path, "w").close()
+    file = open(path, "w")
+    for peer_info in data:
+        file.write(peer_info + "\n")
     file.close()
 
 
@@ -193,5 +202,6 @@ if __name__ == '__main__':
     # get_all_data(path_to_logs + "/rspeers", ids, "rs")
     draw_rs_peers_and_time_plot()
     draw_unique_rs_peers_and_time_plot()
+    gen_rs_peers_list("new_rs_peers")
     # draw_peers_and_time_plot()
     # draw_unique_peers_and_time_plot()

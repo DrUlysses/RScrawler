@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
             createBackup(OWN_IDS_FILENAME, startFirstStageTime);
 
             // Run analyzer
-            exec("../analyzer/run.sh");
+            // exec("../analyzer/run.sh");
 
             // Time
             time_t endAnalyzerTime = time(NULL);
@@ -161,15 +161,18 @@ int main(int argc, char **argv) {
                 delete crawlers[k];
             }
 
+            // Delete old log files
+            remove(LOG_FILENAME);
+            const std::experimental::filesystem::path src = "new_rs_peers";
+            const std::experimental::filesystem::path dst = LOG_FILENAME;
+            std::experimental::filesystem::rename(src, dst);
+            remove(OWN_IDS_FILENAME);
+
             // Wait for the next crawl
             nextCrawlStart -= time(NULL);
 
             std::cerr << "Waiting for the next crawl (" << nextCrawlStart / 60 << " minutes)" << std::endl;
             sleep(nextCrawlStart);
-
-            // Delete old log files
-            remove(LOG_FILENAME);
-            remove(OWN_IDS_FILENAME);
         }
     }
 

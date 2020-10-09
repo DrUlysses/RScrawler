@@ -44,7 +44,8 @@ def add_entries(entries):
     res = 0
     overall = len(entries)
     for entry in entries:
-        if entry.id.count('0') == 40 or len(entry.id) != 40 or entry.ip.count('.') != 3 or not entry.time.isnumeric():
+        if entry.id.count('0') == 40 or len(entry.id) != 40 or entry.ip.count('.') != 3 \
+                or not entry.time.isnumeric() or entry.version != "rs":
             continue
         peer = PeerEntry(id=entry.id, ip=entry.ip, version=entry.version, time=entry.time)
         old = session.query(PeerEntry).filter_by(id=entry.id).first()
@@ -57,6 +58,17 @@ def add_entries(entries):
         print("Added " + str(res) + " entries")
     session.commit()
     return overall - res
+
+
+def get_rs_peers_list():
+    res = []
+    entered_peers = []
+    entries = session.query(PeerEntry)
+    for entry in entries:
+        if entry.version == "rs" and entry.id not in entered_peers:
+            res.append(str(entry.id) + " " + str(entry.ip) + " BD02RS51 " + str(entry.time))
+            entered_peers.append(entry.id)
+    return res
 
 
 def sort_dict(dictionary):
