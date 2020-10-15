@@ -126,6 +126,25 @@ def get_data(path, ids, version=""):
     file.close()
 
 
+def sort_data(data):
+    sortednames = sorted(data.keys())
+    new_data = dict([])
+    for name in sortednames:
+        new_data[name] = data[name]
+    return new_data
+
+
+def reverse_keys(data):
+    new_values = []
+    for value in reversed(data.values()):
+        new_values.append(value)
+    i = 0
+    for key in data.keys():
+        data[key] = new_values[i]
+        i += 1
+    return data
+
+
 def gen_rs_peers_list(path):
     data = database.get_rs_peers_list()
     open(path, "w").close()
@@ -137,11 +156,11 @@ def gen_rs_peers_list(path):
 
 def draw_peers_and_time_plot():
     plot.ylabel("Peers count")
-    plot.xlabel("Elapsed time")
-    data = database.get_all_count_to_time_results()
+    plot.xlabel("Elapsed time in hours")
+    data = reverse_keys(sort_data(database.get_all_count_to_time_results()))
     plot.bar(range(len(data)), data.values())
     plot.xticks(range(len(data)), data.keys())
-    plot.savefig("Peers count - Elapsed time.png")
+    plot.savefig("Peers count - Elapsed time.pdf")
     # # Close, so the pics won't overlap
     # plot.close("all")
     # Save as text file just in case
@@ -151,11 +170,11 @@ def draw_peers_and_time_plot():
 
 def draw_unique_peers_and_time_plot():
     plot.ylabel("Unique peers count")
-    plot.xlabel("Elapsed time")
-    data = database.get_unique_all_count_to_time_results()
+    plot.xlabel("Elapsed time in hours")
+    data = reverse_keys(sort_data(database.get_unique_all_count_to_time_results()))
     plot.bar(range(len(data)), data.values())
     plot.xticks(range(len(data)), data.keys())
-    plot.savefig("Unique Peers count - Elapsed time.png")
+    plot.savefig("Unique Peers count - Elapsed time.pdf")
     # Close, so the pics won't overlap
     plot.close("all")
     # Save as text file just in case
@@ -164,31 +183,63 @@ def draw_unique_peers_and_time_plot():
 
 
 def draw_rs_peers_and_time_plot():
-    plot.ylabel("RS Peers count")
-    plot.xlabel("Elapsed time")
-    data = database.get_rs_count_to_time_results()
+    plot.ylabel("RS Peers count", fontsize=15)
+    plot.xlabel("Elapsed time in hours", fontsize=15)
+    data = reverse_keys(sort_data(database.get_rs_count_to_time_results()))
     plot.bar(range(len(data)), data.values())
-    plot.xticks(range(len(data)), data.keys())
-    plot.savefig("RS Peers count - Elapsed time.png")
-    # # Close, so the pics won't overlap
-    # plot.close("all")
+    plot.xticks(range(len(data)), data.keys(), rotation=45, fontsize=15)
+    plot.yticks(fontsize=15)
+    plot.savefig("RS Peers count - Elapsed time.pdf")
+    plot.show()
+    # Close, so the pics won't overlap
+    plot.close("all")
     # Save as text file just in case
     with open("RS Peers count - Elapsed time.txt", 'w') as f:
         print(data, file=f)
 
 
 def draw_unique_rs_peers_and_time_plot():
-    plot.ylabel("Unique RS peers count")
-    plot.xlabel("Elapsed time")
-    data = database.get_unique_rs_count_to_time_results()
+    plot.ylabel("Unique RS peers count", fontsize=15)
+    plot.xlabel("Elapsed time in hours", fontsize=15)
+    data = reverse_keys(sort_data(database.get_unique_rs_count_to_time_results()))
     plot.bar(range(len(data)), data.values())
-    plot.xticks(range(len(data)), data.keys())
-    plot.savefig("Unique RS Peers count - Elapsed time.png")
+    plot.xticks(range(len(data)), data.keys(), fontsize=15, rotation=45)
+    plot.yticks(fontsize=15)
+    plot.savefig("Unique RS Peers count - Elapsed time.pdf")
+    plot.show()
     # Close, so the pics won't overlap
     plot.close("all")
     # Save as text file just in case
     with open("Unique RS Peers count - Elapsed time.txt", 'w') as f:
         print(data, file=f)
+
+
+def draw_unique_rs_peers_and_region_plot():
+    plot.ylabel("Unique RS peers count", fontsize=15)
+    plot.xlabel("Region", fontsize=15)
+    data = reverse_keys(sort_data(database.get_unique_rs_count_to_region_results()))
+    space = [i*5 for i in range(len(data))]
+    plot.bar(space, data.values(), align="edge", width=5)
+    keys = ['00']
+    current = 0
+    for key in data.keys():
+        if current == 15:
+            if key == 'f0':
+                break
+            keys.append(key)
+            current = 0
+        else:
+            current += 1
+    # keys.append('ff')
+    plot.xticks([i * 80 for i in range(len(keys))], keys, rotation=45, fontsize=15)
+    plot.yticks(fontsize=15)
+    plot.savefig("Unique RS Peers count - Region.pdf")
+    plot.show()
+    # Close, so the pics won't overlap
+    plot.close("all")
+    # Save as text file just in case
+    # with open("Unique RS Peers count - Region.txt", 'w') as f:
+    #     print(new_data, file=f)
 
 
 if __name__ == '__main__':
@@ -200,8 +251,9 @@ if __name__ == '__main__':
     get_all_data(path_to_logs + "/dhtlogs", ids)
     # print("Extracting rspeers")
     # get_all_data(path_to_logs + "/rspeers", ids, "rs")
-    draw_rs_peers_and_time_plot()
-    draw_unique_rs_peers_and_time_plot()
     gen_rs_peers_list("new_rs_peers")
     # draw_peers_and_time_plot()
     # draw_unique_peers_and_time_plot()
+    # draw_unique_rs_peers_and_time_plot()
+    # draw_rs_peers_and_time_plot()
+    # draw_unique_rs_peers_and_region_plot()

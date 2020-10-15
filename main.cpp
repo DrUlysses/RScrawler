@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
             createBackup(OWN_IDS_FILENAME, startFirstStageTime);
 
             // Run analyzer
-            // exec("../analyzer/run.sh");
+            exec("../analyzer/run.sh");
 
             // Time
             time_t endAnalyzerTime = time(NULL);

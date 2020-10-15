@@ -71,15 +71,15 @@ def get_rs_peers_list():
     return res
 
 
-def sort_dict(dictionary):
-    biggest = 0
-    for key in dictionary:
-        if key > biggest:
-            biggest = key
+def sort_dict_by_time(dictionary, are_numbers=True):
+    biggest = int(max(dictionary.keys()))
     # Merge near values
     res = dict([])
     removed = []
     for key, value in dictionary.items():
+        key = int(key)
+        if are_numbers:
+            value = int(value)
         new_key = key
         new_value = value
         for temp_key, temp_value in dictionary.items():
@@ -98,7 +98,7 @@ def sort_dict(dictionary):
     # Simplify values
     dictionary = deepcopy(res)
     for key in dictionary:
-        delta = biggest - key
+        delta = biggest - int(key)
         if delta > biggest:
             delta = 0
         res[int(delta / 3600)] = res.pop(key)
@@ -109,12 +109,23 @@ def get_all_count_to_time_results():
     # there should be more efficient way to do this
     # Iterate the database and count the number of results based on the time
     res = dict([])
+    found = {}
     entries = session.query(PeerEntry)
     for entry in entries:
-        time = entry.time
-        current = res.get(time, 0)
-        res[time] = current + 1
-    return sort_dict(res)
+        time = int(str(entry.time)[0:10])
+        if time not in found.keys():
+            found[time] = []
+        if entry.id not in found[time]:
+            found[time].append(entry.id)
+    temp_res = sort_dict_by_time(found, False)
+    for key in temp_res.keys():
+        entities = []
+        for value in temp_res[key]:
+            if value not in entities:
+                entities.append(value)
+                current = res.get(key, 0)
+                res[key] = current + 1
+    return res
 
 
 def get_unique_all_count_to_time_results():
@@ -125,24 +136,37 @@ def get_unique_all_count_to_time_results():
     entries = session.query(PeerEntry)
     for entry in entries:
         if entry.id not in ids:
-            time = entry.time
+            time = int(str(entry.time)[0:10])
             current = res.get(time, 0)
             res[time] = current + 1
             ids.append(entry.id)
-    return sort_dict(res)
+    return sort_dict_by_time(res)
 
 
 def get_rs_count_to_time_results():
     # there should be more efficient way to do this
     # Iterate the database and count the number of rs results based on the time
     res = dict([])
+    found = {}
     entries = session.query(PeerEntry)
     for entry in entries:
+        temp = int(entry.time)
+        time = str(temp)[0:10]
+        time = int(time)
         if entry.version == "rs":
-            time = entry.time
-            current = res.get(time, 0)
-            res[time] = current + 1
-    return sort_dict(res)
+            if time not in found.keys():
+                found[time] = []
+            if entry.id not in found[time]:
+                found[time].append(entry.id)
+    temp_res = sort_dict_by_time(found, False)
+    for key in temp_res.keys():
+        entities = []
+        for value in temp_res[key]:
+            if value not in entities:
+                entities.append(value)
+                current = res.get(key, 0)
+                res[key] = current + 1
+    return res
 
 
 def get_unique_rs_count_to_time_results():
@@ -153,8 +177,30 @@ def get_unique_rs_count_to_time_results():
     entries = session.query(PeerEntry)
     for entry in entries:
         if entry.version == "rs" and entry.id not in ids:
-            time = entry.time
+            time = int(str(entry.time)[0:10])
             current = res.get(time, 0)
             res[time] = current + 1
             ids.append(entry.id)
-    return sort_dict(res)
+    return sort_dict_by_time(res)
+
+
+def get_unique_rs_count_to_region_results():
+    # there should be more efficient way to do this
+    # Iterate the database and count the number of rs results based on the time
+    res = dict([])
+    letters = "0123456789abcdef"
+    for i in range(0, 15):
+        for j in range(0, 15):
+            res[letters[i] + letters[j]] = 0
+    ids = []
+    # ips = []
+    entries = session.query(PeerEntry)
+    for entry in entries:
+        if entry.version == "rs" and entry.id not in ids:
+            region = entry.id[0] + entry.id[1]
+            # if entry.ip not in ips:
+            #     ips.append(entry.ip)
+            current = res.get(region, 0)
+            res[region] = current + 1
+            ids.append(entry.id)
+    return res
